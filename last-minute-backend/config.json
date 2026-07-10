@@ -1,0 +1,21 @@
+{
+    "host": "localhost",
+    "port": 4001,
+    "databaseConfig": {
+        "user": "lastm",
+        "password": "lastm",
+        "server": "localhost",
+        "database": "last_minute",
+        "requestTimeout": 30000,
+        "options": {
+            "trustServerCertificate": true,
+            "enableArithAbort": false
+        },
+        "port": 1433,
+        "pool": {
+            "min": 3,
+            "max": 20,
+            "idleTimeoutMillis": 12000
+        }
+    }
+}
