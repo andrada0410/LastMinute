@@ -10,7 +10,6 @@ import {bootstrapApplication, provideProtractorTestingSupport} from '@angular/pl
 import {provideRouter} from '@angular/router';
 
 import { importProvidersFrom } from '@angular/core';
-import { StarRatingModule } from 'angular-star-rating';
 import {ApplicationConfig} from '@angular/core';
 import {HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
 import routeConfig from './routes';
@@ -19,8 +18,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
    
   provideProtractorTestingSupport(),
-   provideRouter(routeConfig),
-    importProvidersFrom(StarRatingModule.forRoot())
+   provideRouter(routeConfig)
 ]
 
 };
