@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { Navbar } from './navbar/navbar';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterOutlet],
+  imports: [RouterOutlet, Navbar],
   template: `
     <main>
-      <header class="brand-name">
-          <a [routerLink]="['/']">
-          <img class="brand-logo" src="/assets/logo.svg" alt="logo" aria-hidden="true" />
-        </a>
-        </header>
+      <header>
+      <app-navbar></app-navbar>
+      </header>
       <section class="content">
         <router-outlet></router-outlet>
       </section>
