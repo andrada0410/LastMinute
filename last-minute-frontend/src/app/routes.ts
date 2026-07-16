@@ -6,7 +6,7 @@ const routeConfig: Routes = [
   {
     path: '',
     component: Home,
-    title: 'Home page',
+    title: 'Last Minute',
   },
   {
     path: 'details/:id',

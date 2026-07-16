@@ -1,50 +1,70 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { HousingLocation } from '../example/example';
-import { ExampleInfo } from '../example';
-import { ExampleService } from '../example.service';
+import { Component, OnInit, OnDestroy } from "@angular/core";
 
 @Component({
-    selector: 'app-home',
-    imports: [HousingLocation],
+    selector: 'app-home-page',
     template: `
-    <section>
-      <form>
-        <input type="text" placeholder="Filter by city" #filter />
-        <button class="primary" type="button" (click)="filterResults(filter.value)">Search</button>
-      </form>
-    </section>
-    <section class="results">
-      @for(housingLocation of filteredLocationList; track $index) {
-        <app-housing-location [housingLocation]="housingLocation"></app-housing-location>
-      }
-    </section>
-  `,
-    styleUrls: ['./home.css'],
-})
-export class Home implements OnInit {
-    housingLocationList: ExampleInfo[] = [];
-    housingService: ExampleService = inject(ExampleService);
-    filteredLocationList: ExampleInfo[] = [];
+    <div class="home-container">
+    <!-- Partea stanga -->
+    <div class="carousel">
+        <img [src]="images[currentImage]" class="carousel-img base" alt="Food Image">
+        <img [src]="images[nextImage]" class="carousel-img overlay" [class.visible]="showNext" alt="Food Image">
+    </div>
 
-    constructor() { }
+    <!-- Partea dreapta -->
+    <div class = "details">
+        <h1><span class="highlight">Descoperă mese la prețuri reduse</span>, direct de la restaurantele si magazinele din orașul tău.</h1>
+
+        <p>Transformă risipa alimentară în oportunitatea ta de a mânca bine.<br> Prin Last Minute, prinzi ultimele porții ale zilei la prețuri reduse și reduci risipa cu fiecare comandă.</p>
+    
+        <p>Creează-ți contul în câteva secunde și deblochează instant <span class="highlight"><br>ofertele exclusive din aplicație!</span></p>
+    
+        <div class="logo-wrapper">
+            <img src="assets/logo-full.png" class="logo" alt="Logo">
+        </div>
+    </div>
+    
+    </div>
+    `,
+    styleUrls: ['./home.css']
+})
+export class Home implements OnInit, OnDestroy {
+    images = [
+        'assets/carousel-images/food1.jpg',
+        'assets/carousel-images/food2.jpg',
+        'assets/carousel-images/food3.jpg',
+        'assets/carousel-images/food4.jpg',
+        'assets/carousel-images/food5.jpg'
+    ];
+
+    currentImage = 0;
+    nextImage = 1;
+    showNext = false;
+
+    private intervalId: any;
+    private fadeDuration = 800;
 
     ngOnInit(): void {
-        this.housingService
-            .getAllExamples()
-            .subscribe((housingLocationList: ExampleInfo[]) => {
-                this.housingLocationList = housingLocationList;
-                this.filteredLocationList = housingLocationList;
-            });
+        this.intervalId = setInterval(() => this.advance(), 3000);
     }
 
-    filterResults(text: string) {
-        if (!text) {
-            this.filteredLocationList = this.housingLocationList;
-            return;
-        }
+    private advance(): void {
+        this.nextImage = (this.currentImage + 1) % this.images.length;
+        this.showNext = false; 
 
-        this.filteredLocationList = this.housingLocationList.filter((housingLocation) =>
-            housingLocation?.NUME.toLowerCase().includes(text.toLowerCase()),
-        );
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                this.showNext = true;
+            });
+        });
+
+        setTimeout(() => {
+            this.currentImage = this.nextImage; 
+            this.showNext = false; 
+        }, this.fadeDuration);
+    }
+
+    ngOnDestroy(): void {
+        console.log('oprit', this.intervalId);
+        clearInterval(this.intervalId);
     }
 }
