@@ -43,7 +43,7 @@ function getMigrationstoRun(migrations, lastRun, lastMigrationName) {
   if (lastRun == null || lastMigrationName == null) return migrations;
   migrations.sort();
   const lastMigrationRun = migrations.findIndex(m => m === lastMigrationName);
-  return migrations.slice(lastMigrationRun);
+  return migrations.slice(lastMigrationRun + 1);
 }
 
 async function connectToDatabase(config) {
