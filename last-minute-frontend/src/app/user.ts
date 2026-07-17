@@ -7,6 +7,6 @@ export interface User {
 }
 
 export interface LoginResponse {
-  user: User;
+  userData: User;
   token: string;
 }
