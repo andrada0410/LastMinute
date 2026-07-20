@@ -7,10 +7,10 @@ import { Router } from "@angular/router";
     selector: 'app-register',
     imports: [ReactiveFormsModule],
     template:  `
-        <section>
-            <h2>Creează un cont</h2>
+        <section class="page page-centered">
+            <form class="card form-card" [formGroup]="registerForm" (submit)="submitRegister()">
+                <h2>Creează un cont</h2>
 
-            <form [formGroup]="registerForm" (submit)="submitRegister()">
                 <label for="first-name">Prenume: </label>
                 <input id="first-name" type="text" formControlName="firstName"/>
             
@@ -21,28 +21,28 @@ import { Router } from "@angular/router";
                 <input id="email" type="text" formControlName="email"/>
 
                 @if(registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched) {
-                    <p>Adresa de email introdusă nu este validă.</p>
+                    <p class="message error">Adresa de email introdusă nu este validă.</p>
                 }
 
                 <label for="password">Parolă: </label>
                 <input id="password" type="password" formControlName="password"/>
 
                 @if(registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
-                    <p>Parola trebuie să conțină cel puțin 6 caractere.</p>
+                    <p class="message error">Parola trebuie să conțină cel puțin 6 caractere.</p>
                 }
 
                 <label for="confirm-password">Confirmare parolă: </label>
                 <input id="confirm-password" type="password" formControlName="confirmPassword"/>
 
                 @if(registerForm.hasError('passwordsDontMatch') && registerForm.get('confirmPassword')?.touched) {
-                    <p>Parolele sunt diferite!</p>
+                    <p class="message error">Parolele sunt diferite!</p>
                 }
 
                 @if(backendError) {
-                    <p class="error-message">{{ backendError }}</p>
+                    <p class="message error">{{ backendError }}</p>
                 }
 
-                <button type="submit" class='primary' [disabled]="registerForm.invalid">Creare cont</button>
+                <button type="submit" class='button primary' [disabled]="registerForm.invalid">Creare cont</button>
 
             </form>
         </section>
