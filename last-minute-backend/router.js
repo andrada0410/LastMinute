@@ -18,17 +18,35 @@ router.get('/Example/:id', async (ctx, next) => {
 
 router.post('/register', async (ctx) => {
     try {
-        const userData = ctx.request.body;
-        const userInfo = await authAPI.registerUser(userData);
+        const userNetworkInput = ctx.request.body;
+        const dbUserInfo = await authAPI.registerUser(userNetworkInput);
+
         ctx.status = 201;
+        ctx.body = {
+            userData: dbUserInfo.user,
+            token: dbUserInfo.token
+        };
+    } catch (error) {
+        ctx.status = error.status || 500;
+        const message = ctx.status === 500 ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu." : error.message;
+        ctx.body = {error: message};
+    }
+});
+
+router.post('/login', async (ctx) => {
+    try {
+        const userData = ctx.request.body;
+        const userInfo = await authAPI.loginUser(userData);
+        ctx.status = 200;
         ctx.body = {
             userData: userInfo.user,
             token: userInfo.token
         };
     } catch (error) {
-        ctx.status = 400;
-        ctx.body = {error: error.message};
+        ctx.status = error.status || 500;
+        const message = ctx.status === 500 ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu." : error.message;
+        ctx.body = {error: message};
     }
-});
+})
 
 module.exports = router;

@@ -4,13 +4,13 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
     selector: 'app-home-page',
     template: `
     <div class="home-container">
-    <!-- Partea stanga -->
+    <!-- Left Side -->
     <div class="carousel">
         <img [src]="images[currentImage]" class="carousel-img base" alt="Food Image">
         <img [src]="images[nextImage]" class="carousel-img overlay" [class.visible]="showNext" alt="Food Image">
     </div>
 
-    <!-- Partea dreapta -->
+    <!-- Right Side -->
     <div class = "details">
         <h1><span class="highlight">Descoperă mese la prețuri reduse</span>, direct de la restaurantele si magazinele din orașul tău.</h1>
 

@@ -13,14 +13,154 @@ body {
   --primary-color-light: #FFE4CC;
   --secondary-color: #FFA24D;
   --accent-color: #FFF0E0;
+  --navbar-color: #F6E3D0;
+
+  --error-color: #BA4444;
+  --error-bg: #FBEAEA;
+  --success-color: #549d4a;
+  --success-bg: #E8F5EA;
+
+  --text-color: #1A1A1A;
+  --text-muted: #6B6B6B;
   --shadow-color: #E8E8E8;
-  --navbar-color: #F6E3d0;
+  --border-color: #DDDDDD;
+  --disabled-color: #A0A0A0;
+  --bg-color: #FFFFFF;
+
+  --space-s: 8px;
+  --space-m: 16px;
+  --space-l: 32px;
+  --space-xl: 40px;
+
+  --radius-s: 6px;
+  --radius-m: 8px;
+  --radius-l: 16px;
+
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.10);
 }
 
-button.primary {
-  padding: 10px;
-  border: solid 1px var(--primary-color);
+h1, h2, h3 {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+h1 { font-size: 1.85rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; }
+
+p { font-size: 1rem; }
+
+.text-muted { color: var(--text-muted); }
+.text-error { color: var(--error-color); }
+.text-center { text-align: center; }
+
+/* -------------------------------------------------------------- LAYOUT --- */
+.page {
+  min-height: calc(100vh - 75px);
+  padding: var(--space-s);
+}
+
+.page-centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: var(--bg-color);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-xl);
+}
+
+/* -------------------------------------------------------------- FORMS --- */
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-card h1,
+.form-card h2 {
+  text-align: center;
+  margin-bottom: var(--space-s);
+}
+
+.form-card label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.form-card input,
+.form-card select,
+.form-card textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-m);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--accent-color);
+}
+
+/* -------------------------------------------------------------- BUTTONS --- */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem var(--space-l);
+  border: none;
+  border-radius: var(--radius-m);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  width: 100%;
+}
+
+.button.primary
+{
   background: var(--primary-color);
   color: white;
-  border-radius: 8px;
+}
+
+.button.primary:hover:not(:disabled),
+.button:hover:not(:disabled) {
+  background: var(--primary-color-dark);
+}
+
+.button:disabled {
+  background-color: var(--disabled-color);
+  color: white;
+  border-color: var(--disabled-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* -------------------------------------------------------------- MESSAGES ERROR + SUCCESS --- */
+.message {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius-m);
+}
+
+.message.error {
+  color: var(--error-color);
+  background: var(--error-bg);
+}
+
+.message.success {
+  color: var(--success-color);
+  background: var(--success-bg);
 }

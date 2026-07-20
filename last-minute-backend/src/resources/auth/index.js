@@ -1,4 +1,5 @@
-const { getUserByEmail, createUser} = require("../user/index")
+const { getUserByEmail, createUser, deleteUserById} = require("../user/index")
+const {associatePersonToUser} = require("../person/index")
 const config = require('../../../config.json');
 const jwt = require('jsonwebtoken');
 
@@ -9,27 +10,38 @@ async function validateUser (userData) {
 
     const existingUser = await getUserByEmail(userData.email);
     if (existingUser && existingUser.length > 0) {
-        throw new Error("Email-ul este deja utilizat!");
+        const error = new Error("Emailul este deja utilizat!");
+        error.status = 400;
+        throw error;
     }
 
     if (!userData.firstName || userData.firstName.length === 0 
         || !userData.lastName || userData.lastName.length === 0) {
-        throw new Error("Trebuie sa introduceti numele si prenumele!");
+        
+        const error = new Error("Trebuie să introduceți numele și prenumele!");
+        error.status = 400;
+        throw error;
     }
 
     if (!userData.password ||  userData.password.length === 0) {
-        throw new Error("Trebuie sa introduceti o parola valida!");
+        const error = new Error("Trebuie să introduceți o parolă validă!");
+        error.status = 400;
+        throw error;
     }
 }
 
 async function validateEmail (email) {
     if (!email || email.length === 0) {
-        throw new Error("Trebuie sa introduceti emailul!");
+        const error = new Error("Trebuie să introduceți emailul!");
+        error.status = 400;
+        throw error;
     }
 
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regex.test(email)) {
-        throw new Error("Emailul nu este valid!");
+        const error = new Error("Emailul nu este valid!");
+        error.status = 400;
+        throw error;
     }
 }
 
@@ -38,7 +50,8 @@ function  formatUserForResponse (dbUser) {
         id: dbUser.id,
         email: dbUser.email,
         firstName: dbUser.first_name,
-        lastName: dbUser.last_name
+        lastName: dbUser.last_name,
+        role: dbUser.role
     };
 }
 
@@ -46,14 +59,20 @@ module.exports = {
     registerUser: async (userData) => {
         await validateUser(userData);
         const newUser = await createUser(userData);
+        newUser.lastName = userData.lastName;
+        newUser.firstName = userData.firstName;
 
-        if (!JWT_KEY) {
-            throw new Error("Eroare interna, token-ul JWT nu este configurat!");
+        try {
+            await associatePersonToUser(newUser);
+        } catch (Error) {
+            await deleteUserById(newUser.id);
+            throw error;
         }
 
         const token = jwt.sign(
             {
                 id : newUser.id,
+                role: newUser.role
             },
             JWT_KEY,
             {expiresIn: "24h"}
@@ -64,4 +83,40 @@ module.exports = {
             token: token
         }
     },
+
+    loginUser: async (loginData) => {
+        if (!loginData.email || !loginData.password) {
+            const error = new Error("Emailul și parola sunt obligatorii!");;
+            error.status = 400;
+            throw error;
+        }
+
+        if (loginData.email.length === 0 || loginData.password.length === 0) {
+            const error = new Error("Trebuie să introduceți emailul și parola!");
+            error.status = 400;
+            throw error;
+        }
+
+        const user = await getUserByEmail(loginData.email);
+
+        if (!user || user.password !== loginData.password) {
+            const error = new Error("Email sau parolă incorectă!");
+            error.status = 401;
+            throw error;
+        }
+
+        const token = jwt.sign(
+            {
+                id: user.id,
+                role: user.role
+            },
+                JWT_KEY,
+            { expiresIn: "24h" }
+        );
+
+        return {
+            user: formatUserForResponse(user),
+            token: token
+        };
+    }
 }

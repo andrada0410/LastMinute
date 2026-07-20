@@ -2,36 +2,72 @@ const { sqlRequest } = require('../../db');
 
 module.exports = {
     getUsers: async () => {
-        const result = await sqlRequest().query('select id, email, password, first_name, last_name from users');
+        const result = await sqlRequest().query('select id, email, password, role from users');
         return result.recordset;
     },
 
     getUserById: async (id) => {
         const result = await sqlRequest()
             .input('id', id)
-            .query('select id, email, password, first_name, last_name from users where id = @id');
+            .query('select id, email, password, role from users where id = @id');
         return result.recordset;
     },
 
     getUserByEmail: async (email) => {
         const result = await sqlRequest()
         .input('email', email)
-        .query('select id, email, password, first_name, last_name from users where email = @email');
-        return result.recordset;
+        .query(`select u.id as id, u.email as email, u.password as password, ud.first_name as first_name, ud.last_name as last_name, ur.role as role 
+            from users u
+            left join persons ud ON u.id = ud.user_id  
+            left join user_roles ur ON ur.id = u.role
+            where u.email = @email`);
+        return result.recordset[0];
     },
 
     createUser: async (userData) => {
         const result = await sqlRequest()
             .input('email', userData.email)
             .input('password', userData.password)
-            .input('first_name', userData.firstName)
-            .input('last_name', userData.lastName)
+            .input('role', 1)
             .query(`
-                INSERT INTO users(email, password, first_name, last_name)
-                OUTPUT inserted.id, inserted.email, inserted.password, inserted.first_name, inserted.last_name
-                VALUES (@email, @password, @first_name, @last_name)`
-            );
+                SET NOCOUNT ON;
+                SET XACT_ABORT ON;
 
+                BEGIN TRANSACTION;
+                DECLARE @newUserId INT;
+
+                INSERT INTO users(email, password, role)
+                VALUES (@email, @password, @role); 
+
+                SET @newUserId = SCOPE_IDENTITY();
+
+                DECLARE @role_string VARCHAR(20);
+
+                SELECT @role_string =  role FROM user_roles WHERE user_roles.id = @role;
+
+                SELECT
+                    @newUserId as id,
+                    @email as email,
+                    @password as password,
+                    @role_string as role;
+                
+                COMMIT TRANSACTION;
+                `
+            );
+        
+        if (!result || !result.recordset || result.recordset.length === 0) {
+            const error = new Error("A apărut o problemă la generarea utilizatorului în baza de date.");
+            error.status = 500;
+            throw error;
+        }
+    
         return result.recordset[0];
+    },
+
+    deleteUserById: async (userId) => {
+    await sqlRequest()
+        .input('id', userId)
+        .query(`DELETE FROM users WHERE id = @id`);
     }
+
 };
