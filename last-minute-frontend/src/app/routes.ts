@@ -3,6 +3,7 @@ import {Home} from './home/home';
 import {Details} from './details/details';
 import { Login } from './login/login';
 import { Register } from './register/register';
+import { MapComponent } from './map/map.component';
 
 const routeConfig: Routes = [
   {
@@ -24,6 +25,11 @@ const routeConfig: Routes = [
     path: 'register',
     component: Register,
     title: 'Înregistrare'
+  },
+  {
+    path: 'map',
+    component: MapComponent,
+    title: 'Map'
   }
 ];
 
