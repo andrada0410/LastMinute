@@ -6,19 +6,24 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 import {bootstrapApplication, provideProtractorTestingSupport} from '@angular/platform-browser';
-
 import {provideRouter} from '@angular/router';
 
 import { importProvidersFrom } from '@angular/core';
 import {ApplicationConfig} from '@angular/core';
-import {HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptors, withInterceptorsFromDi} from '@angular/common/http';
+import { AuthInterceptor } from './interceptor';
 import routeConfig from './routes';
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptorsFromDi()),
    
-  provideProtractorTestingSupport(),
-   provideRouter(routeConfig)
-]
+    provideProtractorTestingSupport(),
+    provideRouter(routeConfig),
 
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ]
 };

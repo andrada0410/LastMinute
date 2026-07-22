@@ -24,44 +24,66 @@ module.exports = {
         return result.recordset[0];
     },
 
-    createUser: async (userData) => {
+    getShopUsers: async (email) => {
         const result = await sqlRequest()
+            .query(`select u.id as id, u.email as email, u.password as password 
+                    from users u
+                    inner join users `)
+    },
+
+    createUser: async (userData) => {
+        try {
+            const result = await sqlRequest()
             .input('email', userData.email)
             .input('password', userData.password)
-            .input('role', 1)
+            .input('role', userData.role)
             .query(`
                 SET NOCOUNT ON;
                 SET XACT_ABORT ON;
 
                 BEGIN TRANSACTION;
                 DECLARE @newUserId INT;
+                DECLARE @role_int INT;
+
+                SELECT @role_int = id FROM user_roles WHERE user_roles.role = @role;
+
+                IF @role_int IS NULL
+                BEGIN
+                    THROW 50001, 'Rolul specificat nu este valid sau nu există!', 1;
+                END
 
                 INSERT INTO users(email, password, role)
-                VALUES (@email, @password, @role); 
+                VALUES (@email, @password, @role_int); 
 
                 SET @newUserId = SCOPE_IDENTITY();
-
-                DECLARE @role_string VARCHAR(20);
-
-                SELECT @role_string =  role FROM user_roles WHERE user_roles.id = @role;
-
+                
                 SELECT
                     @newUserId as id,
                     @email as email,
                     @password as password,
-                    @role_string as role;
+                    @role as role;
                 
                 COMMIT TRANSACTION;
                 `
             );
         
-        if (!result || !result.recordset || result.recordset.length === 0) {
-            const error = new Error("A apărut o problemă la generarea utilizatorului în baza de date.");
-            error.status = 500;
-            throw error;
+            if (!result || !result.recordset || result.recordset.length === 0) {
+                const error = new Error("A apărut o problemă la generarea utilizatorului în baza de date.");
+                error.status = 500;
+                throw error;
+            }
+        
+            return result.recordset[0];
+        } catch (dbError) {
+            if (dbError.number === 50001) {
+                const error = new Error(dbError.message); 
+                error.status = 400;
+                throw error;
+            }
+
+            throw dbError;
         }
-    
-        return result.recordset[0];
+        
     },
 
     deleteUserById: async (userId) => {

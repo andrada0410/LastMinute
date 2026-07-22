@@ -5,6 +5,17 @@ const jwt = require('jsonwebtoken');
 
 const JWT_KEY = config.databaseConfig.jwtKey; 
 
+function generateToken(user) {
+    return jwt.sign(
+        {
+            id: user.id,
+            role: user.role
+        },
+        JWT_KEY,
+        { expiresIn: "24h" }
+    );
+}
+
 async function validateUser (userData) {
     await validateEmail(userData.email);
 
@@ -58,35 +69,31 @@ function  formatUserForResponse (dbUser) {
 module.exports = {
     registerUser: async (userData) => {
         await validateUser(userData);
+        
+        if (!userData.role || userData.role !== 'USER') {
+            userData.role = 'USER';
+        }
+
         const newUser = await createUser(userData);
         newUser.lastName = userData.lastName;
         newUser.firstName = userData.firstName;
 
         try {
             await associatePersonToUser(newUser);
-        } catch (Error) {
+        } catch (error) {
             await deleteUserById(newUser.id);
             throw error;
         }
 
-        const token = jwt.sign(
-            {
-                id : newUser.id,
-                role: newUser.role
-            },
-            JWT_KEY,
-            {expiresIn: "24h"}
-        );
-
         return {
             user: formatUserForResponse(newUser),
-            token: token
+            token: generateToken(newUser)
         }
     },
 
     loginUser: async (loginData) => {
         if (!loginData.email || !loginData.password) {
-            const error = new Error("Emailul și parola sunt obligatorii!");;
+            const error = new Error("Emailul și parola sunt obligatorii!");
             error.status = 400;
             throw error;
         }
@@ -105,18 +112,9 @@ module.exports = {
             throw error;
         }
 
-        const token = jwt.sign(
-            {
-                id: user.id,
-                role: user.role
-            },
-                JWT_KEY,
-            { expiresIn: "24h" }
-        );
-
         return {
             user: formatUserForResponse(user),
-            token: token
+            token: generateToken(user)
         };
     }
 }
