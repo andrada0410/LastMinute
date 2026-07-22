@@ -4,6 +4,7 @@ import {Details} from './details/details';
 import { Login } from './login/login';
 import { Register } from './register/register';
 import { SuperAdminPage } from './admin-create-shop/admin-create-shop';
+import { MapComponent } from './map/map.component';
 
 const routeConfig: Routes = [
   {
@@ -30,6 +31,11 @@ const routeConfig: Routes = [
     path: 'superadmin',
     component: SuperAdminPage,
     title: 'Super Admin'
+  },
+  {
+    path: 'map',
+    component: MapComponent,
+    title: 'Map'
   }
 ];
 
