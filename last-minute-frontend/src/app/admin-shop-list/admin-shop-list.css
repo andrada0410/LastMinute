@@ -1,0 +1,103 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.list-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.shop-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+    
+.shop-item {
+    display: flex;
+    flex-direction: column; 
+    gap: 0.25rem;
+    padding: 0.75rem 1rem 0.75rem 1.5rem; 
+    background-color: #fafafa;
+    border: 1px solid #eaeaea;
+    border-radius: 0 8px 8px 0;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.shop-item:hover {
+    border-color: var(--primary-color, #ccc);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.shop-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.shop-email {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.empty-state {
+    text-align: center;
+    color: #888;
+    padding: 2rem;
+    font-style: italic;
+    background-color: #fafafa;
+    border-radius: 8px;
+}
+
+.pagination-footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+}
+
+.page-info {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+button.primary {
+    cursor: pointer;
+    background-color: var(--primary-color, #007bff);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    margin-top: 0;
+    transition: opacity 0.2s;
+}
+
+button.primary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+button.primary:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.7;
+}

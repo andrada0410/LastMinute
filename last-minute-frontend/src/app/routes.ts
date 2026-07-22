@@ -3,7 +3,7 @@ import {Home} from './home/home';
 import {Details} from './details/details';
 import { Login } from './login/login';
 import { Register } from './register/register';
-import { MapComponent } from './map/map.component';
+import { SuperAdminPage } from './admin-create-shop/admin-create-shop';
 
 const routeConfig: Routes = [
   {
@@ -27,9 +27,9 @@ const routeConfig: Routes = [
     title: 'Înregistrare'
   },
   {
-    path: 'map',
-    component: MapComponent,
-    title: 'Map'
+    path: 'superadmin',
+    component: SuperAdminPage,
+    title: 'Super Admin'
   }
 ];
 
