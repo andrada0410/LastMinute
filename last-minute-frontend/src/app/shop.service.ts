@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { CreateShopResponse, PaginatedShopsResponse, ShopInfo } from "./shop";
+import { CreateShopResponse, PaginatedShopsResponse } from "./shop";
 
 @Injectable({
   providedIn: 'root',

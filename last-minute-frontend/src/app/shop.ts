@@ -21,3 +21,10 @@ export interface CreateShopResponse {
         userId?: number;
     };
 }
+
+export interface CreateShopRequest {
+    name: string,
+    email: string,
+    password: string,
+    address: string
+}
