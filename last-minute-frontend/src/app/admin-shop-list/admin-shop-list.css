@@ -5,6 +5,14 @@
     height: 100%;
 }
 
+h2 {
+  padding: 2rem 1.5rem 1rem 1.5rem;
+  color: var(--primary-color);
+  margin: 0;
+  border-bottom: 1px solid #eaeaea;
+}
+
+
 .list-container {
     width: 100%;
     display: flex;
@@ -25,33 +33,6 @@
   overflow-y: auto;
 }
     
-.shop-item {
-    display: flex;
-    flex-direction: column; 
-    gap: 0.25rem;
-    padding: 0.75rem 1rem 0.75rem 1.5rem; 
-    background-color: #fafafa;
-    border: 1px solid #eaeaea;
-    border-radius: 0 8px 8px 0;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.shop-item:hover {
-    border-color: var(--primary-color, #ccc);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.shop-name {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: #333;
-}
-
-.shop-email {
-    font-size: 0.9rem;
-    color: #666;
-}
-
 .empty-state {
     text-align: center;
     color: #888;
