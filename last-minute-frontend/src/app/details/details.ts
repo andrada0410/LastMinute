@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ExampleService } from '../example.service';
+import { ExampleService } from '../services/example.service';
 import { ExampleInfo } from '../example';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 

@@ -1,7 +1,8 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import * as L from 'leaflet';
-
+import { ShopService } from '../services/shop.service';
+import { ShopMapInfo, ShopsMapResponse } from '../shop';
 @Component({
   selector: 'app-map',
   template: `
@@ -20,30 +21,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private accuracyCircle?: L.Circle;
   private addressMarkers: L.Marker[] = [];
 
-  private mockShops = [
-    {
-      name: 'Rosa',
-      address: 'Strada Dávid Ferenc 21, Cluj-Napoca',
-      hasOffers: true
-    },
-    {
-      name: 'Big Belly',
-      address: 'Calea Mănăștur 68, Cluj-Napoca',
-      hasOffers: false
-    },
-    {
-      name: 'KFC',
-      address: 'Strada Iuliu Maniu 1, Cluj-Napoca',
-      hasOffers: true
-    },
-    {
-      name: 'Kaufland',
-      address: 'Strada Fabricii 12, Cluj-Napoca',
-      hasOffers: false
-    }
-  ];
+  private shopsList: ShopMapInfo[] = []
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private shopService: ShopService) {}
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -75,7 +55,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map.on('locationfound', (e: L.LocationEvent) => {
 
       const radius = e.accuracy;
-
       
       if (this.userMarker) {
         this.map.removeLayer(this.userMarker);
@@ -110,7 +89,6 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     }); 
 
-    
     this.map.on('locationerror', (e: L.ErrorEvent) => {
       alert('Nu ai permis accesul la locație.');
       console.error(e.message);
@@ -122,58 +100,45 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       enableHighAccuracy: true
     });
 
-    // markere adrese
-    const addresses = this.mockShops.map(shop => shop.address);
-    this.showAddresses(addresses);
+    this.loadShopsFromDatabase();
   }
 
-  // procesare adrese
-  private async showAddresses(addresses: string[]): Promise<void> {
-    for (const address of addresses) {
-      await this.geocodeAndAddMarker(address);
-      await this.delay(1000); // 1 req/secunda (limita nominatim)
+  private loadShopsFromDatabase(): void {
+    this.shopService.getAllShopMapInfo().subscribe({
+      next: (response: ShopsMapResponse) => {
+        this.shopsList = response.entry;
+        this.showAllShopsOnMap(this.shopsList);
+      },
+      error: (error) => {
+        console.error("Eroare la preluarea magazinelor:", error);
+      }
+    })
+  }
+
+  private async showAllShopsOnMap(shops: ShopMapInfo[]): Promise<void> {
+    for (const shop of shops) {
+      if (shop.lat && shop.lon) {
+        this.displayShopOnMap(shop);
+      } 
     }
   }
 
-  private geocodeAndAddMarker(address: string): Promise<void> {
-    return new Promise((resolve) => {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&countrycodes=ro&limit=1`;
+  private displayShopOnMap(shop: ShopMapInfo) {
+    const icon = this.createShopIcon(shop.hasOffers || false);
 
-      this.http.get<any[]>(url).subscribe({
-        next: (results) => {
-          if (results.length > 0) {
-            const lat = parseFloat(results[0].lat);
-            const lon = parseFloat(results[0].lon);
+    if (!shop.lat || !shop.lon)
+       throw new Error('Eroare la afisarea magazinului pe hartă: Nu a fost furnizată locația.')
 
-            const shop = this.mockShops.find(s => s.address === address)!;
-
-            const icon = this.createShopIcon(shop.hasOffers);
-
-            const marker = L.marker([lat, lon], {icon})
-              .addTo(this.map)
-              .bindPopup(`
-                <strong>${shop.name}</strong>
-                <br>
-                ${address}
-                <br>
-              `);
-
-            this.addressMarkers.push(marker);
-          } else {
-            console.warn('Adresa nu a fost găsită:', address);
-          }
-          resolve();
-        },
-        error: (err) => {
-          console.error('Eroare la geocodare pentru:', address, err);
-          resolve(); // continuare chiar daca una esueaza
-        }
-      });
-    });
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    const marker = L.marker([shop.lat, shop.lon], {icon})
+      .addTo(this.map)
+      .bindPopup(`
+        <strong>${shop.name}</strong>
+        <br>
+        ${shop.address}
+        <br>
+      `);
+    
+    this.addressMarkers.push(marker);
   }
 
   private createShopIcon(hasOffers: boolean): L.DivIcon {

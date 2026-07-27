@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { CreateShopResponse, PaginatedShopsResponse, ShopInfo } from "./shop";
+import { CreateShopResponse, PaginatedShopsResponse, ShopInfo, ShopsMapResponse} from "../shop";
 
 @Injectable({
   providedIn: 'root',
@@ -29,8 +29,12 @@ export class ShopService {
         return this.http.get<PaginatedShopsResponse>(`${this.url}/shop`, { params });
     }
 
+    getAllShopMapInfo() : Observable<ShopsMapResponse> {
+        return this.http.get<ShopsMapResponse>(`${this.url}/shops/map`);
+    }
+
     updateShop(id: number, name: string, address: string): Observable<ShopInfo> {
-        return this.http.patch<ShopInfo>(`${this.url}/shop/${id}`, { name, address });
+        return this.http.patch<ShopInfo>(`${this.url}/shop/${id}`, { id, name, address });
     }
     
     deleteShop(id: number): Observable<void> {
