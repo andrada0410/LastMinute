@@ -106,6 +106,7 @@ module.exports = {
                     coordinates.Lat as lat,
                     coordinates.Long as lon
                 FROM shops
+                WHERE is_deleted = 0
                 ORDER BY id`);
 
         const optimizedShops = result.recordset.map(row => {
@@ -136,7 +137,7 @@ module.exports = {
           .query(`
               UPDATE shops
               SET coordinates = geography::Point(@lat, @lon, 4326)
-              WHERE id = @id;
+              WHERE id = @id AND is_deleted = 0;
           `);
 
           if (result.rowsAffected[0] === 0) {
@@ -157,25 +158,30 @@ module.exports = {
         } 
     },
 
-    getShopCoordinatesById: async (shopId) => {
-      const result = await sqlRequest()
-        .input('id', shopId)
-        .query(`SELECT
-                    coordinates.Lat as lat,
-                    coordinates.Long as lon
-                FROM shops
-                WHERE id = @id`);
-      
-      if (result.recordset.length === 0) {
-        return null;
-      }
+    resetShopCoordinates: async (shopId) => {
+        try {
+            const result = await sqlRequest()
+                .input('id', shopId)
+                .query(`
+                    UPDATE shops
+                    SET coordinates = NULL
+                    WHERE id = @id AND is_deleted = 0;
+                `);
 
-      const row = result.recordset[0];
-      
-      if (row.lat === null || row.lon === null) {
-          return null;
-      }
+            if (result.rowsAffected[0] === 0) {
+                const error = new Error("Magazinul cu id-ul specificat nu a fost găsit pentru resetare.");
+                error.status = 404;
+                throw error;
+            }
 
-      return row;
+            return true;
+        } catch (error) {
+            if (error.status) {
+                throw error;
+            }
+            const dbError = new Error(`Eroare la resetarea coordonatelor pentru magazinul ${shopId}: ${error.message}`);
+            dbError.status = 500;
+            throw dbError;
+        }
     },
 }

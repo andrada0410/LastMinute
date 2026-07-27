@@ -82,6 +82,11 @@ const geocodeShopMiddleware = async (ctx, next) => {
         
     } catch (error) {
         console.error(`Eroare de fundal la geocodarea magazinului ${shopId}:`, error.message);
+        try {
+            await shopAPI.resetShopCoordinates(shopId);
+        } catch (resetError) {
+            console.error(`Eroare fatală: Nu am putut reseta coordonatele pentru ${shopId}:`, resetError.message);
+        }
     }
 };
 
