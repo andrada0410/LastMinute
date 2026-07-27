@@ -4,11 +4,13 @@ import { AdminShopList } from "../admin-shop-list/admin-shop-list";
 import { ShopService } from "../shop.service";
 import { AdminCreateShop } from "../admin-create-shop/admin-create-shop";
 import { CreateShopRequest, ShopInfo } from "../shop";
+import { ShopEdit } from "../shop-edit/shop-edit";
+import { ShopConfirmDelete } from "../shop-confirm-delete/shop-confirm-delete";
 
 @Component({
   selector: "app-super-admin-page",
   standalone: true,
-  imports: [ReactiveFormsModule, AdminShopList, AdminCreateShop],
+  imports: [ReactiveFormsModule, AdminShopList, AdminCreateShop, ShopEdit, ShopConfirmDelete],
   template: `
     <div class="admin-dashboard-layout">
       <section class="list-section">
@@ -17,6 +19,8 @@ import { CreateShopRequest, ShopInfo } from "../shop";
           [totalItems]="totalItems"
           [currentPage]="currentPage"
           (changePageEvent)="loadShops($event)"
+          (editShopEvent)="shopToEdit = $event; editError = null"
+          (deleteShopEvent)="shopToDelete = $event"
         ></app-shop-list>
       </section>
 
@@ -28,6 +32,22 @@ import { CreateShopRequest, ShopInfo } from "../shop";
         ></app-admin-create-shop>
       </section>
     </div>
+
+    @if(shopToEdit) {
+      <app-shop-edit
+        [shop]="shopToEdit"
+        [backendError]="editError"
+        (save)="handleEditShop($event)"
+        (cancel)="shopToEdit = null">
+      </app-shop-edit>
+    }
+
+    @if(shopToDelete) {
+      <app-shop-confirm-delete
+        (confirm)="handleDeleteShop()"
+        (cancel)="shopToDelete = null">
+      </app-shop-confirm-delete>
+    }
   `,
 
   styleUrls: ["./admin.css"],
@@ -39,6 +59,10 @@ export class Admin implements OnInit {
   currentPage: number = 1;
   backendError: string | null = null;
   requestStatus: "loading" | "success" = "loading";
+
+  shopToEdit: ShopInfo | null = null;
+  shopToDelete: ShopInfo | null = null;
+  editError: string | null = null;
 
   ngOnInit(): void {
     this.loadShops(this.currentPage);
@@ -76,4 +100,34 @@ export class Admin implements OnInit {
       },
     });
   }
+
+  handleEditShop(data: { id: number; name: string; address: string }) {
+    this.editError = null;
+
+    this.shopService.updateShop(data.id, data.name, data.address).subscribe({
+      next: () => {
+        this.shopToEdit = null;
+        this.loadShops(this.currentPage);
+      },
+      error: (err) => {
+        this.editError = err.error?.error || "A apărut o eroare la editarea magazinului.";
+      }
+    });
+  }
+
+  handleDeleteShop() {
+    if (!this.shopToDelete) return;
+
+    this.shopService.deleteShop(this.shopToDelete.id).subscribe({
+      next: () => {
+        this.shopToDelete = null;
+        this.loadShops(this.currentPage);
+      },
+      error: (err) => {
+        console.error("Eroare la ștergerea magazinului:", err);
+        this.shopToDelete = null;
+      }
+    });
+  }
+
 }

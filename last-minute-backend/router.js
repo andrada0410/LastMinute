@@ -114,6 +114,13 @@ router.post('/register-shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
         const userInfo = body.user;
         const shopInfo = body.shop;
 
+        const existingUser = await userAPI.getUserByEmail(userInfo.email);
+        if (existingUser) {
+            const err = new Error("Emailul este deja utilizat de catre un cont blocat!");
+            err.status = 400;
+            throw err;
+        }
+
         const createdUser = await userAPI.createUser({
             email: userInfo.email,
             password: userInfo.password,
@@ -158,6 +165,35 @@ router.get('/shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
     } catch (error) {
         ctx.status = 500;
         ctx.body = {error: error.message};
+    }
+});
+
+router.patch('/shop/:id', verifyToken, verifyRoleSuperuser, async (ctx) => {
+    try {
+        const { id } = ctx.params;
+        const { name, address } = ctx.request.body;
+
+        const updatedShop = await shopAPI.updateShop(id, name, address);
+
+        ctx.status = 200;
+        ctx.body = updatedShop;
+    } catch (error) {
+        ctx.status = error.status || 500;
+        const message = ctx.status === 500 ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu." : error.message;
+        ctx.body = {error: message};
+    }
+});
+
+router.delete('/shop/:id', verifyToken, verifyRoleSuperuser, async (ctx) => {
+    try {
+        const { id } = ctx.params;
+        await shopAPI.deleteShop(id);
+
+        ctx.status = 204;
+    } catch (error) {
+        ctx.status = error.status || 500;
+        const message = ctx.status === 500 ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu." : error.message;
+        ctx.body = {error: message};
     }
 });
 

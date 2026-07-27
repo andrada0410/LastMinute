@@ -53,8 +53,8 @@ export class Login {
       next: (response) => {
         this.redirectByRole(response.userData.role);
       },
-      error: () => {
-        this.errorMessage.set('Email sau parolă incorectă.');
+      error: (err) => {
+        this.errorMessage.set(err.error?.error || 'Email sau parolă incorectă.');
       },
     });
   }
