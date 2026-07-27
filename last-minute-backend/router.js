@@ -7,6 +7,7 @@ const config = require('./config.json')
 const fs = require('fs');
 const path = require('node:path');
 const shopAPI = require('./src/resources/shop');
+const geocodingAPI = require('./src/data-exchange/map-nominatim/index');
 const user = require('./src/resources/user');
 const shop = require('./src/resources/shop');
 const jwt = require('jsonwebtoken');
@@ -34,8 +35,6 @@ const verifyToken = async (ctx, next) => {
     try {
         const decodedPayload = jwt.verify(token, JWT_KEY);
         ctx.state.user = decodedPayload;
-
-        await next();
     } catch(err) {
         ctx.status = 401;
         ctx.body = {
@@ -43,6 +42,8 @@ const verifyToken = async (ctx, next) => {
         };
         return;
     }
+
+    await next();
 }
 
 const verifyRoleSuperuser = async (ctx, next) => {
@@ -62,6 +63,27 @@ const verifyRoleSuperuser = async (ctx, next) => {
 
     await next();
 }
+
+const geocodeShopMiddleware = async (ctx, next) => {
+    await next();
+    const shopId = ctx.shop.shopId || ctx.params.id;
+    const address = ctx.shop.address || (ctx.request.body && ctx.request.body.address);
+
+    if (!shopId || !address) {
+        await next();
+        return;
+    }
+
+    try {
+        const coordinates = await geocodingAPI.geocodeAddress(address);
+        const { lat, lon } = coordinates;
+
+        await shopAPI.updateShopCoordinates(shopId, lat, lon);
+        
+    } catch (error) {
+        console.error(`Eroare de fundal la geocodarea magazinului ${shopId}:`, error.message);
+    }
+};
 
 router.get('/Example', async (ctx, next) => {
     ctx.response.body = await exampleAPI.get();
@@ -108,7 +130,7 @@ router.post('/login', async (ctx) => {
     }
 })
 
-router.post('/register-shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
+router.post('/register-shop', verifyToken, verifyRoleSuperuser, geocodeShopMiddleware, async (ctx, next) => {
     try {
         const body = ctx.request.body;
         const userInfo = body.user;
@@ -141,6 +163,13 @@ router.post('/register-shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
             },
             shopData: createdShop
         };
+
+        ctx.shop = {};
+        ctx.shop.shopId = createdShop.id;
+        ctx.shop.address = shopInfo.address;
+
+        await next();
+
     } catch (error) {
         ctx.status = error.status || 500;
         const message = ctx.status === 500 ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu." : error.message;
@@ -168,15 +197,40 @@ router.get('/shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
     }
 });
 
-router.patch('/shop/:id', verifyToken, verifyRoleSuperuser, async (ctx) => {
+router.get('/shops/map', async (ctx) => {
+    try {
+        const shopMapData = await shopAPI.getShopsForMap();
+        ctx.status = 200;
+        ctx.body = {
+            entry: shopMapData
+        }
+    } catch (error) {
+        ctx.status = 400;
+        ctx.body = {error: error.message};
+    }
+});
+
+router.patch('/shop/:id', verifyToken, verifyRoleSuperuser, geocodeShopMiddleware, async (ctx, next) => {
     try {
         const { id } = ctx.params;
         const { name, address } = ctx.request.body;
+
+        if (!id || ctx.request.body.id != id) {
+            ctx.status = 400;
+            ctx.body = {error: "id-ul din corpul cererii nu corespunde cu id-ul din ruta."};
+            return;
+        }
 
         const updatedShop = await shopAPI.updateShop(id, name, address);
 
         ctx.status = 200;
         ctx.body = updatedShop;
+        
+        ctx.shop = {};
+        ctx.shop.shopId = id;
+        ctx.shop.address = address;
+
+        await next();
     } catch (error) {
         ctx.status = error.status || 500;
         const message = ctx.status === 500 ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu." : error.message;

@@ -26,6 +26,8 @@ module.exports = {
     return result.recordset[0];
   },
 
+  
+
   getShopsInfo: async (page = 1, limit = 5) => {
     const offset = (page - 1) * limit;
 
@@ -91,5 +93,89 @@ module.exports = {
             .query(`SELECT id, is_deleted FROM shops WHERE user_id = @userId`);
         
         return result.recordset[0];
+    },
+
+
+    getShopsForMap: async () => {
+        const result = await sqlRequest()
+        .query(`SELECT
+                    id,
+                    name,
+                    address,
+                    has_offers as hasOffers,
+                    coordinates.Lat as lat,
+                    coordinates.Long as lon
+                FROM shops
+                ORDER BY id`);
+
+        const optimizedShops = result.recordset.map(row => {
+            const shop = {
+                id: row.id,
+                name: row.name,
+                address: row.address,
+                hasOffers: row.hasOffers
+            };
+
+            if (row.lat != null && row.lon != null) {
+                shop.lat = row.lat;
+                shop.lon = row.lon;
+            }
+
+            return shop;
+        });
+
+        return optimizedShops;
+    },
+
+    updateShopCoordinates: async (shopId, lat, lon) => {
+      try {
+        const result = await sqlRequest()
+          .input('id', shopId)
+          .input('lat', lat)
+          .input('lon', lon)
+          .query(`
+              UPDATE shops
+              SET coordinates = geography::Point(@lat, @lon, 4326)
+              WHERE id = @id;
+          `);
+
+          if (result.rowsAffected[0] === 0) {
+            const error = new Error("Magazinul cu id-ul specificat nu a fost găsit în baza de date.");
+            error.status = 404;
+            throw error;
+          }
+
+          return true;
+        } catch (error) {
+          if (error.status) { // if the error is not thrown directly by the DB, it is thrown further as it is
+            throw error;
+          }
+
+          const dbError = new Error(`Eroare critică la actualizarea coordonatelor pentru magazinul ${shopId}: ${error.message}`);
+          dbError.status = 500;
+          throw dbError;
+        } 
+    },
+
+    getShopCoordinatesById: async (shopId) => {
+      const result = await sqlRequest()
+        .input('id', shopId)
+        .query(`SELECT
+                    coordinates.Lat as lat,
+                    coordinates.Long as lon
+                FROM shops
+                WHERE id = @id`);
+      
+      if (result.recordset.length === 0) {
+        return null;
+      }
+
+      const row = result.recordset[0];
+      
+      if (row.lat === null || row.lon === null) {
+          return null;
+      }
+
+      return row;
     },
 }

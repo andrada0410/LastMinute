@@ -1,7 +1,7 @@
 import { Component, inject, OnInit} from "@angular/core";
 import { ReactiveFormsModule } from "@angular/forms";
 import { AdminShopList } from "../admin-shop-list/admin-shop-list";
-import { ShopService } from "../shop.service";
+import { ShopService } from "../services/shop.service";
 import { AdminCreateShop } from "../admin-create-shop/admin-create-shop";
 import { CreateShopRequest, ShopInfo } from "../shop";
 import { ShopEdit } from "../shop-edit/shop-edit";

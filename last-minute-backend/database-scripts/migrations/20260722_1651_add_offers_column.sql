@@ -1,0 +1,5 @@
+IF (OBJECT_ID('shops')) IS NOT NULL
+BEGIN
+    ALTER TABLE shops
+    ADD has_offers BIT NOT NULL DEFAULT 0
+END;
