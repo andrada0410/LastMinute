@@ -1,5 +1,6 @@
 const { getUserByEmail, createUser, deleteUserById} = require("../user/index")
 const {associatePersonToUser} = require("../person/index")
+const { getShopByUserId } = require("../shop/index")
 const config = require('../../../config.json');
 const jwt = require('jsonwebtoken');
 
@@ -110,6 +111,16 @@ module.exports = {
             const error = new Error("Email sau parolă incorectă!");
             error.status = 401;
             throw error;
+        }
+
+        if (user.role === 'SHOPUSER') {
+            const shop = await getShopByUserId(user.id);
+
+            if (!shop || shop.is_deleted) {
+                const error = new Error("Contul dumneavoastră nu mai este activ.");
+                error.status = 403;
+                throw error;
+            }
         }
 
         return {

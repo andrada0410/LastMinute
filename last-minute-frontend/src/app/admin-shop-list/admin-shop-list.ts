@@ -11,7 +11,11 @@ import { ShopItem } from "../admin-shop-list-item/admin-shop-list-item";
             <ul class="shop-list">
                 @for(shop of shops(); track shop.id) {
                     <li class="shop-item">
-                        <app-admin-shop-list-item [shop]="shop"/>
+                        <app-admin-shop-list-item 
+                        [shop]="shop"
+                        (editShopEvent)="editShopEvent.emit($event)"
+                        (deleteShopEvent)="deleteShopEvent.emit($event)"
+                        />
                     </li>
                 } @empty {
                     <li class="empty-state">Nu există magazine adăugate încă.</li>
@@ -51,6 +55,8 @@ export class AdminShopList {
     currentPage = input.required<number>();
 
     changePageEvent = output<number>();
+    editShopEvent = output<ShopInfo>();
+    deleteShopEvent = output<ShopInfo>(); 
 
     get totalPages(): number {
         return Math.ceil(this.totalItems() / 5) || 1;

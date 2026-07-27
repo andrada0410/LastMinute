@@ -1,6 +1,8 @@
 :host {
     display: flex;
-    flex-direction: column; 
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     gap: 0.25rem;
     padding: 0.75rem 1rem 0.75rem 1.5rem; 
     background-color: #fafafa;
@@ -18,9 +20,51 @@
     font-weight: 600;
     font-size: 1.1rem;
     color: #333;
+    overflow-wrap: anywhere;
 }
 
 .shop-email {
     font-size: 0.9rem;
     color: #666;
+    overflow-wrap: anywhere;
+}
+
+button.primary {
+    cursor: pointer;
+    background-color: var(--primary-color, #007bff);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    margin-top: 0;
+    transition: opacity 0.2s;
+}
+
+button.primary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+button.primary:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.shop-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    flex-shrink: 0;
+}
+
+.shop-actions .block {
+    background-color: #a0a0a0;
+}
+
+.shop-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1 1 auto;
+    min-width: 0;
 }

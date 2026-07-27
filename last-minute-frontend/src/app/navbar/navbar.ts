@@ -16,8 +16,15 @@ import { AuthService } from '../auth.service';
         <a routerLink="/map" routerLinkActive="active">Hartă</a>
 
         @if (authService.isLoggedIn()) {
-          <a routerLink="/active-orders" routerLinkActive="active">Comenzi active</a>
-          <a routerLink="/order-history" routerLinkActive="active">Istoric comenzi</a>
+          @switch (authService.currentUser()?.role) {
+            @case ('SUPERUSER') {
+              <a routerLink="/superadmin" routerLinkActive="active">Conturi magazine</a>
+            }
+            @default {
+              <a routerLink="/active-orders" routerLinkActive="active">Comenzi active</a>
+              <a routerLink="/order-history" routerLinkActive="active">Istoric comenzi</a>
+            }
+          }
           <button class="navbar-logout" type="button" (click)="onLogout()">Deconectare</button>
         } @else {
           <a routerLink="/login" routerLinkActive="active">Conectare</a>
