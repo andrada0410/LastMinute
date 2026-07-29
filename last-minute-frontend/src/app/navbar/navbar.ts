@@ -15,10 +15,13 @@ import { AuthService } from '../services/auth.service';
       <div class="navbar-links">
         <a routerLink="/map" routerLinkActive="active">Hartă</a>
 
-        @if (authService.isLoggedIn()) {
+       @if (authService.isLoggedIn()) {
           @switch (authService.currentUser()?.role) {
             @case ('SUPERUSER') {
               <a routerLink="/superadmin" routerLinkActive="active">Conturi magazine</a>
+            }
+            @case ('SHOPUSER') {
+              <a routerLink="/shop-dashboard" routerLinkActive="active">Dashboard</a>
             }
             @default {
               <a routerLink="/active-orders" routerLinkActive="active">Comenzi active</a>

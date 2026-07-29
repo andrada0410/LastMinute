@@ -5,6 +5,7 @@ import { Login } from './login/login';
 import { Register } from './register/register';
 import { Admin } from './admin/admin';
 import { MapComponent } from './map/map.component';
+import { ShopDashboard } from './shop-dashboard/shop-dashboard';
 
 const routeConfig: Routes = [
   {
@@ -36,7 +37,13 @@ const routeConfig: Routes = [
     path: 'map',
     component: MapComponent,
     title: 'Map'
+  },
+  {
+    path: 'shop-dashboard',
+    component: ShopDashboard,
+    title: 'Shop Dashboard'
   }
+  
 ];
 
 export default routeConfig;

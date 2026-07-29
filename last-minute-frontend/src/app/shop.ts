@@ -4,6 +4,17 @@ export interface ShopInfo {
     address: string;
     email: string;
 }
+
+export interface Shop {
+    id: number;
+    name: string;
+    address: string;
+    userId: number;
+    logoPath: string;
+    bannerPath: string;
+    details: string;
+}
+
 export interface PaginatedShopsResponse {
     entry: ShopInfo[];
     total: number;
@@ -35,7 +46,6 @@ export interface ShopMapInfo {
 export interface ShopsMapResponse {
     entry: ShopMapInfo[];
 }
-
 export interface CreateShopRequest {
     name: string,
     email: string,

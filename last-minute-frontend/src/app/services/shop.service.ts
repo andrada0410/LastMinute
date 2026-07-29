@@ -1,7 +1,7 @@
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { CreateShopResponse, PaginatedShopsResponse, ShopInfo, ShopsMapResponse} from "../shop";
+import { CreateShopResponse, PaginatedShopsResponse, ShopInfo, Shop, ShopsMapResponse} from "../shop";
 
 @Injectable({
   providedIn: 'root',
@@ -28,16 +28,56 @@ export class ShopService {
 
         return this.http.get<PaginatedShopsResponse>(`${this.url}/shop`, { params });
     }
+    
+    deleteShop(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.url}/shop/${id}`);
+    }
 
     getAllShopMapInfo() : Observable<ShopsMapResponse> {
         return this.http.get<ShopsMapResponse>(`${this.url}/shops/map`);
     }
 
-    updateShop(id: number, name: string, address: string): Observable<ShopInfo> {
-        return this.http.patch<ShopInfo>(`${this.url}/shop/${id}`, { id, name, address });
+    updateShopCoordinates(shopId: number, lat: number, lon: number): Observable<any> {
+        return this.http.patch(`${this.url}/shop/${shopId}`, { lat, lon });
     }
+    getShopById(id: number): Observable<Shop> {
+        return this.http.get<Shop>(`${this.url}/shop/${id}`);
+    }
+
+    getMyShop(): Observable<Shop> {
+        return this.http.get<Shop>(`${this.url}/shop/mine`);
+    }
+
+    updateShop(shopId: number, name: string, address: string): Observable<Shop> {
+        return this.http.patch<Shop>(`${this.url}/shop/${shopId}`, {
+        id: shopId,
+        name: name,
+        address: address
+      });
+    }
+
+    updateShopDashboard (
+        shopId: number, 
+        shopData: { details?: string; logo?: File | null; banner?: File | null }
+    ): Observable<Shop> {
     
-    deleteShop(id: number): Observable<void> {
-        return this.http.delete<void>(`${this.url}/shop/${id}`);
+    const formData = new FormData();
+
+    if (shopData.details !== undefined) {
+      formData.append('details', shopData.details);
     }
+
+    if (shopData.logo) {
+      formData.append('logo', shopData.logo);
+    }
+
+    if (shopData.banner) {
+      formData.append('banner', shopData.banner);
+    }
+
+    return this.http.patch<Shop>(
+      `${this.url}/shop/${shopId}/dashboard`,
+      formData
+    );
+  }
 };

@@ -18,5 +18,6 @@
             "idleTimeoutMillis": 12000
         },
         "jwtKey":"34ab5fc84f8f6abc82b0bde2173f5095f45bb36e6ff6f0d1d3493e4c8e403d16034d31e7b15e9e11081f4883f78860ab096fc0e5edc54837944587d32d6a8f85"
-    }
+    },
+    "imagesFolder": "uploads"
 }

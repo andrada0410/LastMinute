@@ -64,6 +64,9 @@ export class Login {
       case 'user':
         this.router.navigate(['/']);
         break;
+      case 'shopuser':
+        this.router.navigate(['/shop-dashboard'])
+        break
       default:
         this.router.navigate(['/']);
     }

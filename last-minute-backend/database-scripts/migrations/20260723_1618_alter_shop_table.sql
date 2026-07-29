@@ -1,0 +1,8 @@
+IF OBJECT_ID('shops') IS NOT NULL
+BEGIN
+ALTER TABLE shops
+ADD
+    logo_path NVARCHAR(255) NULL,
+    banner_path NVARCHAR(255) NULL,
+    details NVARCHAR(1000) NULL;
+END

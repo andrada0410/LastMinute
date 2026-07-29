@@ -1,0 +1,37 @@
+.image-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+.image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-edit-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.image-container:hover .image-edit-overlay {
+    opacity: 1;
+}
+
+.image-edit-label {
+    color: #fff;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.image-edit-label input {
+    display: none;
+}

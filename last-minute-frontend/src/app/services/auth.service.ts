@@ -20,7 +20,8 @@ export class AuthService {
 
   constructor() {
     const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
+    const token = localStorage.getItem('token');
+    if (savedUser && token) {
       this._currentUser.set(JSON.parse(savedUser));
       this._isLoggedIn.set(true);
     }
