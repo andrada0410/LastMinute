@@ -6,6 +6,7 @@ import { AdminCreateShop } from "../admin-create-shop/admin-create-shop";
 import { CreateShopRequest, ShopInfo } from "../shop";
 import { ShopEdit } from "../shop-edit/shop-edit";
 import { ShopConfirmDelete } from "../shop-confirm-delete/shop-confirm-delete";
+import { ToastService } from "../services/toast.service";
 
 @Component({
   selector: "app-super-admin-page",
@@ -19,7 +20,7 @@ import { ShopConfirmDelete } from "../shop-confirm-delete/shop-confirm-delete";
           [totalItems]="totalItems"
           [currentPage]="currentPage"
           (changePageEvent)="loadShops($event)"
-          (editShopEvent)="shopToEdit = $event; editError = null"
+          (editShopEvent)="shopToEdit = $event"
           (deleteShopEvent)="shopToDelete = $event"
         ></app-shop-list>
       </section>
@@ -27,7 +28,6 @@ import { ShopConfirmDelete } from "../shop-confirm-delete/shop-confirm-delete";
       <section class="form-section">
         <app-admin-create-shop
           (addShopEvent)="handleShopAdded($event)"
-          [backendError]="backendError"
           [requestStatus]="requestStatus"
         ></app-admin-create-shop>
       </section>
@@ -36,7 +36,6 @@ import { ShopConfirmDelete } from "../shop-confirm-delete/shop-confirm-delete";
     @if(shopToEdit) {
       <app-shop-edit
         [shop]="shopToEdit"
-        [backendError]="editError"
         (save)="handleEditShop($event)"
         (cancel)="shopToEdit = null">
       </app-shop-edit>
@@ -54,15 +53,14 @@ import { ShopConfirmDelete } from "../shop-confirm-delete/shop-confirm-delete";
 })
 export class Admin implements OnInit {
   shopService = inject(ShopService);
+  toastService = inject(ToastService);
   shops: ShopInfo[] = [];
   totalItems: number = 0;
   currentPage: number = 1;
-  backendError: string | null = null;
   requestStatus: "loading" | "success" = "loading";
 
   shopToEdit: ShopInfo | null = null;
   shopToDelete: ShopInfo | null = null;
-  editError: string | null = null;
 
   ngOnInit(): void {
     this.loadShops(this.currentPage);
@@ -71,18 +69,18 @@ export class Admin implements OnInit {
   handleShopAdded(shop: CreateShopRequest) {
     const { email, password, name, address } = shop;
 
-    this.backendError = null;
     this.requestStatus = "loading";
 
     this.shopService.registerShop(email, password, name, address).subscribe({
       next: (response) => {
         this.requestStatus = "success";
+        this.toastService.success('Creare efectuată cu succes');
         this.loadShops(1);
       },
 
       error: (error) => {
-        this.backendError =
-          error.error?.error || "A apărut o eroare la crearea magazinului.";
+        const backendError = typeof error.error === 'string' ? error.error : (error.error?.error || "A apărut o eroare la crearea magazinului.");
+        this.toastService.error(backendError, 'Eroare');
       },
     });
   }
@@ -96,21 +94,22 @@ export class Admin implements OnInit {
         console.log(response);
       },
       error: (err) => {
-        console.error("Eroare la preluarea magazinelor:", err);
+        const loadError = typeof err.error === 'string' ? err.error : (err.error?.error || "Eroare la preluarea magazinelor.");
+        this.toastService.error(loadError, "Eroare");
       },
     });
   }
 
   handleEditShop(data: { id: number; name: string; address: string }) {
-    this.editError = null;
-
     this.shopService.updateShop(data.id, data.name, data.address).subscribe({
       next: () => {
         this.shopToEdit = null;
+        this.toastService.success('Editare efectuată cu succes');
         this.loadShops(this.currentPage);
       },
       error: (err) => {
-        this.editError = err.error?.error || "A apărut o eroare la editarea magazinului.";
+        const editError = typeof err.error === 'string' ? err.error : (err.error?.error || "A apărut o eroare la editarea magazinului.");
+        this.toastService.error(editError, 'Eroare');
       }
     });
   }
@@ -121,13 +120,14 @@ export class Admin implements OnInit {
     this.shopService.deleteShop(this.shopToDelete.id).subscribe({
       next: () => {
         this.shopToDelete = null;
+        this.toastService.success('Blocare efectuată cu succes');
         this.loadShops(this.currentPage);
       },
       error: (err) => {
-        console.error("Eroare la ștergerea magazinului:", err);
+        const deleteError = typeof err.error === 'string' ? err.error : (err.error?.error || "A apărut o eroare la ștergerea magazinului.");
+        this.toastService.error(deleteError, 'Eroare');
         this.shopToDelete = null;
       }
     });
   }
-
 }

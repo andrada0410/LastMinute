@@ -104,11 +104,10 @@ const verifyRoleShopuser = async (ctx, next) => {
 
 const geocodeShopMiddleware = async (ctx, next) => {
     await next();
-    const shopId = ctx.shop.shopId || ctx.params.id;
-    const address = ctx.shop.address || (ctx.request.body && ctx.request.body.address);
+    const shopId = ctx.shop?.shopId || ctx.params.id;
+    const address = ctx.shop?.address || (ctx.request.body && ctx.request.body.address);
 
     if (!shopId || !address) {
-        await next();
         return;
     }
 
@@ -191,9 +190,12 @@ router.post('/register-shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
 
         const existingUser = await userAPI.getUserByEmail(userInfo.email);
         if (existingUser) {
-            const err = new Error("Emailul este deja utilizat de catre un cont blocat!");
-            err.status = 400;
-            throw err;
+          const message = existingUser.shop_is_deleted == 1
+                ? "Emailul este deja utilizat de catre un cont blocat!"
+                : "Emailul este deja utilizat de catre un cont existent!";
+          const err = new Error(message);
+          err.status = 400;
+          throw err;
         }
 
     const createdUser = await userAPI.createUser({

@@ -26,10 +26,6 @@ import { ShopInfo } from "../shop";
                         <p class="error-text">Adresa este obligatorie.</p>
                     }
 
-                    @if(backendError) {
-                        <p class="error-message">{{ backendError }}</p>
-                    }
-
                     <div class="form-actions">
                         <button type="button" class="button canceled" (click)="cancel.emit()">Anulează</button>
                         <button type="submit" class="button primary" [disabled]="editForm.invalid || !hasChanges">Salvează modificări</button>
@@ -42,7 +38,6 @@ import { ShopInfo } from "../shop";
 })
 export class ShopEdit implements OnChanges {
     @Input({ required: true }) shop!: ShopInfo;
-    @Input() backendError: string | null = null;
 
     @Output() save = new EventEmitter<{ id: number; name: string; address: string }>();
     @Output() cancel = new EventEmitter<void>();

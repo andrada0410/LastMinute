@@ -47,10 +47,6 @@ import { CreateShopRequest } from "../shop";
                 <p class="error-text">Adresa este obligatorie.</p>
             }
 
-            @if(backendError()) {
-                <p class="error-message">{{ backendError() }}</p>
-            }
-
             <button type="submit" class="primary" [disabled]="shopForm.invalid">Creare magazin</button>
         </form>
     `,
@@ -60,7 +56,6 @@ import { CreateShopRequest } from "../shop";
 
 export class AdminCreateShop {
     addShopEvent = output<CreateShopRequest>();
-    backendError = input<string | null>(null);
     requestStatus = input<'loading' | 'success'>('loading');
     
     constructor() {

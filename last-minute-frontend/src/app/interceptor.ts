@@ -9,12 +9,14 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { ToastService } from "./services/toast.service";
 
 @Injectable({
     providedIn: 'root',
 })
 export class AuthInterceptor implements HttpInterceptor {
     private router = inject(Router);
+    private toastService = inject(ToastService);
     private excludedRoutes = ['/login', '/register', '/map']
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -35,7 +37,7 @@ export class AuthInterceptor implements HttpInterceptor {
         return next.handle(modifiedRequest).pipe(
             catchError((error: HttpErrorResponse) => {
                 if (error.status === 401) {
-                    console.warn('Acces interzis! Te rugăm sa te loghezi din nou.');
+                    this.toastService.error('Acces interzis! Te rugăm sa te loghezi din nou.', 'Sesiune expirată');
                     localStorage.removeItem('token');
                     this.router.navigate(['/login']);
                 }
@@ -43,7 +45,7 @@ export class AuthInterceptor implements HttpInterceptor {
                     console.error("Eroare de validare:", error.error.error);
                 }
                 else if (error.status === 403) {
-                    console.error("Nu aveți permisiunea de a vizualiza conținutul acestei pagini.");
+                    this.toastService.error('Nu aveți permisiunea de a vizualiza conținutul acestei pagini.', 'Acces interzis');
                 }
                 else if (error.status === 500) {
                     console.error("problemă server", error.error.error);

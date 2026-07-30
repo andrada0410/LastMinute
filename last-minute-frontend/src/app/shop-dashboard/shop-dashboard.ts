@@ -1,8 +1,9 @@
-import { Component, inject, OnInit, signal } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
-import { ShopService } from "../services/shop.service";
-import { Shop } from "../shop";
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ShopDashboardImage } from '../shop-dashboard-image/shop-dashboard-image';
+import { ShopService } from '../services/shop.service';
+import { Shop } from '../shop';
+import { ToastService } from '../services/toast.service';
 import { ShopCategorySelect } from "../shop-category-select/shop-category-select";
 import { Category } from "../category";
 
@@ -55,10 +56,6 @@ import { Category } from "../category";
             </div>
           }
         </div>
-
-        @if (errorMessage()) {
-          <p class="message error">{{ errorMessage() }}</p>
-        }
 
         <div class="card shop-card">
           <!-- Banner -->
@@ -138,9 +135,9 @@ export class ShopDashboard implements OnInit {
   };
 
   private shopService = inject(ShopService);
+  private toastService = inject(ToastService);
 
   isEditing = signal(false);
-  errorMessage = signal("");
 
   shopId: number | null = null;
   name = "Nume Magazin";
@@ -175,7 +172,7 @@ export class ShopDashboard implements OnInit {
           }
         })
       },
-      error: () => this.errorMessage.set("Nu am putut incarca categoriile."),
+      error: () => this.toastService.error("Nu am putut incarca categoriile.", "Eroare"),
     });
   }
 
@@ -198,8 +195,10 @@ export class ShopDashboard implements OnInit {
       next: (shop: Shop) => {
         this.applyProfile(shop);
       },
-      error: () =>
-        this.errorMessage.set("Nu am putut incarca datele magazinului."),
+      error: (err) => {
+        const errorMessage = typeof err.error === 'string' ? err.error : (err.error?.error || 'Nu am putut incarca datele magazinului.');
+        this.toastService.error(errorMessage, 'Eroare');
+      }
     });
   }
 
@@ -233,7 +232,6 @@ export class ShopDashboard implements OnInit {
 
   cancelEditing(): void {
     this.isEditing.set(false);
-    this.errorMessage.set("");
     this.clearSelectedFiles();
     this.loadShopProfile();
   }
@@ -258,11 +256,9 @@ export class ShopDashboard implements OnInit {
 
   onSubmit(): void {
     if (!this.shopId) {
-      this.errorMessage.set("ID-ul magazinului nu este disponibil.");
+      this.toastService.error('ID-ul magazinului nu este disponibil.', 'Eroare');
       return;
     }
-
-    this.errorMessage.set("");
 
     this.shopService
       .updateShopDashboard(this.shopId, {
@@ -275,11 +271,13 @@ export class ShopDashboard implements OnInit {
         next: () => {
           this.isEditing.set(false);
           this.clearSelectedFiles();
+          this.toastService.success('Editare efectuată cu succes');
           this.loadShopProfile();
         },
-        error: () => {
-          this.errorMessage.set("Salvarea modificărilor a eșuat.");
-        },
+        error: (err) => {
+          const errorMessage = typeof err.error === 'string' ? err.error : (err.error?.error || 'Salvarea modificărilor a eșuat.');
+          this.toastService.error(errorMessage, 'Eroare');
+        }
       });
   }
 }

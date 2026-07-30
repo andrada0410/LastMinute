@@ -17,10 +17,11 @@ module.exports = {
 
   getUserByEmail: async (email) => {
     const result = await sqlRequest().input("email", email)
-      .query(`select u.id as id, u.email as email, u.password as password, ud.first_name as first_name, ud.last_name as last_name, ur.role as role 
+      .query(`select u.id as id, u.email as email, u.password as password, ud.first_name as first_name, ud.last_name as last_name, ur.role as role, s.is_deleted as shop_is_deleted 
             from users u
             left join persons ud ON u.id = ud.user_id  
             left join user_roles ur ON ur.id = u.role
+            left join shops s ON s.user_id = u.id
             where u.email = @email`);
     return result.recordset[0];
   },
