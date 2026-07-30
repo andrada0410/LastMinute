@@ -36,7 +36,7 @@ export class AuthInterceptor implements HttpInterceptor {
         
         return next.handle(modifiedRequest).pipe(
             catchError((error: HttpErrorResponse) => {
-                if (error.status === 401) {
+                if (error.status === 401 && !isExcluded) {
                     this.toastService.error('Acces interzis! Te rugăm sa te loghezi din nou.', 'Sesiune expirată');
                     localStorage.removeItem('token');
                     this.router.navigate(['/login']);

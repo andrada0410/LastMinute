@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -10,10 +11,6 @@ import { AuthService } from '../services/auth.service';
     <section class="page page-centered">
       <form class="card form-card" #loginForm="ngForm" (ngSubmit)="onSubmit()">
         <h1>Conectare</h1>
-
-        @if (errorMessage()) {
-          <p class="message error">{{ errorMessage() }}</p>
-        }
 
         <label for="email">Email</label>
         <input id="email" type="email" name="email" [(ngModel)]="email" #emailModel="ngModel" required email/>
@@ -35,26 +32,24 @@ import { AuthService } from '../services/auth.service';
 export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   email = '';
   password = '';
 
-  errorMessage = signal('');
-
   onSubmit(): void {
     if (!this.email || !this.password) {
-      this.errorMessage.set('Completează email și parolă.');
+      this.toastService.error('Completează email și parolă.', 'Eroare');
       return;
     }
-
-    this.errorMessage.set('');
 
     this.authService.login(this.email, this.password).subscribe({
       next: (response) => {
         this.redirectByRole(response.userData.role);
       },
       error: (err) => {
-        this.errorMessage.set(err.error?.error || 'Email sau parolă incorectă.');
+        const errorMessage = typeof err.error === 'string' ? err.error : (err.error?.error || 'Email sau parolă incorectă.');
+        this.toastService.error(errorMessage, 'Eroare');
       },
     });
   }

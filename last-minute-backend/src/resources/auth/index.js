@@ -3,6 +3,7 @@ const {associatePersonToUser} = require("../person/index")
 const { getShopByUserId } = require("../shop/index")
 const config = require('../../../config.json');
 const jwt = require('jsonwebtoken');
+const userAPI = require("../user/index");
 
 const JWT_KEY = config.databaseConfig.jwtKey; 
 
@@ -75,7 +76,7 @@ module.exports = {
             userData.role = 'USER';
         }
 
-        const newUser = await createUser(userData);
+        const newUser = await userAPI.createUser(userData);
         newUser.lastName = userData.lastName;
         newUser.firstName = userData.firstName;
 

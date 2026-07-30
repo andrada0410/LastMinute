@@ -2,6 +2,7 @@ import { Component, inject } from "@angular/core";
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { AuthService } from "../services/auth.service";
 import { Router } from "@angular/router";
+import { ToastService } from "../services/toast.service";
 
 @Component({
     selector: 'app-register',
@@ -38,10 +39,6 @@ import { Router } from "@angular/router";
                     <p class="message error">Parolele sunt diferite!</p>
                 }
 
-                @if(backendError) {
-                    <p class="message error">{{ backendError }}</p>
-                }
-
                 <button type="submit" class='button primary' [disabled]="registerForm.invalid">Creare cont</button>
 
             </form>
@@ -53,8 +50,7 @@ import { Router } from "@angular/router";
 export class Register {
     private authService = inject(AuthService);
     private router = inject(Router);
-
-    backendError: string | null = null;
+    private toastService = inject(ToastService);
 
     passwordValidator(control: AbstractControl): ValidationErrors | null {
         const password = control.get('password');
@@ -77,8 +73,6 @@ export class Register {
     });
 
     submitRegister() {
-        this.backendError = null;
-
         if (this.registerForm.invalid) {
             return;
         }
@@ -91,7 +85,8 @@ export class Register {
                     this.router.navigate(['/']);
                 },
                 error: (err) => {
-                    this.backendError = err.error.error || 'A apărut o eroare. Te rugăm să încerci din nou.';
+                    const errorMessage = typeof err.error === 'string' ? err.error : (err.error?.error || 'A apărut o eroare. Te rugăm să încerci din nou.');
+                    this.toastService.error(errorMessage, 'Eroare');
                 }
             });
     }
