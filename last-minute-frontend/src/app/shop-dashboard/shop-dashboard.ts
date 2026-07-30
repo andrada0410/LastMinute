@@ -1,17 +1,23 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ShopDashboardImage } from '../shop-dashboard-image/shop-dashboard-image';
-import { ShopService } from '../services/shop.service';
-import { Shop } from '../shop';
+import { Component, inject, OnInit, signal } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
+import { ShopService } from "../services/shop.service";
+import { Shop } from "../shop";
+import { ShopCategorySelect } from "../shop-category-select/shop-category-select";
+import { Category } from "../category";
 
 @Component({
-  selector: 'shop-dashboard',
+  selector: "shop-dashboard",
   standalone: true,
-  imports: [FormsModule, ShopDashboardImage],
+  imports: [FormsModule, ShopDashboardImage, ShopCategorySelect],
   template: `
     <section class="page">
-      <form class="dashboard-page form-card" [class.is-editing]="isEditing()" #shopForm="ngForm" (ngSubmit)="onSubmit()">
-
+      <form
+        class="dashboard-page form-card"
+        [class.is-editing]="isEditing()"
+        #shopForm="ngForm"
+        (ngSubmit)="onSubmit()"
+      >
         <div class="page-head">
           <div>
             <h1>Dashboard</h1>
@@ -20,14 +26,32 @@ import { Shop } from '../shop';
 
           @if (!isEditing()) {
             <div class="view-actions">
-              <button type="button" class="button primary" (click)="startEditing()">Editeaza profilul</button>
+              <button
+                type="button"
+                class="button primary"
+                (click)="startEditing()"
+              >
+                Editeaza profilul
+              </button>
             </div>
           }
 
           @if (isEditing()) {
             <div class="edit-only">
-              <button type="button" class="button secondary" (click)="cancelEditing()">Anuleaza</button>
-              <button type="submit" class="button primary" [disabled]="shopForm.invalid || !hasChanges()">Salveaza modificarile</button>
+              <button
+                type="button"
+                class="button secondary"
+                (click)="cancelEditing()"
+              >
+                Anuleaza
+              </button>
+              <button
+                type="submit"
+                class="button primary"
+                [disabled]="shopForm.invalid || !hasChanges()"
+              >
+                Salveaza modificarile
+              </button>
             </div>
           }
         </div>
@@ -37,7 +61,6 @@ import { Shop } from '../shop';
         }
 
         <div class="card shop-card">
-
           <!-- Banner -->
           <div class="shop-banner">
             <app-shop-dashboard-image
@@ -63,11 +86,24 @@ import { Shop } from '../shop';
           </div>
 
           <div class="shop-body">
-
             <!-- Shop Name -->
             <div class="field-group">
               <span class="field-label">Denumire</span>
-                <div class="shop-name-view">{{ name }}</div>
+              <div class="shop-name-view">{{ name }}</div>
+            </div>
+
+            <div class="field-group">
+              <span class="field-label">Categorie</span>
+              @if (!isEditing()) {
+                <p class="field-value muted">{{ categoryName }}</p>
+              }
+
+              @if (isEditing()) {
+                <app-shop-category-select
+                  [categories]="categories"
+                  [(selectedId)]="categoryId"
+                />
+              }
             </div>
 
             <!-- Details -->
@@ -77,7 +113,12 @@ import { Shop } from '../shop';
                 <p class="field-value muted">{{ details }}</p>
               }
               @if (isEditing()) {
-                <textarea class="field-edit" name="details" [(ngModel)]="details" placeholder="Descrie magazinul..."></textarea>
+                <textarea
+                  class="field-edit"
+                  name="details"
+                  [(ngModel)]="details"
+                  placeholder="Descrie magazinul..."
+                ></textarea>
               }
             </div>
           </div>
@@ -85,29 +126,57 @@ import { Shop } from '../shop';
       </form>
     </section>
   `,
-  styleUrls: ['./shop-dashboard.css'],
+  styleUrls: ["./shop-dashboard.css"],
 })
 export class ShopDashboard implements OnInit {
+  CATEGORY_TRANSLATIONS: Record<string, string> = {
+    "Restaurant": "Restaurant",
+    "Fast-Food": "Fast-Food",
+    "Confectionery": "Cofetărie",
+    "Bakery": "Patiserie",
+    "Supermarket": "Supermarket"
+  };
+
   private shopService = inject(ShopService);
 
   isEditing = signal(false);
-  errorMessage = signal('');
+  errorMessage = signal("");
 
   shopId: number | null = null;
-  name = 'Nume Magazin';
-  details = 'Descriere magazin...';
-  bannerUrl = '';
-  logoUrl = '';
+  name = "Nume Magazin";
+  details = "Descriere magazin...";
+  bannerUrl = "";
+  logoUrl = "";
+  categoryName = "";
+
+  categoryId: number | null = null;
+  categories: Category[] = [];
+  private initialCategoryId: number | null = null;
 
   private bannerFile: File | null = null;
   private logoFile: File | null = null;
 
-  private initialDetails = '';
-  private initialBannerUrl = '';
-  private initialLogoUrl = '';
+  private initialDetails = "";
+  private initialBannerUrl = "";
+  private initialLogoUrl = "";
 
   ngOnInit(): void {
     this.loadShopProfile();
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.shopService.getShopCategories().subscribe({
+      next: (data) => {
+        this.categories = data.map(category =>  {
+          return {
+            id: category.id,
+            name: this.CATEGORY_TRANSLATIONS[category.name] || category.name
+          }
+        })
+      },
+      error: () => this.errorMessage.set("Nu am putut incarca categoriile."),
+    });
   }
 
   private clearSelectedFiles(): void {
@@ -119,7 +188,8 @@ export class ShopDashboard implements OnInit {
     return (
       this.details !== this.initialDetails ||
       this.logoFile !== null ||
-      this.bannerFile !== null
+      this.bannerFile !== null ||
+      this.categoryId !== this.initialCategoryId
     );
   }
 
@@ -128,20 +198,33 @@ export class ShopDashboard implements OnInit {
       next: (shop: Shop) => {
         this.applyProfile(shop);
       },
-      error: () => this.errorMessage.set('Nu am putut incarca datele magazinului.')
+      error: () =>
+        this.errorMessage.set("Nu am putut incarca datele magazinului."),
     });
   }
 
   private applyProfile(shop: Shop): void {
     this.shopId = shop.id;
-    this.name = shop.name || '';
-    this.details = shop.details || '';
-    this.bannerUrl = shop.bannerPath ? `${this.shopService.url}/uploads/${shop.bannerPath}` : 'assets/shop-dashboard/default-banner.png';
-    this.logoUrl = shop.logoPath ? `${this.shopService.url}/uploads/${shop.logoPath}` : 'assets/shop-dashboard/default-logo.png';
+    this.name = shop.name || "";
+    this.details = shop.details || "";
+    this.bannerUrl = shop.bannerPath
+      ? `${this.shopService.url}/uploads/${shop.bannerPath}`
+      : "assets/shop-dashboard/default-banner.png";
+    this.logoUrl = shop.logoPath
+      ? `${this.shopService.url}/uploads/${shop.logoPath}`
+      : "assets/shop-dashboard/default-logo.png";
 
     this.initialDetails = this.details;
     this.initialBannerUrl = this.bannerUrl;
     this.initialLogoUrl = this.logoUrl;
+
+    if (shop.categoryName) {
+      this.categoryName = this.CATEGORY_TRANSLATIONS[shop.categoryName] || shop.categoryName;
+    } else {
+      shop.categoryName = "-";
+    }
+    this.categoryId = shop.categoryId || null;
+    this.initialCategoryId = this.categoryId;
   }
 
   startEditing(): void {
@@ -150,13 +233,13 @@ export class ShopDashboard implements OnInit {
 
   cancelEditing(): void {
     this.isEditing.set(false);
-    this.errorMessage.set('');
+    this.errorMessage.set("");
     this.clearSelectedFiles();
     this.loadShopProfile();
   }
 
-  onImagePicked(file: File, type: 'banner' | 'logo'): void {
-    if (type === 'banner') {
+  onImagePicked(file: File, type: "banner" | "logo"): void {
+    if (type === "banner") {
       this.bannerFile = file;
     } else {
       this.logoFile = file;
@@ -164,7 +247,7 @@ export class ShopDashboard implements OnInit {
 
     const reader = new FileReader();
     reader.onload = () => {
-      if (type === 'banner') {
+      if (type === "banner") {
         this.bannerUrl = reader.result as string;
       } else {
         this.logoUrl = reader.result as string;
@@ -175,17 +258,18 @@ export class ShopDashboard implements OnInit {
 
   onSubmit(): void {
     if (!this.shopId) {
-      this.errorMessage.set('ID-ul magazinului nu este disponibil.');
+      this.errorMessage.set("ID-ul magazinului nu este disponibil.");
       return;
     }
 
-    this.errorMessage.set('');
+    this.errorMessage.set("");
 
     this.shopService
       .updateShopDashboard(this.shopId, {
         details: this.details,
         logo: this.logoFile,
-        banner: this.bannerFile
+        banner: this.bannerFile,
+        categoryId: this.categoryId,
       })
       .subscribe({
         next: () => {
@@ -194,8 +278,8 @@ export class ShopDashboard implements OnInit {
           this.loadShopProfile();
         },
         error: () => {
-          this.errorMessage.set('Salvarea modificărilor a eșuat.');
-        }
+          this.errorMessage.set("Salvarea modificărilor a eșuat.");
+        },
       });
   }
 }

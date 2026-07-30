@@ -18,7 +18,10 @@ module.exports = {
     const result = await sqlRequest()
       .input("id", id)
       .query(
-        "select id, name, address, user_id, logo_path, banner_path, details from shops where id = @id"
+        `select s.id, s.name, s.address, s.user_id, s.logo_path, s.banner_path, s.details, c.id AS categoryId, c.name AS categoryName
+         from shops s
+         left join categories c on c.id = s.category_id
+         where s.id = @id`
       );
     return result.recordset[0];
   },
@@ -26,7 +29,10 @@ module.exports = {
   getShopByUser: async (userId) => {
     const result = await sqlRequest()
       .input('user_id', userId)
-      .query('select id, name, address, user_id, logo_path as logoPath, banner_path as bannerPath, details from shops where user_id=@user_id');
+      .query(`select s.id, s.name, s.address, s.user_id, s.logo_path as logoPath, s.banner_path as bannerPath, s.details, c.id AS categoryId, c.name AS categoryName
+             from shops s
+             left join categories c on c.id = s.category_id
+             where s.user_id=@user_id`);
     return result.recordset[0];
   },
 
@@ -82,10 +88,15 @@ module.exports = {
 
     const currentShopData = currentShopResult.recordset[0];
     let filesToDelete = [];
-
+  
     let updateCommands = [];
     let request = sqlRequest()
       .input('id', id);
+
+    if (shopData.categoryId !== undefined) {
+      updateCommands.push('category_id = @categoryId');
+      request.input('categoryId', shopData.categoryId);
+    }
 
     if (shopData.address !== undefined) {
       updateCommands.push('address = @address');
@@ -130,7 +141,7 @@ module.exports = {
       UPDATE shops
       SET ${updateCommands.join(', ')}
       OUTPUT inserted.id, inserted.user_id AS userId, inserted.address, inserted.name, inserted.details, 
-      inserted.logo_path AS logoPath, inserted.banner_path AS bannerPath
+      inserted.logo_path AS logoPath, inserted.banner_path AS bannerPath, inserted.category_id AS categoryId
       WHERE id = @id AND is_deleted = 0;
     `;
 

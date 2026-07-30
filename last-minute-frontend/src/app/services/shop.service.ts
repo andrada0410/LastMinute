@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { CreateShopResponse, PaginatedShopsResponse, ShopInfo, Shop, ShopsMapResponse} from "../shop";
+import { Category } from "../category";
 
 @Injectable({
   providedIn: 'root',
@@ -58,7 +59,7 @@ export class ShopService {
 
     updateShopDashboard (
         shopId: number, 
-        shopData: { details?: string; logo?: File | null; banner?: File | null }
+        shopData: { details?: string; logo?: File | null; banner?: File | null, categoryId?: number | null }
     ): Observable<Shop> {
     
     const formData = new FormData();
@@ -75,9 +76,17 @@ export class ShopService {
       formData.append('banner', shopData.banner);
     }
 
+    if (shopData.categoryId !== undefined && shopData.categoryId !== null) {
+      formData.append('categoryId', shopData.categoryId.toString());
+    }
+
     return this.http.patch<Shop>(
       `${this.url}/shop/${shopId}/dashboard`,
       formData
     );
+  }
+
+  getShopCategories(): Observable<Category[]> {
+    return this.http.get<Category[]>(`${this.url}/shop-category`);
   }
 };

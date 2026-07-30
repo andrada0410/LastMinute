@@ -13,6 +13,8 @@ export interface Shop {
     logoPath: string;
     bannerPath: string;
     details: string;
+    categoryId: number;
+    categoryName: string;
 }
 
 export interface PaginatedShopsResponse {

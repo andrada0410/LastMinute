@@ -7,6 +7,7 @@ const config = require("./config.json");
 const fs = require("fs");
 const path = require("node:path");
 const shopAPI = require("./src/resources/shop");
+const categoryAPI = require("./src/resources/shop-category");
 const user = require("./src/resources/user");
 const shop = require("./src/resources/shop");
 const jwt = require("jsonwebtoken");
@@ -270,11 +271,17 @@ router.patch(
       const textData = ctx.request.body;
       const uploadedFiles = ctx.request.files;
 
+      let parsedCategoryId = undefined;
+      if (textData.categoryId && textData.categoryId !== "null") {
+        parsedCategoryId = parseInt(textData.categoryId, 10);
+      }
+
       const result = await shopAPI.updateShop(
         shopId, {
           details: textData.details,
           logo: uploadedFiles.logo,
-          banner: uploadedFiles.banner
+          banner: uploadedFiles.banner,
+          categoryId: parsedCategoryId
         }
       );
 
@@ -444,4 +451,18 @@ router.delete('/shop/:id', verifyToken, verifyRoleSuperuser, async (ctx) => {
     }
   },
 );
+
+router.get('/shop-category', verifyToken, verifyRoleShopuser, async (ctx) => {
+  try {
+    categories = await categoryAPI.getAll();
+
+    ctx.status = 200;
+    ctx.body = categories;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    const message = ctx.status === 500 ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu." : error.message;
+    ctx.body = {error: message};
+  }
+});
+
 module.exports = router;

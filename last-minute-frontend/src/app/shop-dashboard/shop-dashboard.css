@@ -130,6 +130,7 @@
 
 textarea.field-edit {
     display: block;
+    box-sizing: border-box;
     width: 100%;
     font-size: 0.95rem;
     font-weight: 400;

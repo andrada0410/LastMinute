@@ -1,0 +1,25 @@
+select.field-edit {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    font-size: 0.95rem;
+    font-weight: 400;
+    font-family: inherit;
+    color: var(--text-color);
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-s);
+    padding: 0.7rem;
+    cursor: pointer;
+}
+
+select.field-edit:hover { 
+    background: var(--accent-color); 
+}
+
+select.field-edit:focus {
+    outline: none;
+    background: var(--bg-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--accent-color);
+}   
