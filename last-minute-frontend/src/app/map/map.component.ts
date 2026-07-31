@@ -1,15 +1,27 @@
-import { Component, AfterViewInit, OnDestroy } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, AfterViewInit, OnDestroy, NgZone } from '@angular/core';
 import * as L from 'leaflet';
 import { ShopService } from '../services/shop.service';
 import { ShopMapInfo, ShopsMapResponse } from '../shop';
+import { MapShopDetailsComponent } from './shop-details/map-shop-details.component';
 @Component({
   selector: 'app-map',
+  standalone: true,
+  imports: [MapShopDetailsComponent],
   template: `
     <div class="map-container">
       <div class="map-frame">
         <div id="map"></div>
       </div>
+      <app-map-shop-details 
+        [shop]="hoveredShop"
+        [logoPath]="hoveredShopLogoPath"
+        [isVisible]="areShopDetailsVisible"
+        [top]="cardTop"
+        [left]="cardLeft"
+        [isFlipped]="isFlippedDown"
+        (mouseEnter)="onKeepShopDetailsVisible()"
+        (mouseLeave)="onHideShopDetails()">
+      </app-map-shop-details>
     </div>
   `,
   styleUrls: ['./map.component.css']
@@ -20,10 +32,21 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private userMarker?: L.CircleMarker;
   private accuracyCircle?: L.Circle;
   private addressMarkers: L.Marker[] = [];
+  private shopsList: ShopMapInfo[] = [];
 
-  private shopsList: ShopMapInfo[] = []
+  public hoveredShop?: ShopMapInfo;
+  public hoveredShopLogoPath: string = '';
+  public areShopDetailsVisible: boolean = false;
+  public cardTop: number = 0;
+  public cardLeft: number = 0;
+  public isFlippedDown: boolean = false;
+  private hideShopDetailsTimeout?: ReturnType<typeof setTimeout>;
+  private switchShopTimeout?: ReturnType<typeof setTimeout>;
 
-  constructor(private http: HttpClient, private shopService: ShopService) {}
+  constructor(
+    private shopService: ShopService,
+    private zone: NgZone
+  ) {}
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -130,15 +153,90 @@ export class MapComponent implements AfterViewInit, OnDestroy {
        throw new Error('Eroare la afisarea magazinului pe hartă: Nu a fost furnizată locația.')
 
     const marker = L.marker([shop.lat, shop.lon], {icon})
-      .addTo(this.map)
-      .bindPopup(`
-        <strong>${shop.name}</strong>
-        <br>
-        ${shop.address}
-        <br>
-      `);
+      .addTo(this.map);
+      
+
+    marker.on('mouseover', (e: L.LeafletMouseEvent) => {
+      this.zone.run(() => {
+        const wasSwitching = !!this.switchShopTimeout;
+        
+        if (this.hideShopDetailsTimeout) {
+          clearTimeout(this.hideShopDetailsTimeout);
+        }
+
+        if (this.switchShopTimeout) {
+          clearTimeout(this.switchShopTimeout);
+        }
+
+        if ((this.areShopDetailsVisible || wasSwitching) && this.hoveredShop && this.hoveredShop !== shop) {
+          this.areShopDetailsVisible = false;
+          this.switchShopTimeout = setTimeout(() => {
+            this.showNewCard(shop, e);
+          }, 250);
+        } else {
+          this.showNewCard(shop, e);
+        }
+      });
+    });
+
+    marker.on('mouseout', () => {
+      this.zone.run(() => {
+        this.hideShopDetailsTimeout = setTimeout(() => {
+          this.areShopDetailsVisible = false;
+        }, 200);
+      });
+    });
     
     this.addressMarkers.push(marker);
+  }
+
+  public onKeepShopDetailsVisible(): void {
+    if (this.hideShopDetailsTimeout) {
+      clearTimeout(this.hideShopDetailsTimeout);
+    }
+    this.areShopDetailsVisible = true;
+  }
+
+  public onHideShopDetails(): void {
+    this.hideShopDetailsTimeout = setTimeout(() => {
+      this.areShopDetailsVisible = false;
+    }, 200);
+  }
+
+  private showNewCard = (shop: ShopMapInfo, e: L.LeafletMouseEvent) => {
+    this.hoveredShop = shop;
+    this.hoveredShopLogoPath = shop.logoPath 
+          ? `${this.shopService.url}/uploads/${shop.logoPath}`
+          : 'assets/shop-dashboard/default-logo.png';
+
+    const point = this.map.latLngToContainerPoint(e.latlng);
+    const mapSize = this.map.getSize();
+
+    this.cardLeft = this.getSafeHorizontalPosition(point.x, mapSize.x);
+    this.cardTop = point.y;
+    this.isFlippedDown = this.shouldFlipCardDown(point.y);
+    this.areShopDetailsVisible = true;
+  };
+
+
+  private getSafeHorizontalPosition(targetX: number, mapWidth: number): number {
+    const cardHalfWidth = 160;
+    const padding = 10;
+
+    if (targetX < cardHalfWidth + padding) {
+      return cardHalfWidth + padding;
+    }
+
+    if (targetX > mapWidth - cardHalfWidth - padding) {
+      return mapWidth - cardHalfWidth - padding;
+    }
+
+    return targetX;
+  }
+
+  private shouldFlipCardDown(targetY: number): boolean {
+    const verticalThreshold = 120;
+    return targetY < verticalThreshold;
   }
 
   private createShopIcon(hasOffers: boolean): L.DivIcon {

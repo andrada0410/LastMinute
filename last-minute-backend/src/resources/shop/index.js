@@ -189,27 +189,38 @@ module.exports = {
     getShopsForMap: async () => {
         const result = await sqlRequest()
         .query(`SELECT
-                    id,
-                    name,
-                    address,
-                    has_offers as hasOffers,
-                    coordinates.Lat as lat,
-                    coordinates.Long as lon
-                FROM shops
-                WHERE is_deleted = 0
-                ORDER BY id`);
+                    s.id,
+                    s.name,
+                    s.address,
+                    s.has_offers as hasOffers,
+                    s.coordinates.Lat as lat,
+                    s.coordinates.Long as lon,
+                    s.logo_path as logoPath,
+                    c.name as category
+                FROM shops s
+                LEFT JOIN categories c ON s.category_id = c.id
+                WHERE s.is_deleted = 0
+                ORDER BY s.id`);
 
       const optimizedShops = result.recordset.map(row => {
           const shop = {
               id: row.id,
               name: row.name,
               address: row.address,
-              hasOffers: row.hasOffers
+              hasOffers: row.hasOffers,
           };
 
           if (row.lat != null && row.lon != null) {
               shop.lat = row.lat;
               shop.lon = row.lon;
+          }
+
+          if (row.logoPath != null) {
+              shop.logoPath = row.logoPath;
+          }
+
+          if (row.category != null) {
+              shop.category = row.category;
           }
 
           return shop;

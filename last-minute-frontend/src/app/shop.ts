@@ -43,6 +43,8 @@ export interface ShopMapInfo {
     hasOffers: boolean;
     lat: number; // latitude
     lon: number; // longitude
+    category: string;
+    logoPath: string;
 }
 
 export interface ShopsMapResponse {

@@ -1,5 +1,4 @@
 const Router = require("koa-router");
-const router = new Router();
 const exampleAPI = require("./src/resources/example");
 const userAPI = require("./src/resources/user");
 const authAPI = require("./src/resources/auth");
@@ -8,11 +7,12 @@ const fs = require("fs");
 const path = require("node:path");
 const shopAPI = require("./src/resources/shop");
 const categoryAPI = require("./src/resources/shop-category");
-const user = require("./src/resources/user");
-const shop = require("./src/resources/shop");
+const geocodingAPI = require("./src/data-exchange/map-nominatim/index");
 const jwt = require("jsonwebtoken");
-const JWT_KEY = config.databaseConfig.jwtKey;
 const multer = require("@koa/multer");
+
+const router = new Router();
+const JWT_KEY = config.databaseConfig.jwtKey;
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
