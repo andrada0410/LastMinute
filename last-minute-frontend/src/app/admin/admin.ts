@@ -22,6 +22,8 @@ import { ToastService } from "../services/toast.service";
           (changePageEvent)="loadShops($event)"
           (editShopEvent)="shopToEdit = $event"
           (deleteShopEvent)="shopToDelete = $event"
+          (searchEvent)="onSearch($event)"
+          (clearSearchEvent)="clearSearch()"
         ></app-shop-list>
       </section>
 
@@ -62,8 +64,24 @@ export class Admin implements OnInit {
   shopToEdit: ShopInfo | null = null;
   shopToDelete: ShopInfo | null = null;
 
+  searchEmail: string = "";
+
   ngOnInit(): void {
     this.loadShops(this.currentPage);
+  }
+
+  onSearch(email: string) {
+    this.searchEmail = email.trim();
+    this.loadShops(1);
+  }
+
+  clearSearch() {
+    this.searchEmail = "";
+    this.loadShops(1);
+  }
+
+  get isSearching(): boolean {
+    return this.searchEmail.trim().length > 0;
   }
 
   handleShopAdded(shop: CreateShopRequest) {
@@ -87,7 +105,9 @@ export class Admin implements OnInit {
 
   loadShops(page: number) {
     this.currentPage = page;
-    this.shopService.getShopsInfo(page, 5).subscribe({
+    const emailFilter = this.isSearching ? this.searchEmail.trim() : undefined;
+
+    this.shopService.getShopsInfo(page, 5, emailFilter).subscribe({
       next: (response) => {
         this.shops = response.entry;
         this.totalItems = response.total;

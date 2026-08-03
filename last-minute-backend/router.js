@@ -232,8 +232,9 @@ router.get("/shop", verifyToken, verifyRoleSuperuser, async (ctx) => {
   try {
     const page = parseInt(ctx.query.page) || 1;
     const limit = parseInt(ctx.query.limit) || 5;
+    const email = ctx.query.email || null;
 
-    const shopList = await shopAPI.getShopsInfo(page, limit);
+    const shopList = await shopAPI.getShopsInfo({page, limit, email});
     const totalRows = shopList.length > 0 ? shopList[0].totalRecords : 0;
 
     ctx.status = 200;

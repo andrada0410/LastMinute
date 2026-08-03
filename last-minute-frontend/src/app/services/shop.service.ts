@@ -22,10 +22,14 @@ export class ShopService {
         });
     }
 
-    getShopsInfo(page: number = 1, limit: number = 5): Observable<PaginatedShopsResponse> {
-        const params = new HttpParams()
+    getShopsInfo(page: number = 1, limit: number = 5, email?: string): Observable<PaginatedShopsResponse> {
+        let params = new HttpParams()
             .set('page', page.toString())
             .set('limit', limit.toString());
+
+        if (email){
+          params = params.set('email', email);
+        }
 
         return this.http.get<PaginatedShopsResponse>(`${this.url}/shop`, { params });
     }

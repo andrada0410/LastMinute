@@ -51,16 +51,25 @@ module.exports = {
     return result.recordset[0];
   },
 
-  getShopsInfo: async (page = 1, limit = 5) => {
+  getShopsInfo: async (options = {}) => {
+    const {page = 1, limit = 5, email = null} = options;
     const offset = (page - 1) * limit;
 
-    const result = await sqlRequest()
+    const request = sqlRequest()
       .input("offset", offset)
-      .input("limit", limit)
-      .query(`SELECT s.id, s.name, s.address, u.email, COUNT(*) OVER() as totalRecords
+      .input("limit", limit);
+
+    let emailFilter = '';
+    if (email) {
+      request.input("email", `%${email}%`);
+      emailFilter = 'AND u.email LIKE @email';
+    }
+
+    const result = await request.query(`
+                SELECT s.id, s.name, s.address, u.email, COUNT(*) OVER() as totalRecords
                 FROM shops s
                 INNER JOIN users u ON s.user_id = u.id
-                WHERE s.is_deleted = 0
+                WHERE s.is_deleted = 0 ${emailFilter}
                 ORDER BY s.id DESC
                 OFFSET @offset ROWS
                 FETCH NEXT @limit ROWS ONLY`);

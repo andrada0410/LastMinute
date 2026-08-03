@@ -1,6 +1,8 @@
-import { Component, input, output } from "@angular/core";
+import { Component, input, output, signal, OnDestroy } from "@angular/core";
 import { ShopInfo } from "../shop";
 import { ShopItem } from "../admin-shop-list-item/admin-shop-list-item";
+import { Subject } from 'rxjs';
+import { debounceTime} from 'rxjs/operators';
 
 @Component({
     selector: 'app-shop-list',
@@ -8,6 +10,19 @@ import { ShopItem } from "../admin-shop-list-item/admin-shop-list-item";
     template: `
         <div class="list-container">
             <h2>Conturi Magazin</h2>
+                <div class="search-bar">
+                    <input
+                    type="email"
+                    name="searchEmail"
+                    placeholder="Caută magazin după email"
+                    [value]="searchEmail()"
+                    (input)="onSearchInputChange($event)"
+                    />
+                    @if(searchEmail()) {
+                    <button type="button" class="clear-btn" (click)="onClear()">&times;</button>
+                }
+                </div>
+
             <ul class="shop-list">
                 @for(shop of shops(); track shop.id) {
                     <li class="shop-item">
@@ -49,14 +64,34 @@ import { ShopItem } from "../admin-shop-list-item/admin-shop-list-item";
     styleUrls: ['./admin-shop-list.css'],
     imports: [ShopItem]
 })
-export class AdminShopList {
+export class AdminShopList implements OnDestroy {
     shops = input.required<ShopInfo[]>();
     totalItems = input.required<number>();
     currentPage = input.required<number>();
 
     changePageEvent = output<number>();
     editShopEvent = output<ShopInfo>();
-    deleteShopEvent = output<ShopInfo>(); 
+    deleteShopEvent = output<ShopInfo>();
+    searchEvent = output<string>();
+    clearSearchEvent = output<void>();
+
+    searchEmail = signal<string>("");
+
+    private searchSubject = new Subject<string>();
+
+    constructor() {
+        this.searchSubject
+        .pipe(debounceTime(300))
+        .subscribe((value) => {
+            const email = value.trim();
+            if (!email) {
+                this.clearSearchEvent.emit()
+            }
+            else {
+                this.searchEvent.emit(email);
+            }
+        })
+    }
 
     get totalPages(): number {
         return Math.ceil(this.totalItems() / 5) || 1;
@@ -72,5 +107,20 @@ export class AdminShopList {
         if (this.currentPage() > 1) {
             this.changePageEvent.emit(this.currentPage() - 1)
         }
+    }
+
+    onSearchInputChange(event: Event) {
+        const email = (event.target as HTMLInputElement).value
+        this.searchEmail.set(email);
+        this.searchSubject.next(email);
+    }
+
+    onClear() {
+        this.searchEmail.set("");
+        this.searchSubject.next("");
+    }
+
+    ngOnDestroy() {
+        this.searchSubject.complete();
     }
 }
