@@ -15,7 +15,7 @@
 }
 
 .dashboard-page {
-    max-width: 960px;
+    max-width: 1020px;
     margin: 0 auto;
 }
 
@@ -47,7 +47,7 @@
 
 /* --- Banner --- */
 .shop-banner {
-    height: 220px;
+    height: 250px;
     width: 100%;
     position: relative;
     background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
@@ -152,4 +152,26 @@ textarea.field-edit:focus {
     background: var(--bg-color);
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--accent-color);
+}
+
+.products-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-m);
+}
+
+.products-header h2 {
+    margin: 0;
+}
+
+.add-product {
+    width: auto;
+}
+
+.section-divider {
+  border: none;
+  border-top: 2px solid var(--disabled-color);
+  margin: 1.5rem 0;
+  opacity: 50%;
 }

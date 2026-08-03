@@ -10,6 +10,7 @@ const categoryAPI = require("./src/resources/shop-category");
 const geocodingAPI = require("./src/data-exchange/map-nominatim/index");
 const jwt = require("jsonwebtoken");
 const multer = require("@koa/multer");
+const productAPI = require("./src/resources/product");
 
 const router = new Router();
 const JWT_KEY = config.databaseConfig.jwtKey;
@@ -125,6 +126,30 @@ const geocodeShopMiddleware = async (ctx, next) => {
             console.error(`Eroare fatală: Nu am putut reseta coordonatele pentru ${shopId}:`, resetError.message);
         }
     }
+};
+
+const verifyShopOwnership = async (ctx, next) => {
+  if (ctx.method === "OPTIONS") {
+    await next();
+    return;
+  }
+
+  try {
+    const userId = ctx.state.user.id;
+    const shop = await shopAPI.getShopByUser(userId);
+
+    if (!shop) {
+      ctx.status = 403;
+      ctx.body = { error: "Nu aveți un magazin asociat contului dvs." };
+      return;
+    }
+
+    ctx.state.shopId = shop.id;
+    await next();
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
 };
 
 router.get("/Example", async (ctx, next) => {
@@ -465,6 +490,101 @@ router.get('/shop-category', verifyToken, verifyRoleShopuser, async (ctx) => {
     ctx.status = error.status || 500;
     const message = ctx.status === 500 ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu." : error.message;
     ctx.body = {error: message};
+  }
+});
+
+router.get("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
+  try {
+    const { shopId } = ctx.query;
+
+    if (!shopId) {
+      ctx.status = 400;
+      ctx.body = { error: "shopId este obligatoriu." };
+      return;
+    }
+
+    const products = await productAPI.getProductsByShop(shopId);
+
+    ctx.status = 200;
+    ctx.body = products;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
+});  
+
+router.post("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, upload.fields([{ name: "product", maxCount: 1 }]), async (ctx) => {
+  try {
+    if (parseInt(ctx.request.body.shopId, 10) !== ctx.state.shopId) {
+      ctx.status = 403;
+      ctx.body = { error: "Nu puteți adăuga produse pentru alt magazin." };
+      return;
+    }
+
+    const product = await productAPI.createProduct({
+      shopId: ctx.request.body.shopId,
+      name: ctx.request.body.name,
+      price: ctx.request.body.price,
+      description: ctx.request.body.description,
+      photo: ctx.request.files.product
+    });
+
+    ctx.status = 201;
+    ctx.body = product;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
+});
+
+router.patch("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnership, upload.fields([{ name: "product", maxCount: 1 }]), async (ctx) => {
+  try {
+    const shopProducts = await productAPI.getProductsByShop(ctx.state.shopId);
+    const belongsToShop = shopProducts.some(p => p.id == ctx.params.id);
+
+    if (!belongsToShop) {
+      ctx.status = 404;
+      ctx.body = { error: "Produsul nu a fost găsit." };
+      return;
+    }
+
+    const product = await productAPI.updateProduct(
+      ctx.params.id,
+      {
+        name: ctx.request.body.name,
+        price: ctx.request.body.price,
+        description: ctx.request.body.description,
+        photo: ctx.request.files.product
+      }
+    );
+
+    ctx.status = 200;
+    ctx.body = product;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
+});
+
+router.delete("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
+  try {
+    const { id } = ctx.params;
+
+    const shopProducts = await productAPI.getProductsByShop(ctx.state.shopId);
+    const belongsToShop = shopProducts.some(p => p.id == id);
+
+    if (!belongsToShop) {
+      ctx.status = 404;
+      ctx.body = { error: "Produsul nu a fost găsit." };
+      return;
+    }
+
+    await productAPI.deleteProduct(id);
+
+    ctx.status = 204;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
   }
 });
 

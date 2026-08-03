@@ -6,7 +6,7 @@ import { Component, output, input } from '@angular/core';
   template: `
     <div class="image-container" [class.is-editing]="isEditing()">
       <img
-      [src]="imageUrl()"
+      [src]="imageUrl() || fallbackImage()"
       [alt]="altText()"
       (error)="onImageError($event)">
 
@@ -27,17 +27,12 @@ export class ShopDashboardImage {
   altText = input('Imagine');
   label = input('Schimbă imaginea');
   isEditing = input(false);
+  fallbackImage = input('');
 
   imageSelected = output<File>();
 
-  onImageError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-
-    if (img.alt === 'Logo magazin') {
-      img.src = 'assets/shop-dashboard/default-logo.png';
-    } else {
-      img.src = 'assets/shop-dashboard/default-banner.png';
-    }
+  onImageError(event: Event) {
+    (event.target as HTMLImageElement).src = this.fallbackImage();
   }
 
   onFileChange(event: Event): void {

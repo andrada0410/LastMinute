@@ -1,0 +1,83 @@
+.form {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.form-content {
+    background: var(--bg-color);
+    border-radius: var(--radius-l); 
+    box-shadow: var(--shadow-card);
+    padding: 0;
+    width: 100%;
+    max-width: 580px; 
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.form-content h2 {
+    position: static;
+    background: transparent;
+    padding: var(--space-xl) var(--space-xl) var(--space-s);
+    margin: 0;
+}
+
+.form-content * {
+    box-sizing: border-box;
+}
+
+.form-content .form-card {
+    max-width: 100%;
+    padding: 0 var(--space-xl) var(--space-xl);
+}
+
+.product-form-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radius-m);
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-m);
+    margin-top: var(--space-s);
+}
+
+.form-actions .button {
+    width: auto;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}
+
+.button.secondary {
+    background: var(--disabled-color);
+    color: white;
+}
+
+.button.secondary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+/* scrollbar style */
+.form-content::-webkit-scrollbar {
+    width: 10px;
+}
+.form-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+.form-content::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 4px;
+}
+.form-content::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}

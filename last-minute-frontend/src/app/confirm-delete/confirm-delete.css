@@ -1,0 +1,40 @@
+.form {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.form-content {
+    background: var(--bg-color);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-xl);
+    width: 100%;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-m);
+    margin-top: var(--space-s);
+}
+
+.canceled {
+    background-color: var(--disabled-color);
+    color: white !important;
+}
+
+.canceled:hover {
+    background-color: #888;
+    color: white !important;
+}

@@ -6,11 +6,16 @@ import { Shop } from '../shop';
 import { ToastService } from '../services/toast.service';
 import { ShopCategorySelect } from "../shop-category-select/shop-category-select";
 import { Category } from "../category";
+import { ShopDashboardProductList } from '../shop-dashboard-product-list/shop-dashboard-product-list';
+import { ProductService } from '../services/product.service';
+import { Product } from '../product';
+import { ShopDashboardProductForm } from "../shop-dashboard-product-form/shop-dashboard-product-form";
+import { ConfirmDelete } from '../confirm-delete/confirm-delete';
 
 @Component({
   selector: "shop-dashboard",
   standalone: true,
-  imports: [FormsModule, ShopDashboardImage, ShopCategorySelect],
+  imports: [FormsModule, ShopDashboardImage, ShopCategorySelect, ShopCategorySelect, ShopDashboardProductList, ShopDashboardProductForm, ConfirmDelete],
   template: `
     <section class="page">
       <form
@@ -66,6 +71,7 @@ import { Category } from "../category";
               label="Schimbă banner-ul"
               [isEditing]="isEditing()"
               (imageSelected)="onImagePicked($event, 'banner')"
+              [fallbackImage]="'assets/shop-dashboard/default-banner.png'";
             />
           </div>
 
@@ -78,6 +84,7 @@ import { Category } from "../category";
                 label="Schimbă logo-ul"
                 [isEditing]="isEditing()"
                 (imageSelected)="onImagePicked($event, 'logo')"
+                [fallbackImage]="'assets/shop-dashboard/default-logo.png'"
               />
             </div>
           </div>
@@ -114,14 +121,54 @@ import { Category } from "../category";
                   class="field-edit"
                   name="details"
                   [(ngModel)]="details"
+                  #detailsField="ngModel"
+                  maxlength="1000"
                   placeholder="Descrie magazinul..."
                 ></textarea>
+
+                @if (detailsField.invalid && detailsField.touched) {
+                  @if (detailsField.errors?.['maxlength']) {
+                    <p class="error-text">Detaliile nu pot avea mai mult de 1000 de caractere.</p>
+                  }
+                }
               }
             </div>
+            
+            <hr class="section-divider" />
+
+            <div class="products-header">
+              <h2>Produse</h2>
+
+              <button type="button" class="button primary add-product" (click)="openCreateProduct()"> Adaugă produs </button>
+            
+            </div>
+
+            <app-shop-dashboard-product-list
+                [products]="products"
+                (edit)="openEditProduct($event)"
+                (remove)="deleteProduct($event)">
+
+            </app-shop-dashboard-product-list>
+            
           </div>
         </div>
       </form>
     </section>
+    @if(showProductForm) {
+      <app-shop-dashboard-product-form
+          [product]="editingProduct"
+          [backendError]="productErrorMessage()"
+          (save)="saveProduct($event)"
+          (cancel)="closeProductForm()">
+      </app-shop-dashboard-product-form>
+    }
+     @if(productPendingDelete !== null) {
+      <app-confirm-delete
+          message="Sigur dorești să ștergi acest produs?"
+          (confirm)="confirmDeleteProduct()"
+          (cancel)="productPendingDelete = null">
+      </app-confirm-delete>
+    }
   `,
   styleUrls: ["./shop-dashboard.css"],
 })
@@ -136,8 +183,14 @@ export class ShopDashboard implements OnInit {
 
   private shopService = inject(ShopService);
   private toastService = inject(ToastService);
+  private productService = inject(ProductService);
 
   isEditing = signal(false);
+
+  showProductForm = false;
+  editingProduct: Product | null = null;
+  productErrorMessage = signal("");
+  productPendingDelete: number | null = null;
 
   shopId: number | null = null;
   name = "Nume Magazin";
@@ -149,6 +202,8 @@ export class ShopDashboard implements OnInit {
   categoryId: number | null = null;
   categories: Category[] = [];
   private initialCategoryId: number | null = null;
+
+  products: Product[] = [];
 
   private bannerFile: File | null = null;
   private logoFile: File | null = null;
@@ -174,8 +229,103 @@ export class ShopDashboard implements OnInit {
       },
       error: () => this.toastService.error("Nu am putut incarca categoriile.", "Eroare"),
     });
+
+    this.shopService.getMyShop().subscribe({
+      next: (shop: Shop) => {
+        this.applyProfile(shop);
+        this.loadProducts();
+      },
+      error: () =>
+        this.toastService.error("Nu am putut incarca datele magazinului.", "Eroare")
+    });
   }
 
+  loadProducts(): void {
+    if (!this.shopId) {
+      return;
+    }
+
+    this.productService.getProducts(this.shopId).subscribe({
+      next: (products) => {
+        this.products = products;
+      },
+      error: () => {
+        this.toastService.error("Nu am putut încărca produsele.", "Eroare");
+      }
+    });
+  }
+
+  openCreateProduct() {
+    this.editingProduct = null;
+    this.productErrorMessage.set('');
+    this.showProductForm = true;
+  }
+
+  openEditProduct(product: Product) {
+    this.editingProduct = product;
+    this.productErrorMessage.set('');
+    this.showProductForm = true;
+  }
+
+  closeProductForm() {
+    this.showProductForm = false;
+    this.editingProduct = null;
+    this.productErrorMessage.set('');
+  }
+
+  saveProduct(data: { name: string; price: number; description: string; photo: File | null }): void {
+    if (!this.shopId) {
+      return;
+    }
+
+    const isEditingAction = !!this.editingProduct;
+    this.productErrorMessage.set('');
+
+    const request$ = this.editingProduct
+      ? this.productService.updateProduct(this.editingProduct.id, data)
+      : this.productService.createProduct(this.shopId, data);
+
+    request$.subscribe({
+      next: () => {
+        this.closeProductForm();
+        this.loadProducts();
+
+        const successMessage = isEditingAction 
+          ? 'Produsul a fost actualizat cu succes.' 
+          : 'Produsul a fost adăugat cu succes.';
+        this.toastService.success(successMessage, 'Succes');
+      },
+      error: () => {
+        const errorMessage = isEditingAction 
+          ? 'Salvarea produsului a eșuat.' 
+          : 'Adăugarea produsului a eșuat.';
+        this.toastService.error(errorMessage, 'Eroare');
+      }
+    });
+  }
+
+  deleteProduct(productId: number): void {
+    this.productPendingDelete = productId;
+  }
+
+  confirmDeleteProduct(): void {
+    if (!this.shopId || this.productPendingDelete === null) {
+      return;
+    }
+
+    this.productService.deleteProduct(this.productPendingDelete).subscribe({
+      next: () => {
+        this.productPendingDelete = null;
+        this.loadProducts();
+        this.toastService.success('Produsul a fost șters.', 'Succes');
+      },
+      error: () => {
+        this.productPendingDelete = null;
+        this.toastService.error('Ștergerea produsului a eșuat.', 'Eroare');
+      }
+    });
+  }
+    
   private clearSelectedFiles(): void {
     this.logoFile = null;
     this.bannerFile = null;
