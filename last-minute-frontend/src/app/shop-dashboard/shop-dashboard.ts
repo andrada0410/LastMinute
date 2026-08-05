@@ -5,7 +5,7 @@ import { ShopService } from '../services/shop.service';
 import { Shop } from '../shop';
 import { ToastService } from '../services/toast.service';
 import { ShopCategorySelect } from "../shop-category-select/shop-category-select";
-import { Category } from "../category";
+import { Category, CATEGORY_TRANSLATIONS } from "../category";
 import { ShopDashboardProductList } from '../shop-dashboard-product-list/shop-dashboard-product-list';
 import { ProductService } from '../services/product.service';
 import { Product } from '../product';
@@ -173,14 +173,6 @@ import { ConfirmDelete } from '../confirm-delete/confirm-delete';
   styleUrls: ["./shop-dashboard.css"],
 })
 export class ShopDashboard implements OnInit {
-  CATEGORY_TRANSLATIONS: Record<string, string> = {
-    "Restaurant": "Restaurant",
-    "Fast-Food": "Fast-Food",
-    "Confectionery": "Cofetărie",
-    "Bakery": "Patiserie",
-    "Supermarket": "Supermarket"
-  };
-
   private shopService = inject(ShopService);
   private toastService = inject(ToastService);
   private productService = inject(ProductService);
@@ -223,7 +215,7 @@ export class ShopDashboard implements OnInit {
         this.categories = data.map(category =>  {
           return {
             id: category.id,
-            name: this.CATEGORY_TRANSLATIONS[category.name] || category.name
+            name: CATEGORY_TRANSLATIONS[category.name] || category.name
           }
         })
       },
@@ -368,7 +360,7 @@ export class ShopDashboard implements OnInit {
     this.initialLogoUrl = this.logoUrl;
 
     if (shop.categoryName) {
-      this.categoryName = this.CATEGORY_TRANSLATIONS[shop.categoryName] || shop.categoryName;
+      this.categoryName = CATEGORY_TRANSLATIONS[shop.categoryName] || shop.categoryName;
     } else {
       shop.categoryName = "-";
     }

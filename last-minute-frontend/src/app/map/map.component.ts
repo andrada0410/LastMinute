@@ -1,14 +1,25 @@
-import { Component, AfterViewInit, OnDestroy, NgZone } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, NgZone, OnInit } from '@angular/core';
 import * as L from 'leaflet';
 import { ShopService } from '../services/shop.service';
 import { ShopMapInfo, ShopsMapResponse } from '../shop';
 import { MapShopDetailsComponent } from './shop-details/map-shop-details.component';
+import { MapFiltersComponent } from "../map-filters/map-filters";
+import { Category, CATEGORY_TRANSLATIONS } from "../category";
+import { MapFilters } from "../filter";
+import { ToastService } from "../services/toast.service";
+
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [MapShopDetailsComponent],
+  imports: [MapShopDetailsComponent, MapFiltersComponent],
   template: `
     <div class="map-container">
+      <app-map-filters
+        [categories]="categoriesList"
+        (filtersChange)="onFiltersChanged($event)"
+      >
+      </app-map-filters>
+
       <div class="map-frame">
         <div id="map"></div>
       </div>
@@ -24,15 +35,17 @@ import { MapShopDetailsComponent } from './shop-details/map-shop-details.compone
       </app-map-shop-details>
     </div>
   `,
-  styleUrls: ['./map.component.css']
+  styleUrls: ["./map.component.css"],
 })
-export class MapComponent implements AfterViewInit, OnDestroy {
-
+export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private map!: L.Map;
   private userMarker?: L.CircleMarker;
   private accuracyCircle?: L.Circle;
   private addressMarkers: L.Marker[] = [];
   private shopsList: ShopMapInfo[] = [];
+
+  categoriesList: Category[] = [];
+  currentFilters?: MapFilters;
 
   public hoveredShop?: ShopMapInfo;
   public hoveredShopLogoPath: string = '';
@@ -45,8 +58,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private shopService: ShopService,
+    private toastService: ToastService,
     private zone: NgZone
   ) {}
+
+  ngOnInit(): void {
+    this.loadCategories();
+  }
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -59,26 +77,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private initMap(): void {
-
-    this.map = L.map('map', {
+    this.map = L.map("map", {
       center: [46.77, 23.58],
-      zoom: 13
+      zoom: 13,
     });
-    
+
     L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
       {
         maxZoom: 20,
         attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-      }
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      },
     ).addTo(this.map);
 
-    
-    this.map.on('locationfound', (e: L.LocationEvent) => {
-
+    this.map.on("locationfound", (e: L.LocationEvent) => {
       const radius = e.accuracy;
-      
+
       if (this.userMarker) {
         this.map.removeLayer(this.userMarker);
       }
@@ -87,62 +102,63 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.map.removeLayer(this.accuracyCircle);
       }
 
-      
       this.userMarker = L.circleMarker(e.latlng, {
         radius: 10,
-        color: 'var(--bg-color)',
+        color: "var(--bg-color)",
         weight: 4,
-        fillColor: 'var(--primary-color)',
-        fillOpacity: 1
+        fillColor: "var(--primary-color)",
+        fillOpacity: 1,
       })
         .addTo(this.map)
-        .bindPopup(`
+        .bindPopup(
+          `
           <strong>📍 Locatia ta</strong><br>
           
-        `)
+        `,
+        )
         .openPopup();
 
-      
       this.accuracyCircle = L.circle(e.latlng, {
         radius: radius,
-        color: 'var(--primary-color)',
-        fillColor: 'var(--primary-color)',
-        fillOpacity: 0.15
+        color: "var(--primary-color)",
+        fillColor: "var(--primary-color)",
+        fillOpacity: 0.15,
       }).addTo(this.map);
+    });
 
-    }); 
-
-    this.map.on('locationerror', (e: L.ErrorEvent) => {
-      alert('Nu ai permis accesul la locație.');
+    this.map.on("locationerror", (e: L.ErrorEvent) => {
+      alert("Nu ai permis accesul la locație.");
       console.error(e.message);
     });
 
     this.map.locate({
       setView: true,
       maxZoom: 16,
-      enableHighAccuracy: true
+      enableHighAccuracy: true,
     });
 
     this.loadShopsFromDatabase();
   }
 
   private loadShopsFromDatabase(): void {
-    this.shopService.getAllShopMapInfo().subscribe({
+    this.shopService.getAllShopMapInfo(this.currentFilters).subscribe({
       next: (response: ShopsMapResponse) => {
+        this.clearMapMarkers();
         this.shopsList = response.entry;
         this.showAllShopsOnMap(this.shopsList);
       },
       error: (error) => {
         console.error("Eroare la preluarea magazinelor:", error);
-      }
-    })
+        this.toastService.error('Nu am putut încărca magazinele.');
+      },
+    });
   }
 
   private async showAllShopsOnMap(shops: ShopMapInfo[]): Promise<void> {
     for (const shop of shops) {
       if (shop.lat && shop.lon) {
         this.displayShopOnMap(shop);
-      } 
+      }
     }
   }
 
@@ -150,7 +166,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const icon = this.createShopIcon(shop.hasOffers || false);
 
     if (!shop.lat || !shop.lon)
-       throw new Error('Eroare la afisarea magazinului pe hartă: Nu a fost furnizată locația.')
+      throw new Error(
+        "Eroare la afisarea magazinului pe hartă: Nu a fost furnizată locația.",
+      );
 
     const marker = L.marker([shop.lat, shop.lon], {icon})
       .addTo(this.map);
@@ -240,11 +258,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   }
 
   private createShopIcon(hasOffers: boolean): L.DivIcon {
-  const color = hasOffers ? '#e01f2f' : '#020203';
+    const color = hasOffers ? "#e01f2f" : "#020203";
 
-  return L.divIcon({
-    className: 'shop-marker',
-    html: `
+    return L.divIcon({
+      className: "shop-marker",
+      html: `
       <div style="
         width: 26px;
         height: 26px;
@@ -255,9 +273,38 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
       "></div>
     `,
-    iconSize: [26, 26],
-    iconAnchor: [13, 26],
-    popupAnchor: [0, -26]
-  });
-}
+      iconSize: [26, 26],
+      iconAnchor: [13, 26],
+      popupAnchor: [0, -26],
+    });
+  }
+  private loadCategories(): void {
+    this.shopService.getShopCategories().subscribe({
+      next: (data) => {
+        this.categoriesList = data.map((category) => {
+          return {
+            id: category.id,
+            name: CATEGORY_TRANSLATIONS[category.name] || category.name,
+          };
+        });
+      },
+
+      error: (err) => {
+        console.error("Eroare la incarcarea categoriilor", err);
+        this.toastService.error('Nu am putut încărca categoriile.')
+      }
+    });
+  }
+
+  onFiltersChanged(filters: MapFilters): void {
+    this.currentFilters = filters;
+    this.loadShopsFromDatabase();
+  }
+
+  private clearMapMarkers(): void {
+    for (const marker of this.addressMarkers) {
+      this.map.removeLayer(marker);
+    }
+    this.addressMarkers = [];
+  }
 }

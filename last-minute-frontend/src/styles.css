@@ -134,6 +134,11 @@ p { font-size: 1rem; }
   color: white;
 }
 
+.button.small {
+  padding: 0.4rem var(--space-m);
+  font-size: 0.9rem;
+}
+
 .button.primary:hover:not(:disabled),
 .button:hover:not(:disabled) {
   background: var(--primary-color-dark);

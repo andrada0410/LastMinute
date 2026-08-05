@@ -3,6 +3,7 @@ import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { CreateShopResponse, PaginatedShopsResponse, ShopInfo, Shop, ShopsMapResponse} from "../shop";
 import { Category } from "../category";
+import { MapFilters } from "../filter";
 
 @Injectable({
   providedIn: 'root',
@@ -38,8 +39,16 @@ export class ShopService {
         return this.http.delete<void>(`${this.url}/shop/${id}`);
     }
 
-    getAllShopMapInfo() : Observable<ShopsMapResponse> {
-        return this.http.get<ShopsMapResponse>(`${this.url}/shops/map`);
+    getAllShopMapInfo(filters?: MapFilters) : Observable<ShopsMapResponse> {
+        let params = new HttpParams();
+        
+        if (filters) {
+          if (filters.categoryIds && filters.categoryIds.length > 0) {
+            params = params.set('categoryId', filters.categoryIds.join(','));
+          }
+        }
+
+        return this.http.get<ShopsMapResponse>(`${this.url}/shops/map`, { params });
     }
 
     updateShopCoordinates(shopId: number, lat: number, lon: number): Observable<any> {

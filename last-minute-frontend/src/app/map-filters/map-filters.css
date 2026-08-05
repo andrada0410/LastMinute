@@ -1,0 +1,65 @@
+.filters-overlay {
+  position: absolute;
+  top: var(--space-m);
+  right: var(--space-m);
+  z-index: 1000;
+  width: 260px;
+  padding: var(--space-m); 
+}
+
+.filters-overlay h3 {
+  margin-bottom: var(--space-m);
+  font-size: 1.1rem;
+}
+
+.filter-section {
+  margin-bottom: var(--space-m);
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: var(--space-s);
+  color: var(--text-color);
+}
+
+.categories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: var(--text-color);
+  transition: color 0.2s;
+}
+
+.checkbox-label:hover {
+  color: var(--primary-color);
+}
+
+input[type="checkbox"],
+input[type="range"] {
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}

@@ -7,9 +7,9 @@ const fs = require("fs");
 const path = require("node:path");
 const shopAPI = require("./src/resources/shop");
 const categoryAPI = require("./src/resources/shop-category");
-const geocodingAPI = require("./src/data-exchange/map-nominatim/index");
 const jwt = require("jsonwebtoken");
 const multer = require("@koa/multer");
+const geocodingAPI = require('./src/data-exchange/map-nominatim/index');
 const productAPI = require("./src/resources/product");
 
 const router = new Router();
@@ -345,7 +345,6 @@ router.post('/login', async (ctx) => {
         const userData = ctx.request.body;
         const userInfo = await authAPI.loginUser(userData);
 
-        console.log(userInfo);
         ctx.status = 200;
         ctx.body = {
             userData: userInfo.user,
@@ -427,7 +426,30 @@ router.get('/shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
 
 router.get('/shops/map', async (ctx) => {
     try {
-        const shopMapData = await shopAPI.getShopsForMap();
+        const categoryIdStr = ctx.query.categoryId;
+
+        let categoryId = undefined;
+
+        if (categoryIdStr !== undefined && categoryIdStr !== '') {
+            const rawIds = categoryIdStr.split(',');
+            
+            const isValidList = rawIds.every(id => !isNaN(parseInt(id)) && Number.isInteger(Number(id)));
+            
+            if (!isValidList) {
+                ctx.status = 400;
+                ctx.body = { error: "Categoriile specificate sunt invalide." };
+                return;
+            }
+
+            categoryId = rawIds.map(id => parseInt(id));        
+        }
+
+        const filter = {
+          categoryId: categoryId,
+        }
+
+        const shopMapData = await shopAPI.getShopsForMap(filter);
+
         ctx.status = 200;
         ctx.body = {
             entry: shopMapData
@@ -480,7 +502,7 @@ router.delete('/shop/:id', verifyToken, verifyRoleSuperuser, async (ctx) => {
   },
 );
 
-router.get('/shop-category', verifyToken, verifyRoleShopuser, async (ctx) => {
+router.get('/shop-category', async (ctx) => {
   try {
     categories = await categoryAPI.getAll();
 
