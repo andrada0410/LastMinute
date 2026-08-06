@@ -1,21 +1,31 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ShopDashboardImage } from '../shop-dashboard-image/shop-dashboard-image';
-import { ShopService } from '../services/shop.service';
-import { Shop } from '../shop';
-import { ToastService } from '../services/toast.service';
+import { Component, inject, OnDestroy, OnInit, signal } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
+import { ShopService } from "../services/shop.service";
+import { Shop } from "../shop";
+import { ToastService } from "../services/toast.service";
 import { ShopCategorySelect } from "../shop-category-select/shop-category-select";
 import { Category, CATEGORY_TRANSLATIONS } from "../category";
-import { ShopDashboardProductList } from '../shop-dashboard-product-list/shop-dashboard-product-list';
-import { ProductService } from '../services/product.service';
-import { Product } from '../product';
+import { ShopDashboardProductList } from "../shop-dashboard-product-list/shop-dashboard-product-list";
+import { ProductService } from "../services/product.service";
+import { Product } from "../product";
 import { ShopDashboardProductForm } from "../shop-dashboard-product-form/shop-dashboard-product-form";
-import { ConfirmDelete } from '../confirm-delete/confirm-delete';
+import { ConfirmDelete } from "../confirm-delete/confirm-delete";
+import { debounceTime, Subject } from "rxjs";
+import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-bar";
 
 @Component({
   selector: "shop-dashboard",
   standalone: true,
-  imports: [FormsModule, ShopDashboardImage, ShopCategorySelect, ShopCategorySelect, ShopDashboardProductList, ShopDashboardProductForm, ConfirmDelete],
+  imports: [
+    FormsModule,
+    ShopDashboardImage,
+    ShopCategorySelect,
+    ShopDashboardProductList,
+    ShopDashboardProductForm,
+    ConfirmDelete,
+    SearchBar,
+  ],
   template: `
     <section class="page">
       <form
@@ -71,7 +81,8 @@ import { ConfirmDelete } from '../confirm-delete/confirm-delete';
               label="Schimbă banner-ul"
               [isEditing]="isEditing()"
               (imageSelected)="onImagePicked($event, 'banner')"
-              [fallbackImage]="'assets/shop-dashboard/default-banner.png'";
+              [fallbackImage]="'assets/shop-dashboard/default-banner.png'"
+              ;
             />
           </div>
 
@@ -127,52 +138,67 @@ import { ConfirmDelete } from '../confirm-delete/confirm-delete';
                 ></textarea>
 
                 @if (detailsField.invalid && detailsField.touched) {
-                  @if (detailsField.errors?.['maxlength']) {
-                    <p class="error-text">Detaliile nu pot avea mai mult de 1000 de caractere.</p>
+                  @if (detailsField.errors?.["maxlength"]) {
+                    <p class="error-text">
+                      Detaliile nu pot avea mai mult de 1000 de caractere.
+                    </p>
                   }
                 }
               }
             </div>
-            
+
             <hr class="section-divider" />
 
             <div class="products-header">
               <h2>Produse</h2>
 
-              <button type="button" class="button primary add-product" (click)="openCreateProduct()"> Adaugă produs </button>
-            
+              <div class="products-actions">
+                <app-shop-dashboard-search-bar
+                  [name]="searchName"
+                  (nameChange)="onSearchChange($event)"
+                />
+
+                <button
+                  type="button"
+                  class="button primary add-product"
+                  (click)="openCreateProduct()"
+                >
+                  Adaugă produs
+                </button>
+              </div>
             </div>
 
             <app-shop-dashboard-product-list
-                [products]="products"
-                (edit)="openEditProduct($event)"
-                (remove)="deleteProduct($event)">
-
+              [products]="products"
+              (edit)="openEditProduct($event)"
+              (remove)="deleteProduct($event)"
+            >
             </app-shop-dashboard-product-list>
-            
           </div>
         </div>
       </form>
     </section>
-    @if(showProductForm) {
+    @if (showProductForm) {
       <app-shop-dashboard-product-form
-          [product]="editingProduct"
-          [backendError]="productErrorMessage()"
-          (save)="saveProduct($event)"
-          (cancel)="closeProductForm()">
+        [product]="editingProduct"
+        [backendError]="productErrorMessage()"
+        (save)="saveProduct($event)"
+        (cancel)="closeProductForm()"
+      >
       </app-shop-dashboard-product-form>
     }
-     @if(productPendingDelete !== null) {
+    @if (productPendingDelete !== null) {
       <app-confirm-delete
-          message="Sigur dorești să ștergi acest produs?"
-          (confirm)="confirmDeleteProduct()"
-          (cancel)="productPendingDelete = null">
+        message="Sigur dorești să ștergi acest produs?"
+        (confirm)="confirmDeleteProduct()"
+        (cancel)="productPendingDelete = null"
+      >
       </app-confirm-delete>
     }
   `,
   styleUrls: ["./shop-dashboard.css"],
 })
-export class ShopDashboard implements OnInit {
+export class ShopDashboard implements OnInit, OnDestroy {
   private shopService = inject(ShopService);
   private toastService = inject(ToastService);
   private productService = inject(ProductService);
@@ -204,22 +230,30 @@ export class ShopDashboard implements OnInit {
   private initialBannerUrl = "";
   private initialLogoUrl = "";
 
+  searchName: string = "";
+  private searchSubject = new Subject<string>();
+
   ngOnInit(): void {
     this.loadShopProfile();
     this.loadCategories();
+
+    this.searchSubject.pipe(debounceTime(300)).subscribe((_) => {
+      this.loadProducts();
+    });
   }
 
   loadCategories(): void {
     this.shopService.getShopCategories().subscribe({
       next: (data) => {
-        this.categories = data.map(category =>  {
+        this.categories = data.map((category) => {
           return {
             id: category.id,
-            name: CATEGORY_TRANSLATIONS[category.name] || category.name
-          }
-        })
+            name: CATEGORY_TRANSLATIONS[category.name] || category.name,
+          };
+        });
       },
-      error: () => this.toastService.error("Nu am putut incarca categoriile.", "Eroare"),
+      error: () =>
+        this.toastService.error("Nu am putut incarca categoriile.", "Eroare"),
     });
 
     this.shopService.getMyShop().subscribe({
@@ -228,7 +262,10 @@ export class ShopDashboard implements OnInit {
         this.loadProducts();
       },
       error: () =>
-        this.toastService.error("Nu am putut incarca datele magazinului.", "Eroare")
+        this.toastService.error(
+          "Nu am putut incarca datele magazinului.",
+          "Eroare",
+        ),
     });
   }
 
@@ -237,41 +274,46 @@ export class ShopDashboard implements OnInit {
       return;
     }
 
-    this.productService.getProducts(this.shopId).subscribe({
+    this.productService.getProducts(this.shopId, this.searchName).subscribe({
       next: (products) => {
         this.products = products;
       },
       error: () => {
         this.toastService.error("Nu am putut încărca produsele.", "Eroare");
-      }
+      },
     });
   }
 
   openCreateProduct() {
     this.editingProduct = null;
-    this.productErrorMessage.set('');
+    this.productErrorMessage.set("");
     this.showProductForm = true;
   }
 
   openEditProduct(product: Product) {
     this.editingProduct = product;
-    this.productErrorMessage.set('');
+    this.productErrorMessage.set("");
     this.showProductForm = true;
   }
 
   closeProductForm() {
     this.showProductForm = false;
     this.editingProduct = null;
-    this.productErrorMessage.set('');
+    this.productErrorMessage.set("");
   }
 
-  saveProduct(data: { name: string; price: number; description: string; photo: File | null }): void {
+  saveProduct(data: {
+    name: string;
+    price: number;
+    description: string;
+    photo: File | null;
+  }): void {
     if (!this.shopId) {
       return;
     }
 
     const isEditingAction = !!this.editingProduct;
-    this.productErrorMessage.set('');
+    this.productErrorMessage.set("");
 
     const request$ = this.editingProduct
       ? this.productService.updateProduct(this.editingProduct.id, data)
@@ -282,17 +324,17 @@ export class ShopDashboard implements OnInit {
         this.closeProductForm();
         this.loadProducts();
 
-        const successMessage = isEditingAction 
-          ? 'Produsul a fost actualizat cu succes.' 
-          : 'Produsul a fost adăugat cu succes.';
-        this.toastService.success(successMessage, 'Succes');
+        const successMessage = isEditingAction
+          ? "Produsul a fost actualizat cu succes."
+          : "Produsul a fost adăugat cu succes.";
+        this.toastService.success(successMessage, "Succes");
       },
       error: () => {
-        const errorMessage = isEditingAction 
-          ? 'Salvarea produsului a eșuat.' 
-          : 'Adăugarea produsului a eșuat.';
-        this.toastService.error(errorMessage, 'Eroare');
-      }
+        const errorMessage = isEditingAction
+          ? "Salvarea produsului a eșuat."
+          : "Adăugarea produsului a eșuat.";
+        this.toastService.error(errorMessage, "Eroare");
+      },
     });
   }
 
@@ -309,15 +351,15 @@ export class ShopDashboard implements OnInit {
       next: () => {
         this.productPendingDelete = null;
         this.loadProducts();
-        this.toastService.success('Produsul a fost șters.', 'Succes');
+        this.toastService.success("Produsul a fost șters.", "Succes");
       },
       error: () => {
         this.productPendingDelete = null;
-        this.toastService.error('Ștergerea produsului a eșuat.', 'Eroare');
-      }
+        this.toastService.error("Ștergerea produsului a eșuat.", "Eroare");
+      },
     });
   }
-    
+
   private clearSelectedFiles(): void {
     this.logoFile = null;
     this.bannerFile = null;
@@ -338,9 +380,12 @@ export class ShopDashboard implements OnInit {
         this.applyProfile(shop);
       },
       error: (err) => {
-        const errorMessage = typeof err.error === 'string' ? err.error : (err.error?.error || 'Nu am putut incarca datele magazinului.');
-        this.toastService.error(errorMessage, 'Eroare');
-      }
+        const errorMessage =
+          typeof err.error === "string"
+            ? err.error
+            : err.error?.error || "Nu am putut incarca datele magazinului.";
+        this.toastService.error(errorMessage, "Eroare");
+      },
     });
   }
 
@@ -356,7 +401,8 @@ export class ShopDashboard implements OnInit {
     this.initialLogoUrl = this.logoUrl;
 
     if (shop.categoryName) {
-      this.categoryName = CATEGORY_TRANSLATIONS[shop.categoryName] || shop.categoryName;
+      this.categoryName =
+        CATEGORY_TRANSLATIONS[shop.categoryName] || shop.categoryName;
     } else {
       shop.categoryName = "-";
     }
@@ -406,7 +452,10 @@ export class ShopDashboard implements OnInit {
 
   onSubmit(): void {
     if (!this.shopId) {
-      this.toastService.error('ID-ul magazinului nu este disponibil.', 'Eroare');
+      this.toastService.error(
+        "ID-ul magazinului nu este disponibil.",
+        "Eroare",
+      );
       return;
     }
 
@@ -421,13 +470,30 @@ export class ShopDashboard implements OnInit {
         next: () => {
           this.isEditing.set(false);
           this.clearSelectedFiles();
-          this.toastService.success('Editare efectuată cu succes');
+          this.toastService.success("Editare efectuată cu succes");
           this.loadShopProfile();
         },
         error: (err) => {
-          const errorMessage = typeof err.error === 'string' ? err.error : (err.error?.error || 'Salvarea modificărilor a eșuat.');
-          this.toastService.error(errorMessage, 'Eroare');
-        }
+          const errorMessage =
+            typeof err.error === "string"
+              ? err.error
+              : err.error?.error || "Salvarea modificărilor a eșuat.";
+          this.toastService.error(errorMessage, "Eroare");
+        },
       });
+  }
+
+  onSearchChange(searchTerm: string): void {
+    this.searchName = searchTerm;
+    this.searchSubject.next(searchTerm);
+  }
+
+  clearSearch(): void {
+    this.searchName = "";
+    this.searchSubject.next("");
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubject.complete();
   }
 }

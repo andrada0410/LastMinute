@@ -1,7 +1,8 @@
 const { sqlRequest } = require("../../db");
 const fs = require("fs/promises");
 const path = require("node:path");
-const config = require('../../../config.json')
+const config = require('../../../config.json');
+const shop = require("../shop");
 
 async function validateProduct(productData) {
     if (productData.name !== undefined) {
@@ -32,16 +33,29 @@ async function validateProduct(productData) {
 }
 
 module.exports = {
-    getProductsByShop: async (shopId) => {
-        const result = await sqlRequest()
-            .input("shopId", shopId)
-            .query(`
-                SELECT id, shop_id AS shopId, name, price, description, photo_path AS photoPath
-                FROM products
-                WHERE shop_id = @shopId
-                AND is_deleted = 0
-                ORDER BY id DESC
-            `);
+    getProducts: async (filter) => {
+        let query = `
+             SELECT id, shop_id AS shopId, name, price, description, photo_path AS photoPath
+             FROM products
+             WHERE is_deleted = 0
+        `;
+
+        const request = await sqlRequest();
+
+        if (filter.shopId) {
+            query += ` AND shop_id = @shopId`
+            request.input('shopId', filter.shopId);
+        }
+
+        if (filter.name) {
+            query += ` AND name LIKE '%' + @name + '%'`;
+            request.input('name', filter.name);
+        }
+
+        query += ' ORDER BY id DESC';
+
+
+        const result = await request.query(query);
         return result.recordset;
     },
 
@@ -170,5 +184,4 @@ module.exports = {
 
         return result.recordset[0];
     },
-
 }

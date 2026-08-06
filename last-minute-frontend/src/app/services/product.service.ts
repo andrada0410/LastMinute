@@ -10,8 +10,14 @@ export class ProductService {
     url = 'http://localhost:4001';
     private http = inject(HttpClient);
 
-    getProducts(shopId: number): Observable<Product[]> {
-        return this.http.get<Product[]>(`${this.url}/product`, { params: { shopId: shopId.toString() }});
+    getProducts(shopId: number, name?: string): Observable<Product[]> {
+        let params: any = { shopId: shopId.toString() };
+
+        if (name) {
+            params.name = name;
+        }
+
+        return this.http.get<Product[]>(`${this.url}/product`, { params });
     }
 
     createProduct(shopId: number, productData: { name: string; price: number; description: string; photo?: File | null; }

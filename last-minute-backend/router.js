@@ -517,7 +517,7 @@ router.get('/shop-category', async (ctx) => {
 
 router.get("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
   try {
-    const { shopId } = ctx.query;
+    const { shopId, name  } = ctx.query;
 
     if (!shopId) {
       ctx.status = 400;
@@ -525,7 +525,12 @@ router.get("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, asy
       return;
     }
 
-    const products = await productAPI.getProductsByShop(shopId);
+    const filter = {
+      shopId: shopId,
+      name: name
+    };
+
+    const products = await productAPI.getProducts(filter);
 
     ctx.status = 200;
     ctx.body = products;

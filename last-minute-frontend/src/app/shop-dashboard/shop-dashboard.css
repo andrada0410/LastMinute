@@ -171,3 +171,9 @@ textarea.field-edit:focus {
   margin: 1.5rem 0;
   opacity: 50%;
 }
+
+.products-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+}
