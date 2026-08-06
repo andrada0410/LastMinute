@@ -47,6 +47,16 @@ export class ShopDashboardProduct {
   expanded = signal(false)
 
   get imageUrl(): string {
-    return this.product().photoPath ? `http://localhost:4001/uploads/${this.product().photoPath}`: "";
+    const photoPath = this.product().photoPath;
+    
+    if (!photoPath) {
+      return "";
+    }
+    
+    const isExternalLink = /^https?:\/\//i.test(photoPath);
+    
+    return isExternalLink
+      ? photoPath
+      : `http://localhost:4001/uploads/${photoPath}`;
   }
 }

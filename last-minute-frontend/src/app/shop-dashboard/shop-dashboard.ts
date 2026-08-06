@@ -348,12 +348,8 @@ export class ShopDashboard implements OnInit {
     this.shopId = shop.id;
     this.name = shop.name || "";
     this.details = shop.details || "";
-    this.bannerUrl = shop.bannerPath
-      ? `${this.shopService.url}/uploads/${shop.bannerPath}`
-      : "assets/shop-dashboard/default-banner.png";
-    this.logoUrl = shop.logoPath
-      ? `${this.shopService.url}/uploads/${shop.logoPath}`
-      : "assets/shop-dashboard/default-logo.png";
+    this.bannerUrl = this.resolveImagePath(shop.bannerPath, 'assets/shop-dashboard/default-banner.png');
+    this.logoUrl = this.resolveImagePath(shop.logoPath, 'assets/shop-dashboard/default-logo.png');
 
     this.initialDetails = this.details;
     this.initialBannerUrl = this.bannerUrl;
@@ -366,6 +362,18 @@ export class ShopDashboard implements OnInit {
     }
     this.categoryId = shop.categoryId || null;
     this.initialCategoryId = this.categoryId;
+  }
+
+  private resolveImagePath(path?: string, fallback?: string): string {
+    if (!path) {
+      return fallback ?? '';
+    }
+    
+    const isExternalLink = /^https?:\/\//i.test(path);
+    
+    return isExternalLink
+      ? path
+      : `${this.shopService.url}/uploads/${path}`;
   }
 
   startEditing(): void {

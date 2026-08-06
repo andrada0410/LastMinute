@@ -47,8 +47,9 @@
 
 /* --- Banner --- */
 .shop-banner {
-    height: 250px;
     width: 100%;
+    aspect-ratio: 2.5/1;
+    overflow: hidden;
     position: relative;
     background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
 }
@@ -81,12 +82,7 @@
     flex-shrink: 0;
     position: relative;
     overflow: hidden;
-}
-
-.shop-logo img { 
-    width: 100%; 
-    height: 100%; 
-    object-fit: cover; 
+    --image-fit: contain;
 }
 
 /* --- Body + Fields --- */

@@ -120,15 +120,24 @@ export class ShopDashboardProductForm {
         description: product.description
       });
 
-      this.imagePreview = product.photoPath
-        ? `http://localhost:4001/uploads/${product.photoPath}`
-        : "";
-
+      this.imagePreview = this.resolveImageUrl(product.photoPath);
       this.selectedPhoto = null;
 
     });
 
   }
+
+  private resolveImageUrl(photoPath: string | null | undefined): string {
+  if (!photoPath) {
+    return "";
+  }
+
+  const isExternalLink = /^https?:\/\//i.test(photoPath);
+
+  return isExternalLink
+    ? photoPath
+    : `http://localhost:4001/uploads/${photoPath}`;
+}
 
   onImageSelected(file: File) {
     this.selectedPhoto = file;

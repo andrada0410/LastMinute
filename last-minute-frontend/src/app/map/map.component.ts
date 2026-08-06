@@ -223,9 +223,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private showNewCard = (shop: ShopMapInfo, e: L.LeafletMouseEvent) => {
     this.hoveredShop = shop;
-    this.hoveredShopLogoPath = shop.logoPath 
-          ? `${this.shopService.url}/uploads/${shop.logoPath}`
-          : 'assets/shop-dashboard/default-logo.png';
+    this.hoveredShopLogoPath = this.resolveLogoPath(shop.logoPath);
 
     const point = this.map.latLngToContainerPoint(e.latlng);
     const mapSize = this.map.getSize();
@@ -235,6 +233,18 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isFlippedDown = this.shouldFlipCardDown(point.y);
     this.areShopDetailsVisible = true;
   };
+
+  private resolveLogoPath(logoPath?: string): string {
+    if (!logoPath) {
+      return 'assets/shop-dashboard/default-logo.png';
+    }
+    
+    const isExternalLink = /^https?:\/\//i.test(logoPath);
+    
+    return isExternalLink
+      ? logoPath
+      : `${this.shopService.url}/uploads/${logoPath}`;
+  }
 
 
   private getSafeHorizontalPosition(targetX: number, mapWidth: number): number {

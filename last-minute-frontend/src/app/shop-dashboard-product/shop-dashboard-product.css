@@ -32,8 +32,9 @@
 
 .product-image {
     width: 100%;
-    aspect-ratio: 21 / 9;
+    height: 220px;
     overflow: hidden;
+    --image-fit: cover;
 }
 
 .product-content {
