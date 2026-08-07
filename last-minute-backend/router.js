@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken");
 const multer = require("@koa/multer");
 const geocodingAPI = require('./src/data-exchange/map-nominatim/index');
 const productAPI = require("./src/resources/product");
+const offerAPI = require("./src/resources/offer");
 
 const router = new Router();
 const JWT_KEY = config.databaseConfig.jwtKey;
@@ -609,6 +610,48 @@ router.delete("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnersh
     await productAPI.deleteProduct(id);
 
     ctx.status = 204;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
+});
+
+router.get("/offer", async (ctx) => {
+  try {
+    const { shopId, startDate, endDate, include } = ctx.query;
+
+    if (!shopId || !startDate || !endDate || !include) {
+      ctx.throw(400, "Lipsesc parametri obligatorii.");
+    }
+
+    const result = await offerAPI.getOfferByShop(Number(shopId), startDate, endDate, include);
+
+    ctx.status = 200;
+    ctx.body = result ;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
+});
+
+router.post("/offer", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
+  try {
+    const { startDate, hoursAvailable, products } = ctx.request.body;
+    const shopId = ctx.state.shopId;
+
+    if (!startDate || !hoursAvailable || !products) {
+      ctx.throw(400, "Lipsesc parametri obligatorii.");
+    }
+
+    const result = await offerAPI.createOffer(
+        shopId,
+        startDate,
+        Number(hoursAvailable),
+        products
+    );
+
+    ctx.status = 201;
+    ctx.body = result;
   } catch (error) {
     ctx.status = error.status || 500;
     ctx.body = { error: error.message };

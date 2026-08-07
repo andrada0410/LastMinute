@@ -22,6 +22,7 @@ import { AuthService } from '../services/auth.service';
             }
             @case ('SHOPUSER') {
               <a routerLink="/shop-dashboard" routerLinkActive="active">Dashboard</a>
+              <a routerLink="/shop-offer" routerLinkActive="active">Oferta Zilei</a>
             }
             @default {
               <a routerLink="/active-orders" routerLinkActive="active">Comenzi active</a>

@@ -6,6 +6,7 @@ import { Register } from './register/register';
 import { Admin } from './admin/admin';
 import { MapComponent } from './map/map.component';
 import { ShopDashboard } from './shop-dashboard/shop-dashboard';
+import { ShopOffer } from './shop-offer/shop-offer';
 import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
 
@@ -52,6 +53,13 @@ const routeConfig: Routes = [
     path: 'shop-dashboard',
     component: ShopDashboard,
     title: 'Shop Dashboard',
+    canActivate: [authGuard],
+    data: { roles: ['SHOPUSER'] }
+  },
+  {
+    path: 'shop-offer',
+    component: ShopOffer,
+    title: 'Oferta Zilei',
     canActivate: [authGuard],
     data: { roles: ['SHOPUSER'] }
   }

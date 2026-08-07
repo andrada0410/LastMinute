@@ -86,6 +86,15 @@
 }
 
 /* --- Body + Fields --- */
+.add-offer{
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.add-offer:hover:not(:disabled) {
+    opacity: 0.8;
+}
+
 .shop-body { 
     padding: var(--space-xl); 
 }
@@ -161,8 +170,16 @@ textarea.field-edit:focus {
     margin: 0;
 }
 
-.add-product {
+
+.products-actions {
+    gap: var(--space-m);
+    display: flex;
+    align-items: center;
+}
+
+.products-actions .button{
     width: auto;
+    white-space: nowrap;
 }
 
 .section-divider {

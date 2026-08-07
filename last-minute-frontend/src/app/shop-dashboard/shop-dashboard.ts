@@ -10,7 +10,10 @@ import { ShopDashboardProductList } from "../shop-dashboard-product-list/shop-da
 import { ProductService } from "../services/product.service";
 import { Product } from "../product";
 import { ShopDashboardProductForm } from "../shop-dashboard-product-form/shop-dashboard-product-form";
-import { ConfirmDelete } from "../confirm-delete/confirm-delete";
+import { ConfirmDelete } from '../confirm-delete/confirm-delete';
+import { CreateOfferRequest } from "../offer";
+import { OfferService } from "../services/offer.service"; // presupun ca exista deja
+import { ShopOfferForm } from '../shop-offer-form/shop-offer-form';
 import { debounceTime, Subject } from "rxjs";
 import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-bar";
 
@@ -25,6 +28,7 @@ import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-ba
     ShopDashboardProductForm,
     ConfirmDelete,
     SearchBar,
+    ShopOfferForm
   ],
   template: `
     <section class="page">
@@ -151,23 +155,26 @@ import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-ba
 
             <div class="products-header">
               <h2>Produse</h2>
-
+              
               <div class="products-actions">
                 <app-shop-dashboard-search-bar
                   [name]="searchName"
                   (nameChange)="onSearchChange($event)"
                 />
 
-                <button
-                  type="button"
-                  class="button primary add-product"
-                  (click)="openCreateProduct()"
-                >
-                  Adaugă produs
-                </button>
+                <button type="button" class="button add-offer" (click)="openCreateOffer()"> Creează ofertă </button>
+                <button type="button" class="button primary add-product" (click)="openCreateProduct()"> Adaugă produs </button>
               </div>
             </div>
 
+            @if (showOfferForm) {
+              <app-shop-offer-form
+                  [products]="products"
+                  [backendError]="offerErrorMessage()"
+                  (save)="saveOffer($event)"
+                  (cancel)="closeOfferForm()">
+              </app-shop-offer-form>
+            }
             <app-shop-dashboard-product-list
               [products]="products"
               (edit)="openEditProduct($event)"
@@ -198,7 +205,78 @@ import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-ba
   `,
   styleUrls: ["./shop-dashboard.css"],
 })
-export class ShopDashboard implements OnInit, OnDestroy {
+export class ShopDashboard implements OnInit {
+  private offerService = inject(OfferService);
+
+  showOfferForm = false;
+  offerErrorMessage = signal("");
+
+  openCreateOffer(): void {
+    if (!this.shopId) {
+      return;
+    }
+
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date();
+    endDate.setHours(23, 59, 59, 999);
+
+    this.offerService.getOffer(
+      this.shopId,
+      startDate.toISOString(),
+      endDate.toISOString()
+    ).subscribe({
+      next: (response) => {
+        const hasActiveOffer = response.entry.length > 0;
+
+        if (hasActiveOffer) {
+          this.toastService.error(
+            "Magazinul are deja o ofertă activă astăzi. Puteți crea o nouă ofertă abia mâine.",
+            "Ofertă existentă"
+          );
+          return;
+        }
+
+        this.offerErrorMessage.set("");
+        this.showOfferForm = true;
+      },
+      error: () => {
+        this.toastService.error("Nu am putut verifica ofertele existente.", "Eroare");
+      }
+    });
+  }
+
+  closeOfferForm(): void {
+    this.showOfferForm = false;
+    this.offerErrorMessage.set("");
+  }
+
+  saveOffer(data: CreateOfferRequest): void {
+    if (!this.shopId) {
+      return;
+    }
+
+    this.offerService.createOffer(this.shopId, data).subscribe({
+      next: () => {
+        this.closeOfferForm();
+        this.toastService.success("Oferta a fost creată cu succes.", "Succes");
+      },
+      error: (err: any) => {
+        const errorMessage = typeof err.error === "string" ? err.error : (err.error?.error || "Crearea ofertei a eșuat.");
+        this.offerErrorMessage.set(errorMessage);
+      }
+    });
+  }
+
+  CATEGORY_TRANSLATIONS: Record<string, string> = {
+    "Restaurant": "Restaurant",
+    "Fast-Food": "Fast-Food",
+    "Confectionery": "Cofetărie",
+    "Bakery": "Patiserie",
+    "Supermarket": "Supermarket"
+  };
+
   private shopService = inject(ShopService);
   private toastService = inject(ToastService);
   private productService = inject(ProductService);
