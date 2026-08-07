@@ -585,7 +585,11 @@ router.post("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, up
 
 router.patch("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnership, upload.fields([{ name: "product", maxCount: 1 }]), async (ctx) => {
   try {
-    const shopProducts = await productAPI.getProductsByShop(ctx.state.shopId);
+    const filter = {
+      shopId : ctx.state.shopId
+    }
+    
+    const shopProducts = await productAPI.getProducts(filter);
     const belongsToShop = shopProducts.some(p => p.id == ctx.params.id);
 
     if (!belongsToShop) {
@@ -615,8 +619,11 @@ router.patch("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnershi
 router.delete("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
   try {
     const { id } = ctx.params;
+    const filter = {
+      shopId: ctx.state.shopId
+    }
 
-    const shopProducts = await productAPI.getProductsByShop(ctx.state.shopId);
+    const shopProducts = await productAPI.getProducts(filter);
     const belongsToShop = shopProducts.some(p => p.id == id);
 
     if (!belongsToShop) {

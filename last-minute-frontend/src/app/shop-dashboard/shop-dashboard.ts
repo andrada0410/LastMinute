@@ -16,6 +16,7 @@ import { OfferService } from "../services/offer.service"; // presupun ca exista 
 import { ShopOfferForm } from '../shop-offer-form/shop-offer-form';
 import { debounceTime, Subject } from "rxjs";
 import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-bar";
+import { PdfMeniuGenerator } from "../pdf-meniu-generator/pdf-meniu-generator";
 
 @Component({
   selector: "shop-dashboard",
@@ -28,6 +29,7 @@ import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-ba
     ShopDashboardProductForm,
     ConfirmDelete,
     SearchBar,
+    PdfMeniuGenerator,
     ShopOfferForm
   ],
   template: `
@@ -164,6 +166,11 @@ import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-ba
 
                 <button type="button" class="button add-offer" (click)="openCreateOffer()"> Creează ofertă </button>
                 <button type="button" class="button primary add-product" (click)="openCreateProduct()"> Adaugă produs </button>
+
+                <app-pdf-meniu-generator
+                  [shopName]="name"
+                  [products]="products"
+                />
               </div>
             </div>
 
