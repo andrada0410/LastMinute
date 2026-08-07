@@ -1,4 +1,5 @@
-import { Component, AfterViewInit, OnDestroy, NgZone, OnInit } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, NgZone, OnInit} from '@angular/core';
+import { Router } from '@angular/router';
 import * as L from 'leaflet';
 import { ShopService } from '../services/shop.service';
 import { ShopMapInfo, ShopsMapResponse } from '../shop';
@@ -58,8 +59,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private shopService: ShopService,
-    private toastService: ToastService,
-    private zone: NgZone
+    private zone: NgZone,
+    private router: Router,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -172,7 +174,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const marker = L.marker([shop.lat, shop.lon], {icon})
       .addTo(this.map);
-      
 
     marker.on('mouseover', (e: L.LeafletMouseEvent) => {
       this.zone.run(() => {
@@ -202,6 +203,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.hideShopDetailsTimeout = setTimeout(() => {
           this.areShopDetailsVisible = false;
         }, 200);
+      });
+    });
+
+    marker.on('click', () => {
+      this.zone.run(() => {
+        this.router.navigate(['/shop', shop.id]);
       });
     });
     

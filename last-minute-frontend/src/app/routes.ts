@@ -6,6 +6,7 @@ import { Register } from './register/register';
 import { Admin } from './admin/admin';
 import { MapComponent } from './map/map.component';
 import { ShopDashboard } from './shop-dashboard/shop-dashboard';
+import { ShopViewComponent } from './shop-view/shop-view.component';
 import { ShopOffer } from './shop-offer/shop-offer';
 import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
@@ -43,7 +44,7 @@ const routeConfig: Routes = [
   {
     path: 'map',
     component: MapComponent,
-    title: 'Map',
+    title: 'Hartă',
     canActivate: [authGuard],
     data: {
       allowUnauthenticated: true,
@@ -52,9 +53,19 @@ const routeConfig: Routes = [
   {
     path: 'shop-dashboard',
     component: ShopDashboard,
-    title: 'Shop Dashboard',
+    title: 'Pagină magazin',
     canActivate: [authGuard],
     data: { roles: ['SHOPUSER'] }
+  },
+  {
+    path: 'shop/:id',
+    component: ShopViewComponent,
+    title: 'Vizualizare detalii magazin',
+    canActivate: [authGuard],
+    data: { 
+      allowUnauthenticated: true,
+      roles: ['USER'] 
+    }
   },
   {
     path: 'shop-offer',
@@ -63,7 +74,6 @@ const routeConfig: Routes = [
     canActivate: [authGuard],
     data: { roles: ['SHOPUSER'] }
   }
-
 ];
 
 export default routeConfig;

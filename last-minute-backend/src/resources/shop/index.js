@@ -18,7 +18,7 @@ module.exports = {
     const result = await sqlRequest()
       .input("id", id)
       .query(
-        `select s.id, s.name, s.address, s.user_id, s.logo_path, s.banner_path, s.details, c.id AS categoryId, c.name AS categoryName
+        `select s.id, s.name, s.address, s.user_id, s.logo_path as logoPath, s.banner_path as bannerPath, s.details, c.id AS categoryId, c.name AS categoryName
          from shops s
          left join categories c on c.id = s.category_id
          where s.id = @id`,

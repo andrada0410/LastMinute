@@ -15,6 +15,9 @@ export interface Shop {
     details: string;
     categoryId: number;
     categoryName: string;
+    contact: {
+        email: string;
+    }
 }
 
 export interface PaginatedShopsResponse {

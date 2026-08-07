@@ -280,9 +280,27 @@ router.get("/shop/mine", verifyToken, verifyRoleShopuser, async (ctx) => {
   ctx.status = 200;
 });
 
-router.get("/shop/:id", verifyToken, verifyRoleShopuser, async (ctx) => {
-  ctx.response.body = await shopAPI.getShopById(ctx.params.id);
-  ctx.status = 200;
+router.get("/shop/:id", async (ctx) => {
+  try {
+    let shopData = await shopAPI.getShopById(ctx.params.id);
+    let contact = { email: undefined };
+    const user = await userAPI.getUserById(shopData.user_id);
+    const { email } = user[0] || {};
+    if (email) {
+      contact.email = email;
+    }
+    shopData.contact = contact;
+
+    ctx.response.body = shopData;
+    ctx.status = 200;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    const message =
+      ctx.status === 500
+        ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu."
+        : error.message;
+    ctx.body = { error: message };
+  }
 });
 
 router.patch(

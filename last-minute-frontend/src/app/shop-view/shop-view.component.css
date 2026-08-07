@@ -1,0 +1,144 @@
+.shop-view-page {
+  max-width: 1050px;
+  margin: 0 auto;
+  background-color: var(--bg-color);
+  min-height: 100vh;
+  box-shadow: var(--shadow-card);
+}
+
+.shop-hero {
+  position: relative;
+  width: 100%;
+  height: 40vh;
+  background-color: var(--accent-color);
+}
+
+.banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.logo-container {
+  position: absolute;
+  bottom: -40px;
+  left: var(--space-l);
+  width: 100px;
+  height: 100px;
+  background-color: var(--bg-color);
+  border-radius: var(--radius-l);
+  padding: var(--space-s);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-m);
+}
+
+.shop-content {
+  padding: var(--space-xl) var(--space-l);
+}
+
+.shop-content h1 {
+  margin: 0 0 var(--space-s) 0;
+  font-size: 2rem;
+  color: var(--primary-color-dark);
+}
+
+.category-badge {
+  display: inline-block;
+  background-color: var(--primary-color-light);
+  color: var(--primary-color);
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius-l);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-l);
+}
+
+.info-section {
+  margin-bottom: var(--space-xl);
+}
+
+.info-section h2 {
+  font-size: 1.25rem;
+  color: var(--text-color);
+  margin-bottom: var(--space-m);
+  padding-bottom: var(--space-s);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.info-section p {
+  line-height: 1.6;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.contact-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.contact-info li {
+  padding: var(--space-s) 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.contact-info li strong {
+  color: var(--text-color);
+  margin-right: var(--space-s);
+  min-width: 70px;
+  display: inline-block;
+}
+
+.loading {
+  text-align: center;
+  padding: var(--space-xl);
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+.error {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--error-color);
+  font-weight: 600;
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .shop-hero {
+    height: 180px;
+  }
+
+  .logo-container {
+    left: var(--space-m);
+    width: 80px;
+    height: 80px;
+    bottom: -30px;
+  }
+
+  .shop-content {
+    padding: var(--space-xl) var(--space-m) var(--space-l) var(--space-m);
+  }
+
+  .shop-content h1 {
+    font-size: 1.5rem;
+  }
+}
