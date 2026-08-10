@@ -168,13 +168,16 @@ textarea.field-edit:focus {
 
 .products-header h2 {
     margin: 0;
+    padding-top: 8px;
 }
-
 
 .products-actions {
     gap: var(--space-m);
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    max-width: 100%;
+    justify-content: flex-end;
 }
 
 .products-actions .button{
@@ -187,10 +190,4 @@ textarea.field-edit:focus {
   border-top: 2px solid var(--disabled-color);
   margin: 1.5rem 0;
   opacity: 50%;
-}
-
-.products-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--space-m);
 }

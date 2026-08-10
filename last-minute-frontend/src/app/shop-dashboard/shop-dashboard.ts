@@ -16,7 +16,9 @@ import { OfferService } from "../services/offer.service"; // presupun ca exista 
 import { ShopOfferForm } from '../shop-offer-form/shop-offer-form';
 import { debounceTime, Subject } from "rxjs";
 import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-bar";
+import { ShopDashboardProductImport } from "../shop-dashboard-product-import/shop-dashboard-product-import";
 import { PdfMeniuGenerator } from "../pdf-meniu-generator/pdf-meniu-generator";
+import { DropdownMenu } from "../dropdown-menu/dropdown-menu";
 
 @Component({
   selector: "shop-dashboard",
@@ -29,8 +31,10 @@ import { PdfMeniuGenerator } from "../pdf-meniu-generator/pdf-meniu-generator";
     ShopDashboardProductForm,
     ConfirmDelete,
     SearchBar,
+    ShopDashboardProductImport,
     PdfMeniuGenerator,
-    ShopOfferForm
+    ShopOfferForm,
+    DropdownMenu,
   ],
   template: `
     <section class="page">
@@ -157,29 +161,53 @@ import { PdfMeniuGenerator } from "../pdf-meniu-generator/pdf-meniu-generator";
 
             <div class="products-header">
               <h2>Produse</h2>
-              
+
               <div class="products-actions">
                 <app-shop-dashboard-search-bar
                   [name]="searchName"
                   (nameChange)="onSearchChange($event)"
                 />
 
-                <button type="button" class="button add-offer" (click)="openCreateOffer()"> Creează ofertă </button>
-                <button type="button" class="button primary add-product" (click)="openCreateProduct()"> Adaugă produs </button>
+                <app-dropdown-menu>
+                  <button
+                    type="button"
+                    class="menu-item"
+                    (click)="openCreateProduct()"
+                  >
+                    Adaugă produs
+                  </button>
 
-                <app-pdf-meniu-generator
-                  [shopName]="name"
-                  [products]="products"
-                />
+                  <button
+                    type="button"
+                    class="menu-item"
+                    (click)="openCreateOffer()"
+                  >
+                    Creează ofertă
+                  </button>
+
+                  <button
+                    type="button"
+                    class="menu-item"
+                    (click)="openImportModal()"
+                  >
+                    Importă Excel
+                  </button>
+
+                  <app-pdf-meniu-generator
+                    [shopName]="name"
+                    [products]="products"
+                  />
+                </app-dropdown-menu>
               </div>
             </div>
 
             @if (showOfferForm) {
               <app-shop-offer-form
-                  [products]="products"
-                  [backendError]="offerErrorMessage()"
-                  (save)="saveOffer($event)"
-                  (cancel)="closeOfferForm()">
+                [products]="products"
+                [backendError]="offerErrorMessage()"
+                (save)="saveOffer($event)"
+                (cancel)="closeOfferForm()"
+              >
               </app-shop-offer-form>
             }
             <app-shop-dashboard-product-list
@@ -209,6 +237,13 @@ import { PdfMeniuGenerator } from "../pdf-meniu-generator/pdf-meniu-generator";
       >
       </app-confirm-delete>
     }
+
+    @if (showImportModal) {
+      <app-shop-dashboard-product-import
+        (close)="showImportModal = false"
+        (upload)="uploadExcel($event)"
+      />
+    }
   `,
   styleUrls: ["./shop-dashboard.css"],
 })
@@ -229,29 +264,30 @@ export class ShopDashboard implements OnInit {
     const endDate = new Date();
     endDate.setHours(23, 59, 59, 999);
 
-    this.offerService.getOffer(
-      this.shopId,
-      startDate.toISOString(),
-      endDate.toISOString()
-    ).subscribe({
-      next: (response) => {
-        const hasActiveOffer = response.entry.length > 0;
+    this.offerService
+      .getOffer(this.shopId, startDate.toISOString(), endDate.toISOString())
+      .subscribe({
+        next: (response) => {
+          const hasActiveOffer = response.entry.length > 0;
 
-        if (hasActiveOffer) {
+          if (hasActiveOffer) {
+            this.toastService.error(
+              "Magazinul are deja o ofertă activă astăzi. Puteți crea o nouă ofertă abia mâine.",
+              "Ofertă existentă",
+            );
+            return;
+          }
+
+          this.offerErrorMessage.set("");
+          this.showOfferForm = true;
+        },
+        error: () => {
           this.toastService.error(
-            "Magazinul are deja o ofertă activă astăzi. Puteți crea o nouă ofertă abia mâine.",
-            "Ofertă existentă"
+            "Nu am putut verifica ofertele existente.",
+            "Eroare",
           );
-          return;
-        }
-
-        this.offerErrorMessage.set("");
-        this.showOfferForm = true;
-      },
-      error: () => {
-        this.toastService.error("Nu am putut verifica ofertele existente.", "Eroare");
-      }
-    });
+        },
+      });
   }
 
   closeOfferForm(): void {
@@ -270,18 +306,21 @@ export class ShopDashboard implements OnInit {
         this.toastService.success("Oferta a fost creată cu succes.", "Succes");
       },
       error: (err: any) => {
-        const errorMessage = typeof err.error === "string" ? err.error : (err.error?.error || "Crearea ofertei a eșuat.");
+        const errorMessage =
+          typeof err.error === "string"
+            ? err.error
+            : err.error?.error || "Crearea ofertei a eșuat.";
         this.offerErrorMessage.set(errorMessage);
-      }
+      },
     });
   }
 
   CATEGORY_TRANSLATIONS: Record<string, string> = {
-    "Restaurant": "Restaurant",
+    Restaurant: "Restaurant",
     "Fast-Food": "Fast-Food",
-    "Confectionery": "Cofetărie",
-    "Bakery": "Patiserie",
-    "Supermarket": "Supermarket"
+    Confectionery: "Cofetărie",
+    Bakery: "Patiserie",
+    Supermarket: "Supermarket",
   };
 
   private shopService = inject(ShopService);
@@ -317,6 +356,8 @@ export class ShopDashboard implements OnInit {
 
   searchName: string = "";
   private searchSubject = new Subject<string>();
+
+  showImportModal = false;
 
   ngOnInit(): void {
     this.loadShopProfile();
@@ -478,8 +519,14 @@ export class ShopDashboard implements OnInit {
     this.shopId = shop.id;
     this.name = shop.name || "";
     this.details = shop.details || "";
-    this.bannerUrl = this.resolveImagePath(shop.bannerPath, 'assets/shop-dashboard/default-banner.png');
-    this.logoUrl = this.resolveImagePath(shop.logoPath, 'assets/shop-dashboard/default-logo.png');
+    this.bannerUrl = this.resolveImagePath(
+      shop.bannerPath,
+      "assets/shop-dashboard/default-banner.png",
+    );
+    this.logoUrl = this.resolveImagePath(
+      shop.logoPath,
+      "assets/shop-dashboard/default-logo.png",
+    );
 
     this.initialDetails = this.details;
     this.initialBannerUrl = this.bannerUrl;
@@ -497,14 +544,12 @@ export class ShopDashboard implements OnInit {
 
   private resolveImagePath(path?: string, fallback?: string): string {
     if (!path) {
-      return fallback ?? '';
+      return fallback ?? "";
     }
-    
+
     const isExternalLink = /^https?:\/\//i.test(path);
-    
-    return isExternalLink
-      ? path
-      : `${this.shopService.url}/uploads/${path}`;
+
+    return isExternalLink ? path : `${this.shopService.url}/uploads/${path}`;
   }
 
   startEditing(): void {
@@ -576,6 +621,31 @@ export class ShopDashboard implements OnInit {
   clearSearch(): void {
     this.searchName = "";
     this.searchSubject.next("");
+  }
+
+  openImportModal() {
+    this.showImportModal = true;
+  }
+
+  uploadExcel(file: File) {
+    if (!this.shopId) return;
+
+    this.productService.importProducts(this.shopId, file).subscribe({
+      next: (response) => {
+        this.showImportModal = false;
+
+        this.toastService.success(
+          `Au fost importate ${response.successCount} produse cu succes.`,
+          "Import finalizat",
+        );
+        this.loadProducts();
+      },
+      error: (err) => {
+        const errorMessage =
+          err.error?.error || "Eroare la procesarea fișierului.";
+        this.toastService.error(errorMessage, "Eroare Import");
+      },
+    });
   }
 
   ngOnDestroy(): void {

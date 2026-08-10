@@ -6,3 +6,7 @@ export interface Product {
     description: string;
     photoPath: string;
 }
+
+export interface ProductsImportResponse {
+    successCount: number
+}

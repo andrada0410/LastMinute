@@ -11,12 +11,14 @@ const jwt = require("jsonwebtoken");
 const multer = require("@koa/multer");
 const geocodingAPI = require('./src/data-exchange/map-nominatim/index');
 const productAPI = require("./src/resources/product");
+const ExcelJS = require('exceljs');
+const { runInNewContext } = require("node:vm");
 const offerAPI = require("./src/resources/offer");
 
 const router = new Router();
 const JWT_KEY = config.databaseConfig.jwtKey;
 
-const storage = multer.diskStorage({
+const diskStorage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadDir = path.join(process.cwd(), config.imagesFolder);
     if (!fs.existsSync(uploadDir)) {
@@ -33,8 +35,10 @@ const storage = multer.diskStorage({
     );
   },
 });
+const uploadImages = multer({ storage: diskStorage });
 
-const upload = multer({ storage: storage });
+const memoryStorage = multer.memoryStorage();
+const uploadTemp = multer({ storage: memoryStorage });
 
 const verifyToken = async (ctx, next) => {
   if (ctx.method === "OPTIONS") {
@@ -307,7 +311,7 @@ router.patch(
   "/shop/:id/dashboard",
   verifyToken,
   verifyRoleShopuser,
-  upload.fields([
+  uploadImages.fields([
     { name: "logo", maxCount: 1 },
     { name: "banner", maxCount: 1 },
   ]),
@@ -576,7 +580,7 @@ router.get("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, asy
   }
 });  
 
-router.post("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, upload.fields([{ name: "product", maxCount: 1 }]), async (ctx) => {
+router.post("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, uploadImages.fields([{ name: "product", maxCount: 1 }]), async (ctx) => {
   try {
     if (parseInt(ctx.request.body.shopId, 10) !== ctx.state.shopId) {
       ctx.status = 403;
@@ -600,7 +604,7 @@ router.post("/product", verifyToken, verifyRoleShopuser, verifyShopOwnership, up
   }
 });
 
-router.patch("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnership, upload.fields([{ name: "product", maxCount: 1 }]), async (ctx) => {
+router.patch("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnership, uploadImages.fields([{ name: "product", maxCount: 1 }]), async (ctx) => {
   try {
     const filter = {
       shopId : ctx.state.shopId
@@ -657,6 +661,115 @@ router.delete("/product/:id", verifyToken, verifyRoleShopuser, verifyShopOwnersh
     ctx.body = { error: error.message };
   }
 });
+
+router.post("/shop/:shopId/products/import",
+  verifyToken,
+  verifyRoleShopuser,
+  verifyShopOwnership,
+  uploadTemp.single("file"),
+  async (ctx) => {
+    try {
+      const { shopId } = ctx.params;
+
+      if (parseInt(shopId) !== ctx.state.shopId) {
+        ctx.status = 403;
+        ctx.body = { error: "Magazinul nu a fost găsit sau nu vă aparține."}
+        return;
+      }
+
+      const file = ctx.request.file;
+      if (!file || !file.buffer) {
+        ctx.status = 400;
+        ctx.body = { error: "Nu există un fișier asociat."}
+        return;
+      }
+
+      const originalName = file.originalname || "";
+      const isExcel =
+        originalName.toLowerCase().endsWith(".xls") ||
+        originalName.toLocaleLowerCase().endsWith(".xlsx");
+
+      if (!isExcel) {
+        ctx.status = 400;
+        ctx.body = { error: "Sunt acceptate doar fișiere .xls și .xlsx."}
+        return;
+      }
+
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(file.buffer);
+
+      const worksheet = workbook.getWorksheet(1);
+      if (!worksheet) {
+        ctx.status = 400;
+        ctx.body = { error: "Nu există datele produselor."};
+        return;
+      }
+
+      const productsToInsert = [];
+
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return;
+
+        const name = row.getCell(1).value?.toString().trim();
+        const priceRaw = row.getCell(2).value;
+        const description = row.getCell(3).value?.toString().trim();
+        const imagePath = row.getCell(4).value?.toString().trim();
+
+        if (!name) {
+          return;
+        }
+
+        const price = parseFloat(priceRaw);
+        if (isNaN(price) || price <= 0) {
+          return;
+        }
+
+        if (!description) {
+          return;
+        }
+        
+        const product = {
+            shopId: ctx.state.shopId,
+            name,
+            price,
+            description,
+        }
+
+        if (imagePath) {
+          product.photo = imagePath;
+        }
+
+        productsToInsert.push(product);
+      });
+
+      if (productsToInsert.length === 0) {
+        ctx.status = 400;
+        ctx.body = {
+          error: "Nu s-au găsit produse valide în fișier.",
+        };
+        return;
+      }
+
+      for (const product of productsToInsert) {
+        await productAPI.createProduct(product);
+      }
+
+      ctx.status = 200;
+      ctx.body = {
+        successCount: productsToInsert.length
+      };
+
+    }
+    catch (error) {
+      ctx.status = error.status || 500;
+      const message =
+        ctx.status === 500
+          ? "Eroare internă a serverului. Vă rugăm să încercați din nou mai târziu."
+          : error.message;
+      ctx.body = { error: message };
+    }
+  }
+)
 
 router.get("/offer", async (ctx) => {
   try {

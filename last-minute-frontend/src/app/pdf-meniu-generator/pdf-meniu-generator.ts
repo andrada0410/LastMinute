@@ -11,7 +11,7 @@ import { PdfFontService } from "../services/pdf-font.service";
   selector: "app-pdf-meniu-generator",
   standalone: true,
   template: `
-    <button type="button" class="button primary" (click)="generatePDF()">
+    <button type="button" class="menu-item" (click)="generatePDF()">
       Generare meniu
     </button>
   `

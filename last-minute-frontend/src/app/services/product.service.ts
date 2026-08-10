@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { Product } from "../product";
+import { Product, ProductsImportResponse } from "../product";
 
 @Injectable({
     providedIn: 'root',
@@ -60,5 +60,15 @@ export class ProductService {
 
     deleteProduct(id: number): Observable<void> {
         return this.http.delete<void>(`${this.url}/product/${id}`);
+    }
+
+    importProducts(shopId: number, excelFile: File) : Observable<ProductsImportResponse> {
+        const formData = new FormData();
+        formData.append("file", excelFile);
+
+        return this.http.post<ProductsImportResponse>(
+          `${this.url}/shop/${shopId}/products/import`,
+          formData,
+        );
     }
 };

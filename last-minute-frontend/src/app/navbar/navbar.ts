@@ -13,8 +13,6 @@ import { AuthService } from '../services/auth.service';
       </a>
 
       <div class="navbar-links">
-        <a routerLink="/map" routerLinkActive="active">Hartă</a>
-
        @if (authService.isLoggedIn()) {
           @switch (authService.currentUser()?.role) {
             @case ('SUPERUSER') {
@@ -25,12 +23,14 @@ import { AuthService } from '../services/auth.service';
               <a routerLink="/shop-offer" routerLinkActive="active">Oferta Zilei</a>
             }
             @default {
+              <a routerLink="/map" routerLinkActive="active">Hartă</a>
               <a routerLink="/active-orders" routerLinkActive="active">Comenzi active</a>
               <a routerLink="/order-history" routerLinkActive="active">Istoric comenzi</a>
             }
           }
           <button class="navbar-logout" type="button" (click)="onLogout()">Deconectare</button>
         } @else {
+          <a routerLink="/map" routerLinkActive="active">Hartă</a>
           <a routerLink="/login" routerLinkActive="active">Conectare</a>
           <a routerLink="/register" routerLinkActive="active">Înregistrare</a>
         }

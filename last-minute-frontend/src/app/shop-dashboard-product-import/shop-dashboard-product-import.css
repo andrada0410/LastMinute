@@ -1,0 +1,115 @@
+.form {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.form-content {
+    background: var(--bg-color);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-card);
+    padding: 0;
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.form-content h2 {
+    position: static;
+    background: transparent;
+    padding: var(--space-xl) var(--space-xl) 0;
+    margin: 0;
+}
+
+.form-content .form-card {
+    max-width: 100%;
+    padding: var(--space-m) var(--space-xl) var(--space-xl) var(--space-xl);
+    box-sizing: border-box;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-m);
+    margin-top: var(--space-s);
+}
+
+.form-actions .button {
+    width: auto;
+    white-space: nowrap;
+}
+
+.button.secondary {
+    background: var(--disabled-color);
+    color: white;
+    border: none;
+}
+
+.button.secondary:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.form-content::-webkit-scrollbar { width: 10px; }
+.form-content::-webkit-scrollbar-track { background: transparent; }
+.form-content::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+.form-content::-webkit-scrollbar-thumb:hover { background: #bbb; }
+
+.template-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.template-link:hover {
+    text-decoration: underline;
+    color: var(--primary-color-dark);
+}
+
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 0;
+}
+
+.form-card input.file-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.35rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.form-card input.file-input::file-selector-button {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-s);
+    padding: 0.3rem 0.8rem;
+    margin-right: var(--space-m);
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.form-card input.file-input::file-selector-button:hover {
+    background: var(--accent-color);
+}
+
+.form-actions .button {
+    width: auto;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}

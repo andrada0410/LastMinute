@@ -13,6 +13,7 @@
     "@koa/multer": "^4.0.0",
     "axios": "^1.18.1",
     "dotenv": "^17.4.2",
+    "exceljs": "^4.4.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-simple": "0.5.5",
     "koa": "^2.13.1",

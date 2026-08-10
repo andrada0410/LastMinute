@@ -62,7 +62,13 @@ module.exports = {
     createProduct: async (productData) => {
         await validateProduct(productData);
 
-        const photo = productData.photo && productData.photo.length > 0 ? productData.photo[0].filename : null;
+        let photo = null;
+        if (productData.photo && Array.isArray(productData.photo) && productData.photo.length > 0) {
+            photo = productData.photo[0].filename;
+        } 
+        else if (productData.photo && typeof productData.photo === 'string') {
+            photo = productData.photo;
+        }
 
         const result = await sqlRequest()
             .input("shopId", productData.shopId)

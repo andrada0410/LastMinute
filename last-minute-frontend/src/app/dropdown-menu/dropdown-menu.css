@@ -1,0 +1,74 @@
+.dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem;
+  border: 1px solid var(--primary-color);
+}
+
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  cursor: default;
+}
+
+.dropdown-content {
+  position: absolute;
+  top: calc(100% + var(--space-s));
+  right: 0;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+  min-width: 180px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+::ng-deep .dropdown-content button {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.6rem var(--space-m);
+  text-align: center; 
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  width: 100%;
+  display: block; 
+  box-sizing: border-box;
+  transition: background 0.2s, color 0.2s;
+  outline: none;
+}
+
+::ng-deep .dropdown-content button:hover {
+  background: var(--accent-color);
+  color: var(--primary-color-dark);
+}
+
+::ng-deep .dropdown-content app-pdf-meniu-generator {
+  display: contents;
+}
+
+::ng-deep .dropdown-content > :last-child,
+::ng-deep .dropdown-content > :last-child button {
+  border-bottom: none;
+}
