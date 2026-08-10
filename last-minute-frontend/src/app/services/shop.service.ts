@@ -46,6 +46,10 @@ export class ShopService {
           if (filters.categoryIds && filters.categoryIds.length > 0) {
             params = params.set('categoryId', filters.categoryIds.join(','));
           }
+
+        if (filters.maxPrice !== undefined) {
+            params = params.set('maxPrice', filters.maxPrice.toString());
+          }
         }
 
         return this.http.get<ShopsMapResponse>(`${this.url}/shops/map`, { params });

@@ -446,8 +446,10 @@ router.get('/shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
 router.get('/shops/map', async (ctx) => {
     try {
         const categoryIdStr = ctx.query.categoryId;
+        const maxPriceStr = ctx.query.maxPrice;
 
         let categoryId = undefined;
+        let maxPrice = undefined;
 
         if (categoryIdStr !== undefined && categoryIdStr !== '') {
             const rawIds = categoryIdStr.split(',');
@@ -463,8 +465,23 @@ router.get('/shops/map', async (ctx) => {
             categoryId = rawIds.map(id => parseInt(id));        
         }
 
+        if (maxPriceStr !== undefined && maxPriceStr !== '') {
+            const parsedMaxPrice = Number(maxPriceStr);
+
+            if (isNaN(parsedMaxPrice) || parsedMaxPrice < 0) {
+                ctx.status = 400;
+                ctx.body = {
+                    error: "Prețul maxim specificat este invalid."
+                };
+                return;
+            }
+
+            maxPrice = parsedMaxPrice;
+        }
+
         const filter = {
           categoryId: categoryId,
+          maxPrice: maxPrice
         }
 
         const shopMapData = await shopAPI.getShopsForMap(filter);

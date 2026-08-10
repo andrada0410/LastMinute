@@ -227,6 +227,26 @@ module.exports = {
       });
     }
 
+    if (filter && filter.maxPrice !== undefined) {
+        query += `
+            AND EXISTS (
+                SELECT 1
+                FROM offers o
+                INNER JOIN offers_products op
+                    ON op.offer_id = o.id
+                INNER JOIN products p
+                    ON p.id = op.product_id
+                WHERE o.shop_id = s.id
+                    AND o.is_deleted = 0
+                    AND p.is_deleted = 0
+                    AND CAST(o.start_date AS DATE) = CAST(GETDATE() AS DATE)
+                    AND (p.price * (100 - op.discount_percent) / 100.0) <= @maxPrice
+            )
+        `;
+
+        request.input("maxPrice", filter.maxPrice);
+    }
+
     query += ` ORDER BY s.id`;
 
     const result = await request.query(query);

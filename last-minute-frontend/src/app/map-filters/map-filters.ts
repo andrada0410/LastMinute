@@ -2,6 +2,7 @@ import { Component, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Category } from "../category";
 import { MapFilters } from "../filter";
+import { debounceTime, Subject } from "rxjs";
 
 @Component({
   selector: "app-map-filters",
@@ -28,6 +29,32 @@ import { MapFilters } from "../filter";
         </div>
       </div>
 
+      <div class="filter-section">
+        <label class="section-label">
+          Preț maxim:
+          <input
+            type="number"
+            class="price-input"
+            min="0"
+            [max]="priceUpperBound"
+            step="0.01"
+            [value]="maxPrice"
+            (input)="onManualPriceInput($event)"
+          />
+
+          <span class="price-unit">RON</span>
+        </label>
+        <input
+          type="range"
+          min="0"
+          [max]="priceUpperBound"
+          step="0.01"
+          [value]="maxPrice ?? priceUpperBound"
+          (input)="onSliderInput($event)"
+        />
+
+      </div>
+
       @if (hasActiveFilters) {
         <button class="button primary small" (click)="resetFilters()">
           Resetează filtrele
@@ -41,10 +68,21 @@ export class MapFiltersComponent {
   categories = input<Category[]>([]);
   filtersChange = output<MapFilters>();
 
+  priceUpperBound = 150;
+
   selectedCategoryIds: number[] = [];
+  maxPrice: number | null = null;
+
+  private priceSubject = new Subject<void>();
+
+  constructor() {
+    this.priceSubject
+      .pipe(debounceTime(300))
+      .subscribe(() => this.emitFilters());
+  }
 
   get hasActiveFilters(): boolean {
-    return this.selectedCategoryIds.length > 0;
+    return this.selectedCategoryIds.length > 0 || this.maxPrice !== null;
   }
 
   toggleCategory(id: number, event: Event): void {
@@ -61,15 +99,50 @@ export class MapFiltersComponent {
     this.emitFilters();
   }
 
+  onSliderInput(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    this.maxPrice = value >= this.priceUpperBound ? null : value;
+
+    this.emitFilters();
+  }
+
+  onManualPriceInput(event: Event): void {
+    const rawValue = (event.target as HTMLInputElement).value;
+
+    if (rawValue === "") {
+      this.maxPrice = null;
+      this.priceSubject.next();
+      return;
+    }
+
+    const value = Number(rawValue);
+
+    if (isNaN(value)) {
+      return;
+    }
+
+    const clamped = Math.max(0, value);
+
+    this.maxPrice = clamped >= this.priceUpperBound ? null : Math.round(clamped * 100) / 100
+
+    this.priceSubject.next();
+  }
+
   private emitFilters(): void {
     this.filtersChange.emit({
-      categoryIds: [...this.selectedCategoryIds]
+      categoryIds: [...this.selectedCategoryIds],
+      maxPrice: this.maxPrice ?? undefined
     });
   }
 
   resetFilters(): void {
     this.selectedCategoryIds = [];
+    this.maxPrice = null;
 
     this.emitFilters();
+  }
+
+  ngOnDestroy(): void {
+    this.priceSubject.complete();
   }
 }

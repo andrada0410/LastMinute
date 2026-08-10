@@ -8,26 +8,35 @@
 }
 
 .filters-overlay h3 {
-  margin-bottom: var(--space-m);
+  margin-top: 0;
+  margin-bottom: var(--space-s);
   font-size: 1.1rem;
 }
 
 .filter-section {
+  display: flex;
+  flex-direction: column;
   margin-bottom: var(--space-m);
 }
 
-.filter-section:last-child {
+.filter-section:last-of-type {
   margin-bottom: 0;
+}
+
+.filter-section input[type="range"] {
+  width: 100%;
+  display: block;
+  margin-top: 4px;
 }
 
 .section-label {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
   font-weight: 600;
-  margin-bottom: var(--space-s);
+  margin-bottom: 6px;
   color: var(--text-color);
+  gap: 6px;
 }
 
 .categories-list {
@@ -62,4 +71,29 @@ input[type="range"] {
 input[type="checkbox"] {
   width: 16px;
   height: 16px;
+}
+
+.filters-overlay button {
+  width: 100%;
+  margin-top: var(--space-m);
+}
+
+.price-input {
+    width: 70px;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-m);
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.price-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+.price-unit {
+    font-size: 0.9rem;
+    color: var(--text-muted);
 }
