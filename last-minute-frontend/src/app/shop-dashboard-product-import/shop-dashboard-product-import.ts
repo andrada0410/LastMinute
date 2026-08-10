@@ -26,10 +26,10 @@ import { Component, input, output } from "@angular/core";
 
           <hr class="section-divider" />
 
-          <label>Selectează fișierul completat (.xls, .xlsx):</label>
+          <label>Selectează fișierul completat (.xlsx):</label>
           <input
             type="file"
-            accept=".xls, .xlsx"
+            accept=".xlsx"
             (change)="onFileSelected($event)"
             class="file-input"
           />

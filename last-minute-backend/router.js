@@ -685,13 +685,11 @@ router.post("/shop/:shopId/products/import",
       }
 
       const originalName = file.originalname || "";
-      const isExcel =
-        originalName.toLowerCase().endsWith(".xls") ||
-        originalName.toLocaleLowerCase().endsWith(".xlsx");
+      const isExcel = originalName.toLocaleLowerCase().endsWith(".xlsx");
 
       if (!isExcel) {
         ctx.status = 400;
-        ctx.body = { error: "Sunt acceptate doar fișiere .xls și .xlsx."}
+        ctx.body = { error: "Sunt acceptate doar fișiere .xlsx."}
         return;
       }
 
