@@ -58,6 +58,7 @@ export class ShopService {
     updateShopCoordinates(shopId: number, lat: number, lon: number): Observable<any> {
         return this.http.patch(`${this.url}/shop/${shopId}`, { lat, lon });
     }
+    
     getShopById(id: number): Observable<Shop> {
         return this.http.get<Shop>(`${this.url}/shop/${id}`);
     }

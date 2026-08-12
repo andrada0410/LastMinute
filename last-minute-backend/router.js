@@ -157,11 +157,6 @@ const verifyShopOwnership = async (ctx, next) => {
   }
 };
 
-router.get("/Example", async (ctx, next) => {
-  ctx.response.body = await exampleAPI.get();
-  ctx.response.status = 200;
-});
-
 router.get('/Example', async (ctx, next) => {
     ctx.response.body = await exampleAPI.get();
     ctx.response.status = 200;

@@ -26,13 +26,6 @@ module.exports = {
     return result.recordset[0];
   },
 
-  getShopUsers: async (email) => {
-    const result = await sqlRequest()
-      .query(`select u.id as id, u.email as email, u.password as password 
-                    from users u
-                    inner join users `);
-  },
-
   createUser: async function (userData) {
     const existingUser = await this.getUserByEmail(userData.email);
     if (existingUser) {
