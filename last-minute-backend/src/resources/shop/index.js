@@ -207,7 +207,15 @@ module.exports = {
                     s.id,
                     s.name,
                     s.address,
-                    s.has_offers as hasOffers,
+                    CAST(
+                        CASE WHEN EXISTS (
+                            SELECT 1 
+                            FROM offers o 
+                            WHERE o.shop_id = s.id 
+                                AND o.is_deleted = 0 
+                                AND GETUTCDATE() BETWEEN o.start_date AND o.end_date
+                        ) THEN 1 ELSE 0 
+                    END AS BIT) AS hasOffers,
                     s.coordinates.Lat as lat,
                     s.coordinates.Long as lon,
                     s.logo_path as logoPath,

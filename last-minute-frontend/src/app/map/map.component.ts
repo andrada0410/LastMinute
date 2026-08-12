@@ -275,7 +275,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private createShopIcon(hasOffers: boolean): L.DivIcon {
-    const color = hasOffers ? "#e01f2f" : "#020203";
+    const color = hasOffers ? "var(--primary-color)" : "#020203";
 
     return L.divIcon({
       className: "shop-marker",
