@@ -7,6 +7,9 @@ import { ActivatedRoute } from '@angular/router';
 import { CATEGORY_TRANSLATIONS } from '../category';
 import { OfferService } from '../services/offer.service';
 import { ToastService } from '../services/toast.service';
+import { AuthService } from '../services/auth.service';
+import { CreateReservationRequest } from '../reservation';
+import { ReservationService } from '../services/reservation.service';
 
 @Component({
   selector: 'app-shop-view',
@@ -44,7 +47,10 @@ import { ToastService } from '../services/toast.service';
             @if (currentOfferInfo) {
               <app-offer-ticket
                 [offer]="currentOfferInfo"
-                [products]="currentOfferProducts">
+                [products]="currentOfferProducts"
+                [isLoggedIn]="authService.isLoggedIn()"
+                (reserve)="handleReservation($event)"
+                >
                 </app-offer-ticket>
             } @else {
               <p class="text-muted">Momentan nu există oferte disponibile pentru acest magazin.</p>
@@ -72,6 +78,8 @@ export class ShopViewComponent implements OnInit {
   private shopService = inject(ShopService);
   private offerService = inject(OfferService);
   private toastService = inject(ToastService);
+  authService = inject(AuthService);
+  private reservationService = inject(ReservationService);
   private route = inject(ActivatedRoute);
   public CATEGORY_TRANSLATIONS = CATEGORY_TRANSLATIONS;
 
@@ -142,5 +150,33 @@ export class ShopViewComponent implements OnInit {
 
   public getLogoUrl(): string {
     return this.resolveImagePath(this.shop?.logoPath, 'assets/shop-dashboard/default-logo.png');
+  }
+
+  public handleReservation(event: CreateReservationRequest) {
+    if (!this.currentOfferInfo) return;
+
+    this.reservationService
+      .createReservation(event.offerId, event.productId, event.quantity)
+      .subscribe({
+        next: (response) => {
+          const product = this.currentOfferProducts.find(
+            (p) => p.id === event.productId,
+          );
+          if (product) {
+            product.quantity -= event.quantity;
+          }
+
+          this.toastService.success(
+            "Rezervarea a fost plasată cu succes!",
+            "Succes",
+          );
+        },
+
+        error: (err) => {
+          const errorMessage =
+            err.error?.error || "A apărut o eroare la procesarea rezervării.";
+          this.toastService.error(errorMessage, "Eroare");
+        },
+      });
   }
 }

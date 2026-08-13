@@ -175,5 +175,34 @@ module.exports = {
             }
             throw err;
         }
+    },
+
+    getOfferProductDetails: async (offerId, productId) => {
+        const result = await sqlRequest()
+            .input("offerId", offerId)
+            .input("productId", productId)
+            .query(`
+                SELECT op.quantity, op.discount_percent AS discountPercent, p.price
+                FROM offers_products op
+                INNER JOIN products p ON op.product_id = p.id
+                WHERE op.offer_id = @offerId AND op.product_id = @productId
+            `);
+
+        return result.recordset[0];
+    },
+
+    updateOfferStock: async (offerId, productId, quantity) => {
+        const result = await sqlRequest()
+            .input("offerId", offerId)
+            .input("productId", productId)
+            .input("quantity", quantity)
+            .query(`
+                UPDATE offers_products
+                SET quantity = quantity - @quantity
+                OUTPUT INSERTED.quantity
+                WHERE offer_id = @offerId AND product_id = @productId
+            `);
+
+        return result.recordset[0].quantity;
     }
 }

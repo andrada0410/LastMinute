@@ -1,11 +1,13 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, inject, EventEmitter, Output } from '@angular/core';
 import { OfferInfo, OfferProduct } from '../offer';
 import { PricePipe } from '../pipes/price';
+import { ReservationModalComponent } from '../product-reservation/reservation-modal/reservation-modal.component';
+import { CreateReservationRequest } from '../reservation';
 
 @Component({
     selector: 'app-offer-ticket',
     standalone: true,
-    imports: [PricePipe],
+    imports: [PricePipe, ReservationModalComponent],
     template: `
     <div class="promo-ticket"
         [class.is-expired]="getOfferState(offer.startDate, offer.endDate) === 'expired'"
@@ -68,22 +70,40 @@ import { PricePipe } from '../pipes/price';
                     </div>
                     </div>
                 </div>
-                
+
+                @if (isLoggedIn && getOfferState(offer.startDate, offer.endDate) === 'active') {
+                    <div class="item-actions">
+                        <button type="button" class="btn-reserve" (click)="openModal(item)">Rezervă</button>
+                    </div>
+                }
                 </li>
             }
             </ul>
         </div>
 
     </div>
+
+    @if (selectedProductForReservation) {
+        <app-reservation-modal
+        [product]="selectedProductForReservation"
+        (close)="closeModal()"
+        (reserve)="handleReservation($event)">
+        </app-reservation-modal>
+    }
+
     `,
     styleUrls: ['./offer-ticket.component.css']
 })
 export class OfferTicketComponent implements OnInit, OnDestroy {
     @Input({ required: true }) offer!: OfferInfo;
     @Input({ required: true }) products!: OfferProduct[];
+    @Input() isLoggedIn: boolean = false;
+    @Output() reserve = new EventEmitter<CreateReservationRequest>();
 
     public currentTime: Date = new Date();
     private timerInterval: any;
+
+    public selectedProductForReservation: OfferProduct | null = null;
 
     ngOnInit(): void {
         this.startTimer();
@@ -156,5 +176,22 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
   public getDiscountPercent(originalPrice: number, offerPrice: number): number {
     if (!originalPrice) return 0;
     return Math.round(((originalPrice - offerPrice) / originalPrice) * 100);
+  }
+
+  public openModal(product: OfferProduct): void {
+    this.selectedProductForReservation = product;
+  }
+
+  public closeModal(): void {
+    this.selectedProductForReservation = null;
+  }
+
+  public handleReservation(event: {productId: number, quantity: number}): void {
+    this.closeModal();
+    this.reserve.emit({
+        offerId: this.offer.id,
+        productId: event.productId,
+        quantity: event.quantity
+    });
   }
 }

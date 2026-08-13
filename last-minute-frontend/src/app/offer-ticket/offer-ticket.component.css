@@ -214,10 +214,52 @@
   background: linear-gradient(135deg, var(--disabled-color), var(--text-muted));
 }
 
+
+.item-actions {
+  margin-left: var(--space-m);
+}
+
+.btn-reserve {
+  background-color: var(--primary-color);
+  color: var(--bg-color);
+  border: none;
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius-m);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(224, 101, 10, 0.2);
+}
+
+.btn-reserve:hover {
+  background-color: var(--primary-color-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(224, 101, 10, 0.3);
+}
+
+.btn-reserve:active {
+  transform: translateY(0);
+}
+
 @media (max-width: 600px) {
   .ticket-timer-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-s);
+  }
+
+  .bundle-items li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-m);
+  }
+  .item-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .btn-reserve {
+    width: 100%;
+    padding: 12px;
   }
 }

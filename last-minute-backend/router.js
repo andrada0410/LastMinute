@@ -14,6 +14,7 @@ const productAPI = require("./src/resources/product");
 const ExcelJS = require('exceljs');
 const { runInNewContext } = require("node:vm");
 const offerAPI = require("./src/resources/offer");
+const reservationAPI = require("./src/resources/reservation");
 
 const router = new Router();
 const JWT_KEY = config.databaseConfig.jwtKey;
@@ -89,6 +90,25 @@ const verifyRoleSuperuser = async (ctx, next) => {
 
   await next();
 };
+
+const verifyRoleUser = async (ctx, next) => {
+  if (ctx.method === "OPTIONS") {
+    await next();
+    return;
+  }
+
+  const role = ctx.state.user?.role;
+  if (!role || role !== "USER") {
+    ctx.status = 403;
+    ctx.body = {
+      error: "Nu aveți permisiunea de a accesa această resursă.",
+    };
+    return;
+  }
+
+  await next();
+};
+
 
 const verifyRoleShopuser = async (ctx, next) => {
   if (ctx.method === "OPTIONS") {
@@ -800,6 +820,47 @@ router.post("/offer", verifyToken, verifyRoleShopuser, verifyShopOwnership, asyn
 
     ctx.status = 201;
     ctx.body = result;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
+});
+
+router.post("/reservation", verifyToken, verifyRoleUser, async (ctx) => {
+  try {
+    const userId = ctx.state.user.id;
+    const { offerId, productId, quantity } = ctx.request.body;
+
+    if (!offerId || !productId || !quantity || quantity <= 0) {
+      ctx.throw(400, "Lipsesc parametri obligatorii.");
+    }
+
+    const offerProduct = await offerAPI.getOfferProductDetails(offerId, productId);
+
+    if (!offerProduct) {
+      ctx.throw(404, "Produsul nu a fost găsit în această ofertă.");
+    }
+
+    if (offerProduct.quantity < quantity) {
+      ctx.throw(400, "Stoc insuficient pentru cantiatea cerută.");
+    }
+
+    const unitPrice = offerProduct.price * (100 - offerProduct.discountPercent) / 100.0;
+    const totalPrice = unitPrice* quantity;
+
+    const newReservation = await reservationAPI.createReservation({
+      userId,
+      offerId,
+      productId,
+      quantity,
+      unitPrice,
+      totalPrice
+    });
+
+    const stock = await offerAPI.updateOfferStock(offerId, productId, quantity);
+
+    ctx.status = 201;
+    ctx.body = newReservation;
   } catch (error) {
     ctx.status = error.status || 500;
     ctx.body = { error: error.message };
