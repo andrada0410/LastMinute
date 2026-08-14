@@ -1,0 +1,112 @@
+:host {
+    display: block;
+}
+
+.reservation-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    background: var(--bg-color);
+    border-radius: var(--radius-l);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-m);
+}
+
+.reservation-image {
+    width: 100px;
+    height: 90px;
+    flex-shrink: 0;
+    border-radius: var(--radius-m);
+    overflow: hidden;
+}
+
+.reservation-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-m);
+    flex: 1;
+    min-width: 0;
+}
+
+.reservation-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.reservation-right {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.reservation-right p,
+.reservation-left p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.reservation-name {
+    margin: 0;
+    overflow-wrap: break-word;
+}
+
+.reservation-content p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.reservation-status {
+    display: inline-flex;
+    align-self: flex-start;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.15rem var(--space-s);
+    border-radius: var(--radius-s);
+    margin: 2px 0 4px !important;
+}
+
+.status-pending {
+    color: var(--primary-color-dark);
+    background: var(--primary-color-light);
+}
+
+.status-completed {
+    color: var(--success-color);
+    background: var(--success-bg);
+}
+
+.status-cancelled {
+    color: var(--error-color);
+    background: var(--error-bg);
+}
+
+.reservation-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.reservation-actions .button {
+    width: auto;
+    padding: 0.4rem var(--space-m);
+    font-size: 0.95rem;
+}
+
+.reservation-actions .button.danger {
+    background: var(--error-color);
+    color: white;
+}
+
+.reservation-actions .button.danger:hover:not(:disabled) {
+    opacity: 0.85;
+}

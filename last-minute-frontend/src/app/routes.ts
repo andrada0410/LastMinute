@@ -10,6 +10,7 @@ import { ShopViewComponent } from './shop-view/shop-view.component';
 import { ShopOffer } from './shop-offer/shop-offer';
 import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
+import { ShopActiveReservations } from './shop-active-reservations/shop-active-reservations';
 import { UserReservations } from './user-reservations/user-reservations';
 
 const routeConfig: Routes = [
@@ -72,6 +73,13 @@ const routeConfig: Routes = [
     path: 'shop-offer',
     component: ShopOffer,
     title: 'Oferta Zilei',
+    canActivate: [authGuard],
+    data: { roles: ['SHOPUSER'] }
+  },
+  {
+    path: 'shop-active-reservations',
+    component: ShopActiveReservations,
+    title: 'Rezervări active',
     canActivate: [authGuard],
     data: { roles: ['SHOPUSER'] }
   },

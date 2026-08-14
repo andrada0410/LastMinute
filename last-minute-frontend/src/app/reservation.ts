@@ -15,6 +15,22 @@ export interface Reservation {
     status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
     createdAt: string;
 }
+
+export interface ShopReservation {
+    id: number;
+    offerId: number;
+    productId: number;
+    productName: string;
+    productImage: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+    pickupStart: string;
+    pickupEnd: string;
+    customerName: string;
+    status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
+    createdAt: string;
+}
 export interface UserReservation extends Reservation {
     productName: string;
     productPhotoPath: string;

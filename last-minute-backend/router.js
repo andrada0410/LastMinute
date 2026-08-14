@@ -842,7 +842,7 @@ router.post("/reservation", verifyToken, verifyRoleUser, async (ctx) => {
     }
 
     if (offerProduct.quantity < quantity) {
-      ctx.throw(400, "Stoc insuficient pentru cantiatea cerută.");
+      ctx.throw(400, "Stoc insuficient pentru cantitatea cerută.");
     }
 
     const unitPrice = offerProduct.price * (100 - offerProduct.discountPercent) / 100.0;
@@ -865,6 +865,60 @@ router.post("/reservation", verifyToken, verifyRoleUser, async (ctx) => {
     ctx.status = error.status || 500;
     ctx.body = { error: error.message };
   }
+});
+
+router.get("/reservation/shop/:shopId", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
+    try {
+      const { shopId } = ctx.params;
+      const { status } = ctx.query;
+ 
+      if (parseInt(shopId, 10) !== ctx.state.shopId) {
+        ctx.status = 403;
+        ctx.body = { error: "Nu puteți accesa rezervările altui magazin." };
+        return;
+      }
+
+      const allowedStatuses = ["PENDING", "COMPLETED", "CANCELLED"];
+      const filterStatus = status && allowedStatuses.includes(status.toUpperCase())
+          ? status.toUpperCase()
+          : "PENDING";
+ 
+      const reservations = await reservationAPI.getReservationsByShop(ctx.state.shopId, filterStatus);
+ 
+      ctx.status = 200;
+      ctx.body = reservations;
+    } catch (error) {
+      ctx.status = error.status || 500;
+      ctx.body = { error: error.message };
+    }
+});
+ 
+router.patch("/reservation/:id/confirm", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
+    try {
+      const { id } = ctx.params;
+ 
+      const updated = await reservationAPI.confirmReservation(id, ctx.state.shopId);
+ 
+      ctx.status = 200;
+      ctx.body = updated;
+    } catch (error) {
+      ctx.status = error.status || 400;
+      ctx.body = { error: error.message };
+    }
+});
+ 
+router.patch("/reservation/:id/cancel", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
+    try {
+      const { id } = ctx.params;
+ 
+      const updated = await reservationAPI.cancelReservation(id, ctx.state.shopId);
+ 
+      ctx.status = 200;
+      ctx.body = updated;
+    } catch (error) {
+      ctx.status = error.status || 400;
+      ctx.body = { error: error.message };
+    }
 });
 
 router.get("/reservation/mine", verifyToken, verifyRoleUser, async (ctx) => {

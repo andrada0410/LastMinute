@@ -1,0 +1,9 @@
+.reservations-section {
+    width: 100%;
+}
+
+.reservations-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+}

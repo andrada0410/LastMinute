@@ -9,7 +9,7 @@ import { Component, input, output } from "@angular/core";
                 <p>{{ message() }}</p>
                 <div class="form-actions">
                     <button type="button" class="button canceled" (click)="cancel.emit()">Anulează</button>
-                    <button type="button" class="button primary" (click)="confirm.emit()">Confirm</button>
+                    <button type="button" class="button primary" (click)="confirm.emit()">Confirmă</button>
                 </div>
             </div>
         </div>

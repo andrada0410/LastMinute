@@ -1,0 +1,22 @@
+.reservations-page {
+    max-width: 1020px;
+    margin: 0 auto;
+}
+
+.page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--space-l);
+    gap: var(--space-m);
+    flex-wrap: wrap;
+}
+
+.reservations-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.reservations-body {
+    padding: var(--space-xl);
+}

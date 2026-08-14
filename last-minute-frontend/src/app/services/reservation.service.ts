@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
-import { ReservationsResponse } from "../reservation";
 import { Observable } from "rxjs";
+import { Reservation, ReservationsResponse, ShopReservation } from "../reservation";
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +16,20 @@ export class ReservationService {
             productId,
             quantity
         });
+    }
+
+    getShopReservations(shopId: number, status: string): Observable<ShopReservation[]> {
+        return this.http.get<ShopReservation[]>(`${this.url}/reservation/shop/${shopId}`,  {
+            params: { status }
+        });
+    }
+
+    confirmReservation(reservationId: number): Observable<Reservation> {
+        return this.http.patch<Reservation>(`${this.url}/reservation/${reservationId}/confirm`, {});
+    }
+ 
+    cancelReservation(reservationId: number): Observable<Reservation> {
+        return this.http.patch<Reservation>(`${this.url}/reservation/${reservationId}/cancel`, {});
     }
 
     getUserReservations(): Observable<ReservationsResponse> {
