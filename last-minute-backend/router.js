@@ -867,4 +867,17 @@ router.post("/reservation", verifyToken, verifyRoleUser, async (ctx) => {
   }
 });
 
+router.get("/reservation/mine", verifyToken, verifyRoleUser, async (ctx) => {
+  try {
+    const id = ctx.state.user.id;
+    const reservations = await reservationAPI.getReservationsByUser(id);
+
+    ctx.status = 200;
+    ctx.body = { entry: reservations };
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message };
+  }
+});
+
 module.exports = router;

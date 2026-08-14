@@ -54,7 +54,7 @@ import { CreateReservationRequest } from '../reservation';
             @for (item of products; track item.id) {
                 <li>
                 <div class="item-main">
-                    <img [src]="item.photoPath || 'assets/shop-dashboard/default-logo.png'" 
+                    <img [src]="item.photoPath || 'assets/shop-dashboard/default-product.png'" 
                         alt="Produs" 
                         class="item-thumb">
                     <div class="item-info">

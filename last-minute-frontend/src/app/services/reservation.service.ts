@@ -1,5 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
+import { ReservationsResponse } from "../reservation";
+import { Observable } from "rxjs";
 
 @Injectable({
   providedIn: 'root',
@@ -14,5 +16,9 @@ export class ReservationService {
             productId,
             quantity
         });
+    }
+
+    getUserReservations(): Observable<ReservationsResponse> {
+        return this.http.get<ReservationsResponse>(`${this.url}/reservation/mine`);
     }
 }

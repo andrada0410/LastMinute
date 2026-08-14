@@ -1,0 +1,47 @@
+.reservations-page {
+    max-width: 1020px;
+    margin: 0 auto;
+}
+
+.page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--space-l);
+    gap: var(--space-m);
+    flex-wrap: wrap;
+}
+
+.reservations-card {
+    padding: var(--space-l);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+.reservations-section {
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.reservations-section h2 {
+    margin: 0;
+    padding: var(--space-m) var(--space-l);
+    background: var(--primary-color);
+    color: white;
+    font-size: 1.1rem;
+}
+
+.reservations-section .title-history {
+    background: var(--primary-color-dark);
+}
+
+.reservations-list-frame {
+    border: 1px solid var(--border-color);
+    border-top: none;
+    padding: 0 var(--space-m);
+}
+
+.reservations-list-frame p.text-muted {
+    padding: var(--space-m) 0;
+}

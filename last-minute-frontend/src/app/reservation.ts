@@ -15,3 +15,14 @@ export interface Reservation {
     status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
     createdAt: string;
 }
+export interface UserReservation extends Reservation {
+    productName: string;
+    productPhotoPath: string;
+    shopName: string;
+    pickupStartTime: string;
+    pickupEndTime: string;
+}
+
+export interface ReservationsResponse {
+    entry: UserReservation[];
+}

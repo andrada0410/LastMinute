@@ -1,0 +1,110 @@
+:host {
+    display: block;
+}
+
+:host:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.reservation-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    padding: var(--space-m) 0;
+}
+
+.item-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-m);
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-card);
+    flex-shrink: 0;
+}
+
+.reservation-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.item-name {
+    font-weight: 580;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.shop-name {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.total-price {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.qty {
+    color: var(--primary-color-dark);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-right: var(--space-s);
+}
+
+.reservation-pickup {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    flex-shrink: 0;
+    min-width: 140px;
+}
+
+.pickup-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    background: rgba(128, 128, 128, 0.1);
+}
+
+.pickup-time {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.status-badge {
+    flex-shrink: 0;
+    padding: 4px var(--space-s);
+    border-radius: var(--radius-s);
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--success-bg);
+    color: var(--success-color);
+}
+
+.status-badge.status-cancelled {
+    background: var(--error-bg);
+    color: var(--error-color);
+}
+
+.reservation-item.is-history {
+    opacity: 0.55;
+    filter: grayscale(70%);
+}
+
+@media (max-width: 700px) {
+    .reservation-item {
+        flex-wrap: wrap;
+    }
+
+    .reservation-pickup {
+        align-items: flex-start;
+        min-width: 0;
+    }
+}

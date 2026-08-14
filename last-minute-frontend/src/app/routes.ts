@@ -10,6 +10,7 @@ import { ShopViewComponent } from './shop-view/shop-view.component';
 import { ShopOffer } from './shop-offer/shop-offer';
 import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
+import { UserReservations } from './user-reservations/user-reservations';
 
 const routeConfig: Routes = [
   {
@@ -73,6 +74,12 @@ const routeConfig: Routes = [
     title: 'Oferta Zilei',
     canActivate: [authGuard],
     data: { roles: ['SHOPUSER'] }
+  },
+  {
+    path: 'user-reservations',
+    component: UserReservations,
+    title: 'Rezervări',
+    data: { roles: ['USER'] }
   }
 ];
 

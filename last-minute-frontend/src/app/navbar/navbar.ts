@@ -24,8 +24,7 @@ import { AuthService } from '../services/auth.service';
             }
             @default {
               <a routerLink="/map" routerLinkActive="active">Hartă</a>
-              <a routerLink="/active-orders" routerLinkActive="active">Comenzi active</a>
-              <a routerLink="/order-history" routerLinkActive="active">Istoric comenzi</a>
+              <a routerLink="/user-reservations" routerLinkActive="active">Rezervări</a>
             }
           }
           <button class="navbar-logout" type="button" (click)="onLogout()">Deconectare</button>
