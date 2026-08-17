@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from "@angular/core";
-import { UserReservation as UserReservationModel } from "../reservation";
+import { isUserReservation, UserReservation as UserReservationModel } from "../reservation";
 import { ReservationService } from "../services/reservation.service";
 import { UserReservation } from "../user-reservation/user-reservation";
+import { AuthService } from "../services/auth.service";
 
 @Component({
     selector: "app-user-reservations",
@@ -63,31 +64,36 @@ import { UserReservation } from "../user-reservation/user-reservation";
 })
 export class UserReservations implements OnInit {
     private reservationService = inject(ReservationService);
+    private authService = inject(AuthService);
 
     reservations: UserReservationModel[] = [];
     currentReservations: UserReservationModel[] = [];
     previousReservations: UserReservationModel[] = [];
 
     ngOnInit(): void {
-        this.loadReservations();
+        const userId = this.authService.currentUser()?.id;
+
+        if (!userId) {
+            return;
+        }
+        
+        this.loadCurrentReservations(userId);
+        this.loadPreviousReservations(userId);
     }
 
-    private loadReservations(): void {
-        this.reservationService.getUserReservations().subscribe({
+    private loadCurrentReservations(userId: number ): void {
+        this.reservationService.getReservations({ userId, status: ["PENDING"] }).subscribe({
             next: (response) => {
-                this.reservations = response.entry;
-                this.splitReservations();
+                this.currentReservations = response.entry.filter(isUserReservation);
             }
         });
     }
 
-    private splitReservations(): void {
-        this.currentReservations = this.reservations.filter(
-            reservation => reservation.status === "PENDING"
-        );
-
-        this.previousReservations = this.reservations.filter(
-            reservation => reservation.status !== "PENDING"
-        );
+    private loadPreviousReservations(userId: number): void {
+        this.reservationService.getReservations({ userId, status: ["COMPLETED", "CANCELLED"] }).subscribe({
+            next: (response) => {
+                this.previousReservations = response.entry.filter(isUserReservation);
+            }
+        });
     }
 }

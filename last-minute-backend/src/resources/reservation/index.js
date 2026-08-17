@@ -76,45 +76,6 @@ module.exports = {
     return result.recordset[0];
   },
 
-  getReservationsByShop: async function (shopId, status) {
-    await expireOverdueReservations();
-    
-    const request = sqlRequest().input("shopId", shopId);
- 
-    let statusFilter = "";
-    if (status) {
-      request.input("status", status);
-      statusFilter = "AND r.status = @status";
-    }
- 
-    const result = await request.query(`
-            SELECT
-                r.id AS id,
-                r.offer_id AS offerId,
-                r.product_id AS productId,
-                p.name AS productName,
-                p.photo_path AS productImage,
-                r.quantity AS quantity,
-                r.unit_price AS unitPrice,
-                r.total_price AS totalPrice,
-                o.start_date AS pickupStart,
-                o.end_date AS pickupEnd,
-                CONCAT(per.first_name, ' ', per.last_name) AS customerName,
-                r.status AS status,
-                r.created_at AS createdAt
-            FROM reservations r
-            INNER JOIN offers o ON r.offer_id = o.id
-            INNER JOIN products p ON r.product_id = p.id
-            INNER JOIN users u ON r.user_id = u.id
-            LEFT JOIN persons per ON per.user_id = u.id
-            WHERE o.shop_id = @shopId
-            ${statusFilter}
-            ORDER BY r.created_at DESC
-            `);
- 
-    return result.recordset;
-  },
-
   confirmReservation: async function (reservationId, shopId) {
     const result = await sqlRequest()
       .input("id", reservationId)
@@ -179,10 +140,32 @@ module.exports = {
     return result.recordset[0];
   },
 
-    getReservationsByUser: async (id) => {
-        const result = await sqlRequest()
-            .input("userId", id)
-            .query(`
+getReservations: async ({ userId, shopId, status }) => {
+    if (userId === undefined && shopId === undefined) {
+        throw Object.assign(
+            new Error("Trebuie specificat userId sau shopId."),
+            { status: 400 }
+        );
+    }
+
+    await expireOverdueReservations();
+
+    const request = sqlRequest();
+
+    let statusFilter = "";
+    if (status && status.length > 0) {
+        const statusParams = status.map((s, i) => {
+            const paramName = `status${i}`;
+            request.input(paramName, s);
+            return `@${paramName}`;
+        });
+        statusFilter = `AND r.status IN (${statusParams.join(", ")})`;
+    }
+
+    const resourceType = userId !== undefined ? "UserReservation" : "ShopReservation";
+
+    const query = userId !== undefined
+        ? `
             SELECT
                 r.id,
                 r.offer_id AS offerId,
@@ -202,9 +185,41 @@ module.exports = {
             INNER JOIN offers o ON o.id = r.offer_id
             INNER JOIN shops s ON s.id = o.shop_id
             WHERE r.user_id = @userId
+            ${statusFilter}
             ORDER BY r.created_at DESC
-            `);
+        `
+        : `
+            SELECT
+                r.id AS id,
+                r.offer_id AS offerId,
+                r.product_id AS productId,
+                p.name AS productName,
+                p.photo_path AS productImage,
+                r.quantity AS quantity,
+                r.unit_price AS unitPrice,
+                r.total_price AS totalPrice,
+                o.start_date AS pickupStart,
+                o.end_date AS pickupEnd,
+                CONCAT(per.first_name, ' ', per.last_name) AS customerName,
+                r.status AS status,
+                r.created_at AS createdAt
+            FROM reservations r
+            INNER JOIN offers o ON r.offer_id = o.id
+            INNER JOIN products p ON r.product_id = p.id
+            INNER JOIN users u ON r.user_id = u.id
+            LEFT JOIN persons per ON per.user_id = u.id
+            WHERE o.shop_id = @shopId
+            ${statusFilter}
+            ORDER BY r.created_at DESC
+        `;
 
-        return result.recordset;
-    },
+    request.input(userId !== undefined ? "userId" : "shopId", userId !== undefined ? userId : shopId);
+
+    const result = await request.query(query);
+
+    return result.recordset.map(row => ({
+        resourceType,
+        ...row
+    }));
+},
 };

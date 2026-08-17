@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from "@angular/core";
-import { ShopReservation } from "../reservation";
+import { isShopReservation, ShopReservation } from "../reservation";
 import { ReservationService } from "../services/reservation.service";
 import { ShopService } from "../services/shop.service";
 import { ToastService } from "../services/toast.service";
@@ -68,9 +68,9 @@ export class ShopActiveReservations implements OnInit {
     private loadReservations(): void {
         this.shopService.getMyShop().subscribe({
             next: (shop) => {
-                this.reservationService.getShopReservations(shop.id, "PENDING").subscribe({
-                    next: (reservations) => {
-                        this.reservations = reservations;
+                this.reservationService.getReservations({ shopId: shop.id, status: ["PENDING"] }).subscribe({
+                    next: (response) => {
+                        this.reservations = response.entry.filter(isShopReservation);
                     },
                     error: () => {
                         this.toastService.error("Nu s-au putut încărca rezervările.", "Eroare");

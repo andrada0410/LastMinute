@@ -17,6 +17,7 @@ export interface Reservation {
 }
 
 export interface ShopReservation {
+    resourceType: "ShopReservation";
     id: number;
     offerId: number;
     productId: number;
@@ -31,7 +32,16 @@ export interface ShopReservation {
     status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
     createdAt: string;
 }
-export interface UserReservation extends Reservation {
+export interface UserReservation {
+    resourceType: "UserReservation";
+    id: number;
+    offerId: number;
+    productId: number;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+    status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
+    createdAt: string;
     productName: string;
     productPhotoPath: string;
     shopName: string;
@@ -39,6 +49,16 @@ export interface UserReservation extends Reservation {
     pickupEndTime: string;
 }
 
+export type ReservationEntryItem = UserReservation | ShopReservation;
+
 export interface ReservationsResponse {
-    entry: UserReservation[];
+    entry: ReservationEntryItem[];
+}
+
+export function isUserReservation(item: ReservationEntryItem): item is UserReservation {
+    return item.resourceType === "UserReservation";
+}
+
+export function isShopReservation(item: ReservationEntryItem): item is ShopReservation {
+    return item.resourceType === "ShopReservation";
 }

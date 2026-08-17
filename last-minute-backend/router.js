@@ -976,16 +976,73 @@ router.patch("/reservation/:id/cancel", verifyToken, verifyRoleShopuser, verifyS
     }
 });
 
-router.get("/reservation/mine", verifyToken, verifyRoleUser, async (ctx) => {
+router.get("/reservation", verifyToken, async (ctx) => {
   try {
-    const id = ctx.state.user.id;
-    const reservations = await reservationAPI.getReservationsByUser(id);
+    const statusStr = ctx.query.status;
+    const validStatuses = ["PENDING", "COMPLETED", "CANCELLED"];
+
+    const filter = {};
+
+    if (statusStr !== undefined && statusStr !== "") {
+      const rawStatuses = statusStr.split(",");
+
+      const isValidList = rawStatuses.every(s => validStatuses.includes(s));
+
+      if (!isValidList) {
+        ctx.status = 400;
+        ctx.body = {
+          error: "Statusurile specificate sunt invalide."
+        };
+        return;
+      }
+
+      filter.status = rawStatuses;
+    }
+
+    const { userId, shopId } = ctx.query;
+
+    const hasUserId = userId !== undefined && userId !== "";
+    const hasShopId = shopId !== undefined && shopId !== "";
+
+    if (hasUserId === hasShopId) {
+      ctx.status = 400;
+      ctx.body = {
+        error: "Trebuie specificat exact unul dintre userId sau shopId."
+      };
+      return;
+    }
+
+    if (hasUserId) {
+      if (ctx.state.user.role !== "USER") {
+        ctx.status = 403;
+        ctx.body = {
+          error: "Nu ai permisiunea de a accesa rezervarile dupa userId."
+        };
+        return;
+      }
+      filter.userId = userId;
+    } else {
+      if (ctx.state.user.role !== "SHOPUSER") {
+        ctx.status = 403;
+        ctx.body = {
+          error: "Nu ai permisiunea de a accesa rezervarile dupa shopId."
+        };
+        return;
+      }
+      filter.shopId = shopId;
+    }
+
+    const reservations = await reservationAPI.getReservations(filter);
 
     ctx.status = 200;
-    ctx.body = { entry: reservations };
+    ctx.body = {
+      entry: reservations
+    };
   } catch (error) {
     ctx.status = error.status || 500;
-    ctx.body = { error: error.message };
+    ctx.body = {
+      error: error.message
+    };
   }
 });
 
