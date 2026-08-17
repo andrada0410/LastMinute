@@ -42,7 +42,7 @@ async function expireOverdueReservations() {
         OUTPUT INSERTED.offer_id, INSERTED.product_id, INSERTED.quantity INTO @expired
         FROM reservations r
         INNER JOIN offers o ON r.offer_id = o.id
-        WHERE r.status = 'PENDING' AND o.end_date < GETDATE();
+        WHERE r.status = 'PENDING' AND o.end_date < GETUTCDATE();
  
         UPDATE op
         SET op.quantity = op.quantity + e.quantity
