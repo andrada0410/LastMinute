@@ -29,9 +29,9 @@ module.exports = {
   createUser: async function (userData) {
     const existingUser = await this.getUserByEmail(userData.email);
     if (existingUser) {
-        const error = new Error("Emailul este deja utilizat!");
-        error.status = 400;
-        throw error;
+      const error = new Error("Emailul este deja utilizat!");
+      error.status = 400;
+      throw error;
     }
 
     try {
@@ -92,4 +92,35 @@ module.exports = {
       .input("id", userId)
       .query(`DELETE FROM users WHERE id = @id`);
   },
+
+  getFavoriteShopsIds: async (userId) => {
+    const result = await sqlRequest().input("userId", userId).query(`
+        SELECT shop_id AS shopId
+        FROM favorite_shops
+        WHERE user_id = @userId
+      `);
+
+    return result.recordset.map((row) => row.shopId);
+  },
+
+  addFavoriteShop: async (userId, shopId) => {
+    await sqlRequest()
+      .input("userId", userId)
+      .input("shopId", shopId)
+      .query(`
+        INSERT INTO favorite_shops (user_id, shop_id)
+        VALUES (@userId, @shopId);
+        `);
+  },
+
+  removeFavoriteShop: async (userId, shopId) => {
+    await sqlRequest()
+      .input("userId", userId)
+      .input("shopId", shopId)
+      .query(`
+        DELETE FROM favorite_shops
+        WHERE user_id = @userId
+        AND shop_id = @shopId;
+        `)
+  }
 };

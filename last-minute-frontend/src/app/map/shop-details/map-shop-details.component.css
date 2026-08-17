@@ -71,3 +71,25 @@
 .details-container.visible.flipped {
     transform: translate(-50%, 35px);
 }
+
+.btn-favorite {
+    background: none;
+    border: none;
+    padding: 6px;
+    margin-left: auto;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 50%;
+}
+
+.btn-favorite:hover {
+    transform: scale(1.1); 
+}
+
+.heart-icon {
+    width: 32px;
+    height: 32px;
+}

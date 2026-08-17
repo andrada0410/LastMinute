@@ -8,9 +8,11 @@ import { MapFiltersComponent } from "../map-filters/map-filters";
 import { Category, CATEGORY_TRANSLATIONS } from "../category";
 import { MapFilters } from "../filter";
 import { ToastService } from "../services/toast.service";
+import { FavoritesService } from '../services/favorites.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
-  selector: 'app-map',
+  selector: "app-map",
   standalone: true,
   imports: [MapShopDetailsComponent, MapFiltersComponent],
   template: `
@@ -24,7 +26,7 @@ import { ToastService } from "../services/toast.service";
       <div class="map-frame">
         <div id="map"></div>
       </div>
-      <app-map-shop-details 
+      <app-map-shop-details
         [shop]="hoveredShop"
         [logoPath]="hoveredShopLogoPath"
         [isVisible]="areShopDetailsVisible"
@@ -32,7 +34,11 @@ import { ToastService } from "../services/toast.service";
         [left]="cardLeft"
         [isFlipped]="isFlippedDown"
         (mouseEnter)="onKeepShopDetailsVisible()"
-        (mouseLeave)="onHideShopDetails()">
+        (mouseLeave)="onHideShopDetails()"
+        [isFavorite]="isHoveredFavorite"
+        (toggleFavorite)="onToggleFavorite($event)"
+        [isLoggedIn]="authService.isLoggedIn()";
+      >
       </app-map-shop-details>
     </div>
   `,
@@ -42,14 +48,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private map!: L.Map;
   private userMarker?: L.CircleMarker;
   private accuracyCircle?: L.Circle;
-  private addressMarkers: L.Marker[] = [];
+  private addressMarkers = new Map<number, L.Marker>();
   private shopsList: ShopMapInfo[] = [];
 
   categoriesList: Category[] = [];
   currentFilters?: MapFilters;
 
   public hoveredShop?: ShopMapInfo;
-  public hoveredShopLogoPath: string = '';
+  public hoveredShopLogoPath: string = "";
   public areShopDetailsVisible: boolean = false;
   public cardTop: number = 0;
   public cardLeft: number = 0;
@@ -57,15 +63,22 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private hideShopDetailsTimeout?: ReturnType<typeof setTimeout>;
   private switchShopTimeout?: ReturnType<typeof setTimeout>;
 
+  favoriteShopsIds: number[] = [];
+
   constructor(
     private shopService: ShopService,
     private zone: NgZone,
     private router: Router,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private favoritesService: FavoritesService,
+    public authService: AuthService,
   ) {}
 
   ngOnInit(): void {
     this.loadCategories();
+    if (this.authService.isLoggedIn()) {
+      this.loadFavorites();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -151,7 +164,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: (error) => {
         console.error("Eroare la preluarea magazinelor:", error);
-        this.toastService.error('Nu am putut încărca magazinele.');
+        this.toastService.error("Nu am putut încărca magazinele.");
       },
     });
   }
@@ -165,20 +178,20 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private displayShopOnMap(shop: ShopMapInfo) {
-    const icon = this.createShopIcon(shop.hasOffers || false);
+    const isFavorite = this.favoriteShopsIds.includes(shop.id);
+    const icon = this.createShopIcon(shop.hasOffers || false, isFavorite);
 
     if (!shop.lat || !shop.lon)
       throw new Error(
         "Eroare la afisarea magazinului pe hartă: Nu a fost furnizată locația.",
       );
 
-    const marker = L.marker([shop.lat, shop.lon], {icon})
-      .addTo(this.map);
+    const marker = L.marker([shop.lat, shop.lon], { icon }).addTo(this.map);
 
-    marker.on('mouseover', (e: L.LeafletMouseEvent) => {
+    marker.on("mouseover", (e: L.LeafletMouseEvent) => {
       this.zone.run(() => {
         const wasSwitching = !!this.switchShopTimeout;
-        
+
         if (this.hideShopDetailsTimeout) {
           clearTimeout(this.hideShopDetailsTimeout);
         }
@@ -187,7 +200,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           clearTimeout(this.switchShopTimeout);
         }
 
-        if ((this.areShopDetailsVisible || wasSwitching) && this.hoveredShop && this.hoveredShop !== shop) {
+        if (
+          (this.areShopDetailsVisible || wasSwitching) &&
+          this.hoveredShop &&
+          this.hoveredShop !== shop
+        ) {
           this.areShopDetailsVisible = false;
           this.switchShopTimeout = setTimeout(() => {
             this.showNewCard(shop, e);
@@ -198,7 +215,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    marker.on('mouseout', () => {
+    marker.on("mouseout", () => {
       this.zone.run(() => {
         this.hideShopDetailsTimeout = setTimeout(() => {
           this.areShopDetailsVisible = false;
@@ -206,13 +223,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    marker.on('click', () => {
+    marker.on("click", () => {
       this.zone.run(() => {
-        this.router.navigate(['/shop', shop.id]);
+        this.router.navigate(["/shop", shop.id]);
       });
     });
-    
-    this.addressMarkers.push(marker);
+
+    this.addressMarkers.set(shop.id, marker);
   }
 
   public onKeepShopDetailsVisible(): void {
@@ -243,16 +260,15 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private resolveLogoPath(logoPath?: string): string {
     if (!logoPath) {
-      return 'assets/shop-dashboard/default-logo.png';
+      return "assets/shop-dashboard/default-logo.png";
     }
-    
+
     const isExternalLink = /^https?:\/\//i.test(logoPath);
-    
+
     return isExternalLink
       ? logoPath
       : `${this.shopService.url}/uploads/${logoPath}`;
   }
-
 
   private getSafeHorizontalPosition(targetX: number, mapWidth: number): number {
     const cardHalfWidth = 160;
@@ -274,8 +290,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     return targetY < verticalThreshold;
   }
 
-  private createShopIcon(hasOffers: boolean): L.DivIcon {
+  private createShopIcon(hasOffers: boolean, isFavorite: boolean): L.DivIcon {
     const color = hasOffers ? "var(--primary-color)" : "#020203";
+
+    const heartImg = isFavorite ? `<img class="pin-heart-icon" src="assets/white-heart.svg" alt="favorite"/> `
+      : "";
 
     return L.divIcon({
       className: "shop-marker",
@@ -288,7 +307,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         border-radius: 50% 50% 50% 0;
         transform: rotate(-45deg);
         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      "></div>
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+        ${heartImg}
+      </div>
     `,
       iconSize: [26, 26],
       iconAnchor: [13, 26],
@@ -308,8 +332,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
       error: (err) => {
         console.error("Eroare la incarcarea categoriilor", err);
-        this.toastService.error('Nu am putut încărca categoriile.')
-      }
+        this.toastService.error("Nu am putut încărca categoriile.");
+      },
     });
   }
 
@@ -319,9 +343,75 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private clearMapMarkers(): void {
-    for (const marker of this.addressMarkers) {
-      this.map.removeLayer(marker);
+    this.addressMarkers.forEach(marker => this.map.removeLayer(marker));
+    this.addressMarkers.clear();
+  }
+
+  private loadFavorites(): void {
+    this.favoritesService.getFavoriteShopsIds().subscribe({
+      next: (ids) => {
+        this.favoriteShopsIds = ids;
+
+        if (this.addressMarkers.size > 0) {
+          this.addressMarkers.forEach((marker, shopId) => this.updateMarkerIcon(shopId));
+        }
+      },
+
+      error: (error) => {
+        this.toastService.error("Nu am putut încărca magazinele favorite.");
+      },
+    });
+  }
+
+  get isHoveredFavorite(): boolean {
+    if (!this.hoveredShop) return false;
+    return this.favoriteShopsIds.includes(this.hoveredShop.id);
+  }
+
+  public onToggleFavorite(shopId: number): void {
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.error(
+        "Trebuie să fii autentificat pentru a adăuga la favorite.",
+      );
+      return;
     }
-    this.addressMarkers = [];
+
+    const isFavorite = this.favoriteShopsIds.includes(shopId);
+    if (isFavorite) {
+      this.favoritesService.removeFavorite(shopId).subscribe({
+        next: () => {
+          this.favoriteShopsIds = this.favoriteShopsIds.filter(
+            (id) => id !== shopId,
+          );
+          this.updateMarkerIcon(shopId);
+          this.toastService.success("Magazinul a fost șters din favorite.");
+        },
+
+        error: () =>
+          this.toastService.error("Nu am putut șterge magazinul din favorite."),
+      });
+    } else {
+      this.favoritesService.addFavorite(shopId).subscribe({
+        next: () => {
+          this.favoriteShopsIds = [...this.favoriteShopsIds, shopId];
+          this.updateMarkerIcon(shopId);
+          this.toastService.success("Magazinul a fost adăugat la favorite!");
+        },
+
+        error: () =>
+          this.toastService.error("Nu am putut adăuga magazinul la favorite."),
+      });
+    }
+  }
+
+  private updateMarkerIcon(shopId: number): void {
+    const marker = this.addressMarkers.get(shopId);
+    const shop = this.shopsList.find(s => s.id === shopId);
+
+    if (marker && shop) {
+      const isFavorite = this.favoriteShopsIds.includes(shopId);
+      const newIcon = this.createShopIcon(shop.hasOffers || false, isFavorite);
+      marker.setIcon(newIcon);
+    }
   }
 }

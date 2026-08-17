@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ShopMapInfo } from '../../shop';
 import { CommonModule } from '@angular/common';
+import { CATEGORY_TRANSLATIONS } from 'src/app/category';
 
 @Component({
   selector: 'app-map-shop-details',
@@ -23,6 +24,12 @@ import { CommonModule } from '@angular/common';
           <h3 class="shop-name">{{ shop.name }}</h3>
           <span class="shop-address">{{ shop.address }}</span>
         </div>
+        @if (isLoggedIn) {
+          <button type="button" class="btn-favorite" (click)=onFavoriteClick($event)>
+            <img class="heart-icon" [src]="isFavorite ? 'assets/heart-filled.svg' : 'assets/heart-empty.svg'" alt="favorite"/> 
+         </button>
+        }
+        
       </div>
     </div>
   `,
@@ -37,17 +44,13 @@ export class MapShopDetailsComponent {
   @Input() top: number = 0;
   @Input() left: number = 0;
   @Input() isFlipped: boolean = false;
+  @Input() isFavorite: boolean = false;
+  @Input() isLoggedIn: boolean = false;
 
   @Output() mouseEnter: EventEmitter<void> = new EventEmitter<void>();
   @Output() mouseLeave: EventEmitter<void> = new EventEmitter<void>();
+  @Output() toggleFavorite = new EventEmitter<number>();
 
-  CATEGORY_TRANSLATIONS: Record<string, string> = {
-    "Restaurant": "Restaurant",
-    "Fast-Food": "Fast-Food",
-    "Confectionery": "Cofetărie",
-    "Bakery": "Patiserie",
-    "Supermarket": "Supermarket"
-  };
 
   onMouseEnter() {
     this.mouseEnter.emit();
@@ -59,6 +62,14 @@ export class MapShopDetailsComponent {
 
   getTranslatedCategory(category: string): string {
     if (!category) return '';
-    return this.CATEGORY_TRANSLATIONS[category] || category;
+    return CATEGORY_TRANSLATIONS[category] || category;
+  }
+
+  onFavoriteClick(event: MouseEvent) {
+    event.stopPropagation();
+
+    if (this.shop && this.shop.id) {
+      this.toggleFavorite.emit(this.shop.id);
+    }
   }
 }
