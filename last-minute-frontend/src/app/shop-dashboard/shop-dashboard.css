@@ -191,3 +191,52 @@ textarea.field-edit:focus {
   margin: 1.5rem 0;
   opacity: 50%;
 }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content,
+.statistics-modal {
+  background: var(--bg-color);
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-l);
+  width: 100%;
+  max-width: 955px;
+  max-height: 110vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--space-m);
+  margin-bottom: var(--space-m);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.75rem;
+  color: var(--text-muted);
+  width: 36px;
+  height: 36px;
+  border-radius: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: var(--primary-color-light);
+  color: var(--primary-color-dark);
+}

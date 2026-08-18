@@ -19,6 +19,9 @@ import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-ba
 import { ShopDashboardProductImport } from "../shop-dashboard-product-import/shop-dashboard-product-import";
 import { PdfMeniuGenerator } from "../pdf-meniu-generator/pdf-meniu-generator";
 import { DropdownMenu } from "../dropdown-menu/dropdown-menu";
+import { ShopBarChart } from "../shop-bar-chart/shop-bar-chart";
+import { ShopReservationStatistics } from "../reservation";
+import { ReservationService } from "../services/reservation.service";
 
 @Component({
   selector: "shop-dashboard",
@@ -35,7 +38,8 @@ import { DropdownMenu } from "../dropdown-menu/dropdown-menu";
     PdfMeniuGenerator,
     ShopOfferForm,
     DropdownMenu,
-  ],
+    ShopBarChart
+],
   template: `
     <section class="page">
       <form
@@ -193,6 +197,14 @@ import { DropdownMenu } from "../dropdown-menu/dropdown-menu";
                     Importă Excel
                   </button>
 
+                  <button
+                    type="button"
+                    class="menu-item"
+                    (click)="openStatistics()"
+                  >
+                    Statistici produse
+                  </button>
+
                   <app-pdf-meniu-generator
                     [shopName]="name"
                     [products]="products"
@@ -244,14 +256,32 @@ import { DropdownMenu } from "../dropdown-menu/dropdown-menu";
         (upload)="uploadExcel($event)"
       />
     }
+
+    @if (showStatistics) {
+      <div class="modal-overlay" (click)="closeStatistics()">
+        <div class="modal-content statistics-modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Statistici produse</h3>
+            <button type="button" class="close-btn" (click)="closeStatistics()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <app-shop-bar-chart [data]="shopReservationStatistics" />
+          </div>
+        </div>
+      </div>
+    }
   `,
   styleUrls: ["./shop-dashboard.css"],
 })
 export class ShopDashboard implements OnInit {
   private offerService = inject(OfferService);
+  private reservationService = inject(ReservationService);
 
   showOfferForm = false;
   offerErrorMessage = signal("");
+
+  showStatistics = false;
+  shopReservationStatistics: ShopReservationStatistics[] = [];
 
   openCreateOffer(): void {
     if (!this.shopId) {
@@ -645,6 +675,29 @@ export class ShopDashboard implements OnInit {
           err.error?.error || "Eroare la procesarea fișierului.";
         this.toastService.error(errorMessage, "Eroare Import");
       },
+    });
+  }
+
+  openStatistics(): void {
+    if (!this.shopId) return;
+    this.showStatistics = true;
+    this.loadShopReservationStatistics();
+  }
+
+  closeStatistics(): void {
+    this.showStatistics = false;
+  }
+
+  loadShopReservationStatistics(): void {
+    if (!this.shopId) return;
+    this.reservationService.getShopStatistics(this.shopId).subscribe({
+      next: (data) => {
+        this.shopReservationStatistics = data;
+      },
+      error: (err) => {
+        const errorMessage = err.error?.error || "Nu am putut încărca statisticile ofertelor.";
+        this.toastService.error(errorMessage, "Eroare Statistici");
+      }
     });
   }
 

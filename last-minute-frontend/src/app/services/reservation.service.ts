@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
-import { Reservation, ReservationsResponse, ShopReservation } from "../reservation";
+import { Reservation, ReservationsResponse, ShopReservation, ShopReservationStatistics } from "../reservation";
 
 @Injectable({
   providedIn: 'root',
@@ -48,5 +48,9 @@ export class ReservationService {
         }
 
         return this.http.get<ReservationsResponse>(`${this.url}/reservation`, { params: httpParams });
+    }
+
+    getShopStatistics(shopId: number) {
+        return this.http.get<ShopReservationStatistics[]>(`${this.url}/reservation/shop/${shopId}/statistics`);
     }
 }

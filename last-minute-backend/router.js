@@ -1048,4 +1048,28 @@ router.delete("/offer/:offerId", verifyToken, verifyRoleShopuser, verifyShopOwne
   }
 });
 
+router.get("/reservation/shop/:shopId/statistics", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
+    try {
+      const { shopId } = ctx.params;
+
+      if (parseInt(shopId, 10) !== ctx.state.shopId) {
+        ctx.status = 403;
+        ctx.body = {
+          error: "Nu puteți accesa statisticile altui magazin."
+        };
+        return;
+      }
+
+      const statistics = await reservationAPI.getShopOfferStatistics(ctx.state.shopId);
+
+      ctx.status = 200;
+      ctx.body = statistics;
+
+      } catch (error) {
+        ctx.status = error.status || 500;
+        ctx.body = { error: error.message };
+      }
+    }
+);
+
 module.exports = router;

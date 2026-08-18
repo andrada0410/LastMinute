@@ -234,5 +234,48 @@ getReservations: async ({ userId, shopId, status, page, limit }) => {
         resourceType,
         ...row
     }));
-},
+    },
+
+    getShopOfferStatistics: async function (shopId) {
+    await expireOverdueReservations();
+    
+    const parsedShopId = parseInt(shopId, 10);
+    const result = await sqlRequest()
+        .input("shopId", parsedShopId)
+        .query(`
+            SELECT
+                p.id AS productId,
+                p.name AS productName,
+                listed.listedQuantity,
+                COALESCE(sold.soldQuantity, 0) AS soldQuantity
+            FROM products p
+
+            INNER JOIN (
+                SELECT
+                    op.product_id,
+                    SUM(op.quantity) AS listedQuantity
+                FROM offers_products op
+                INNER JOIN offers o ON o.id = op.offer_id
+                WHERE o.shop_id = @shopId
+                  AND o.is_deleted = 0
+                GROUP BY op.product_id
+            ) listed ON listed.product_id = p.id
+
+            LEFT JOIN (
+                SELECT
+                    r.product_id,
+                    SUM(r.quantity) AS soldQuantity
+                FROM reservations r
+                INNER JOIN offers o ON o.id = r.offer_id
+                WHERE o.shop_id = @shopId
+                  AND o.is_deleted = 0
+                  AND r.status = 'COMPLETED'
+                GROUP BY r.product_id
+            ) sold ON sold.product_id = p.id
+
+            WHERE p.is_deleted = 0
+            ORDER BY p.name;
+        `);
+        return result.recordset;
+    },
 };

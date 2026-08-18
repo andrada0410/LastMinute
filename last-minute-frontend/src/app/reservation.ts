@@ -63,3 +63,10 @@ export function isUserReservation(item: ReservationEntryItem): item is UserReser
 export function isShopReservation(item: ReservationEntryItem): item is ShopReservation {
     return item.resourceType === "ShopReservation";
 }
+
+export interface ShopReservationStatistics {
+  productId: number;
+  productName: string;
+  listedQuantity: number;
+  soldQuantity: number;
+}

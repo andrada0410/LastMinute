@@ -1,0 +1,81 @@
+.chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  width: 100%;
+  background: var(--bg-color);
+  border-radius: var(--radius-l);
+  padding: var(--space-m);
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-m);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-s);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-s);
+}
+
+.legend-color.listed {
+  background-color: var(--primary-color);
+}
+
+.legend-color.sold {
+  background-color: var(--secondary-color);
+}
+
+.chart-container {
+  width: 100%;
+  min-height: 380px;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  color: var(--text-muted);
+}
+
+::ng-deep .bar.listed {
+  fill: var(--primary-color);
+}
+
+::ng-deep .bar.sold {
+  fill: var(--secondary-color);
+}
+
+::ng-deep .bar-label {
+  font-size: 0.8rem;
+  fill: var(--text-color);
+  font-weight: 600;
+}
+
+::ng-deep .axis text {
+  font-size: 0.8rem;
+  fill: var(--text-muted);
+  font-family: inherit;
+}
+
+::ng-deep .axis--y > text {
+  fill: var(--text-muted);
+  font-size: 1rem;
+}
+
+::ng-deep .axis line,
+::ng-deep .axis path {
+  stroke: var(--border-color);
+}
