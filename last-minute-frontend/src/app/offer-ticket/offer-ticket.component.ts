@@ -54,7 +54,7 @@ import { CreateReservationRequest } from '../reservation';
             @for (item of products; track item.id) {
                 <li [class.is-out-of-stock]="item.quantity <= 0">
                 <div class="item-main">
-                    <img [src]="item.photoPath || 'assets/shop-dashboard/default-product.png'" 
+                    <img [src]="resolveImagePath(item.photoPath, 'assets/shop-dashboard/default-product.png')" 
                         alt="Produs" 
                         class="item-thumb">
                     <div class="item-info">
@@ -107,6 +107,7 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
 
     public currentTime: Date = new Date();
     private timerInterval: any;
+    private url = 'http://localhost:4001';
 
     public selectedProductForReservation: OfferProduct | null = null;
 
@@ -198,5 +199,17 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
         productId: event.productId,
         quantity: event.quantity
     });
+  }
+
+  public resolveImagePath(path?: string, fallback?: string): string {
+    if (!path) {
+      return fallback ?? '';
+    }
+    
+    const isExternalLink = /^https?:\/\//i.test(path);
+    
+    return isExternalLink
+      ? path
+      : `${this.url}/uploads/${path}`;
   }
 }

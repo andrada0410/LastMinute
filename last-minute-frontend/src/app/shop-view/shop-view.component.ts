@@ -145,7 +145,7 @@ export class ShopViewComponent implements OnInit {
   }
 
   public getBannerUrl(): string {
-    return this.resolveImagePath(this.shop?.bannerPath, 'assets/shop-dashboard/default-banner.jpg');
+    return this.resolveImagePath(this.shop?.bannerPath, 'assets/shop-dashboard/default-banner.png');
   }
 
   public getLogoUrl(): string {
