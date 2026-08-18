@@ -12,6 +12,7 @@ import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
 import { ShopActiveReservations } from './shop-active-reservations/shop-active-reservations';
 import { UserReservations } from './user-reservations/user-reservations';
+import { ShopReservationsHistory } from './shop-reservations-history/shop-reservations-history';
 
 const routeConfig: Routes = [
   {
@@ -88,6 +89,12 @@ const routeConfig: Routes = [
     component: UserReservations,
     title: 'Rezervări',
     data: { roles: ['USER'] }
+  },
+  {
+    path: 'shop-reservations-history',
+    component: ShopReservationsHistory,
+    title: 'Istoric Rezervări',
+    data: { roles: ['SHOPUSER'] }
   }
 ];
 

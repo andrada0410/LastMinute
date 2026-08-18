@@ -16,6 +16,8 @@ import { ShopReservationCard } from "../shop-reservation-card/shop-reservation-c
                         <app-shop-reservation-card
                             [reservation]="reservation"
                             [readOnly]="readOnly()"
+                            [showOrderDate]="showOrderDate()"
+                            [showPickupTime]="showPickupTime()"
                             (confirm)="confirmReservation.emit($event)"
                             (cancel)="cancelReservation.emit($event)"
                         >
@@ -32,6 +34,9 @@ export class ShopReservationList {
     reservations = input<ShopReservation[]>([]);
     readOnly = input<boolean>(false);
     emptyMessage = input<string>("Nu există rezervări.");
+
+    showOrderDate = input<boolean>(false);
+    showPickupTime = input<boolean>(true);
 
     confirmReservation = output<number>();
     cancelReservation = output<number>();

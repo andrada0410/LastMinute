@@ -921,32 +921,6 @@ router.delete("/user/favorites/:shopId", verifyToken, verifyRoleUser, async (ctx
     ctx.body = { error: error.message };
   }
 });
-
-router.get("/reservation/shop/:shopId", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
-    try {
-      const { shopId } = ctx.params;
-      const { status } = ctx.query;
- 
-      if (parseInt(shopId, 10) !== ctx.state.shopId) {
-        ctx.status = 403;
-        ctx.body = { error: "Nu puteți accesa rezervările altui magazin." };
-        return;
-      }
-
-      const allowedStatuses = ["PENDING", "COMPLETED", "CANCELLED"];
-      const filterStatus = status && allowedStatuses.includes(status.toUpperCase())
-          ? status.toUpperCase()
-          : "PENDING";
- 
-      const reservations = await reservationAPI.getReservationsByShop(ctx.state.shopId, filterStatus);
- 
-      ctx.status = 200;
-      ctx.body = reservations;
-    } catch (error) {
-      ctx.status = error.status || 500;
-      ctx.body = { error: error.message };
-    }
-});
  
 router.patch("/reservation/:id/confirm", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
     try {
@@ -999,7 +973,14 @@ router.get("/reservation", verifyToken, async (ctx) => {
       filter.status = rawStatuses;
     }
 
-    const { userId, shopId } = ctx.query;
+    const { userId, shopId, page, limit } = ctx.query;
+
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    if (!isNaN(pageNumber) && pageNumber > 0 && !isNaN(limitNumber) && limitNumber > 0) {
+      filter.page = pageNumber;
+      filter.limit = limitNumber;
+    }
 
     const hasUserId = userId !== undefined && userId !== "";
     const hasShopId = shopId !== undefined && shopId !== "";
@@ -1033,10 +1014,17 @@ router.get("/reservation", verifyToken, async (ctx) => {
     }
 
     const reservations = await reservationAPI.getReservations(filter);
+    
+    const totalRows = reservations.length > 0 ? reservations[0].totalCount : 0
+    const cleanEntries = reservations.map(r => {
+        const { totalCount, ...rest} = r;
+        return rest;
+    });
 
     ctx.status = 200;
     ctx.body = {
-      entry: reservations
+      entry: cleanEntries,
+      total: totalRows
     };
   } catch (error) {
     ctx.status = error.status || 500;

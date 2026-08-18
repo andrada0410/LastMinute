@@ -26,7 +26,7 @@ export class ReservationService {
         return this.http.patch<Reservation>(`${this.url}/reservation/${reservationId}/cancel`, {});
     }
 
-    getReservations(params: ({ userId: number } | { shopId: number }) & { status?: string[] }): Observable<ReservationsResponse> {
+    getReservations(params: ({ userId: number } | { shopId: number }) & { status?: string[], page?: number, limit?: number }): Observable<ReservationsResponse> {
         let httpParams = new HttpParams();
 
         if ("userId" in params) {
@@ -37,6 +37,14 @@ export class ReservationService {
 
         if (params.status?.length) {
             httpParams = httpParams.set("status", params.status.join(","));
+        }
+
+        if (params.page !== undefined) {
+            httpParams = httpParams.set("page", params.page.toString());
+        }
+
+        if (params.limit !== undefined) {
+            httpParams = httpParams.set("limit", params.limit.toString());
         }
 
         return this.http.get<ReservationsResponse>(`${this.url}/reservation`, { params: httpParams });

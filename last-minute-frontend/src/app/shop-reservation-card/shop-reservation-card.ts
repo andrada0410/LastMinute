@@ -3,11 +3,12 @@ import { ShopReservation } from "src/app/reservation";
 import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
 import { PricePipe } from "../pipes/price";
 import { CapitalisePipe } from "../pipes/capitalise";
+import { DatePipe } from '../pipes/date'
 
 @Component({
     selector: "app-shop-reservation-card",
     standalone: true,
-    imports: [ShopDashboardImage, PricePipe, CapitalisePipe],
+    imports: [ShopDashboardImage, PricePipe, CapitalisePipe, DatePipe],
     template: `
         <div class="reservation-card">
 
@@ -29,6 +30,10 @@ import { CapitalisePipe } from "../pipes/capitalise";
                 <p [class]="'reservation-status status-' + reservation().status.toLowerCase()">
                     {{ statusLabel() }}
                 </p>
+
+                @if (showOrderDate()) {
+                    <p class="reservation-date">Plasată în: {{ reservation().createdAt | date:'dd.MM.yyyy HH:mm' }}</p>
+                }
             </div>
 
              <div class="reservation-right">
@@ -36,7 +41,9 @@ import { CapitalisePipe } from "../pipes/capitalise";
 
                 <p>Preț: {{ reservation().totalPrice | price }}</p>
 
-                <p>Ridicare: {{ formatTime(reservation().pickupStart) }} - {{ formatTime(reservation().pickupEnd) }}</p>
+                @if (showPickupTime()) {
+                    <p>Ridicare: {{ formatTime(reservation().pickupStart) }} - {{ formatTime(reservation().pickupEnd) }}</p>
+                }
 
                 <p>Client: {{ reservation().customerName }}</p>
              </div>
@@ -69,6 +76,9 @@ import { CapitalisePipe } from "../pipes/capitalise";
 export class ShopReservationCard {
     reservation = input.required<ShopReservation>();
     readOnly = input<boolean>(false);
+
+    showOrderDate = input<boolean>(false);
+    showPickupTime = input<boolean>(true);
 
     confirm = output<number>();
     cancel = output<number>();

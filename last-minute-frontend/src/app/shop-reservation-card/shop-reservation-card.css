@@ -110,3 +110,9 @@
 .reservation-actions .button.danger:hover:not(:disabled) {
     opacity: 0.85;
 }
+
+.reservation-date {
+    font-size: 0.8rem;
+    margin-top: 4px;
+    color: var(--text-muted);
+}

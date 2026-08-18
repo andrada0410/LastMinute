@@ -140,7 +140,7 @@ module.exports = {
     return result.recordset[0];
   },
 
-getReservations: async ({ userId, shopId, status }) => {
+getReservations: async ({ userId, shopId, status, page, limit }) => {
     if (userId === undefined && shopId === undefined) {
         throw Object.assign(
             new Error("Trebuie specificat userId sau shopId."),
@@ -162,6 +162,15 @@ getReservations: async ({ userId, shopId, status }) => {
         statusFilter = `AND r.status IN (${statusParams.join(", ")})`;
     }
 
+    let paginationSql = "";
+    if (page !== undefined && limit !== undefined) {
+        const offset = (page - 1) * limit;
+        request.input("offset", offset);
+        request.input("limit", limit);
+
+        paginationSql = "OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY";
+    }
+
     const resourceType = userId !== undefined ? "UserReservation" : "ShopReservation";
 
     const query = userId !== undefined
@@ -179,7 +188,8 @@ getReservations: async ({ userId, shopId, status }) => {
                 p.photo_path AS productPhotoPath,
                 s.name AS shopName,
                 o.start_date AS pickupStartTime,
-                o.end_date AS pickupEndTime
+                o.end_date AS pickupEndTime,
+                COUNT(*) OVER() AS totalCount
             FROM reservations r
             INNER JOIN products p ON p.id = r.product_id
             INNER JOIN offers o ON o.id = r.offer_id
@@ -187,6 +197,7 @@ getReservations: async ({ userId, shopId, status }) => {
             WHERE r.user_id = @userId
             ${statusFilter}
             ORDER BY r.created_at DESC
+            ${paginationSql}
         `
         : `
             SELECT
@@ -202,7 +213,8 @@ getReservations: async ({ userId, shopId, status }) => {
                 o.end_date AS pickupEnd,
                 CONCAT(per.first_name, ' ', per.last_name) AS customerName,
                 r.status AS status,
-                r.created_at AS createdAt
+                r.created_at AS createdAt,
+                COUNT(*) OVER() AS totalCount
             FROM reservations r
             INNER JOIN offers o ON r.offer_id = o.id
             INNER JOIN products p ON r.product_id = p.id
@@ -211,6 +223,7 @@ getReservations: async ({ userId, shopId, status }) => {
             WHERE o.shop_id = @shopId
             ${statusFilter}
             ORDER BY r.created_at DESC
+            ${paginationSql}
         `;
 
     request.input(userId !== undefined ? "userId" : "shopId", userId !== undefined ? userId : shopId);

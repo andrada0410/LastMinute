@@ -53,6 +53,7 @@ export type ReservationEntryItem = UserReservation | ShopReservation;
 
 export interface ReservationsResponse {
     entry: ReservationEntryItem[];
+    total?: number;
 }
 
 export function isUserReservation(item: ReservationEntryItem): item is UserReservation {
