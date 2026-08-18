@@ -514,9 +514,10 @@ export class ShopDashboard implements OnInit {
         this.loadProducts();
         this.toastService.success("Produsul a fost șters.", "Succes");
       },
-      error: () => {
+      error: (err) => {
         this.productPendingDelete = null;
-        this.toastService.error("Ștergerea produsului a eșuat.", "Eroare");
+        const message = err.error?.error || "Ștergerea produsului a eșuat.";
+        this.toastService.error(message, "Eroare");
       },
     });
   }

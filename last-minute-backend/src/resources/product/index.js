@@ -87,6 +87,22 @@ module.exports = {
     },
 
     deleteProduct: async (id) => {
+        const checkOfferResult = await sqlRequest()
+        .input("productId", id)
+        .query(`
+            SELECT TOP 1 1 
+            FROM offers_products op
+            INNER JOIN offers o ON op.offer_id = o.id
+            WHERE op.product_id = @productId 
+              AND GETUTCDATE() BETWEEN o.start_date AND o.end_date
+        `);
+        
+        if (checkOfferResult.recordset.length > 0) {
+            const err = new Error("Produsul nu poate fi șters, deoarece este inclus într-o ofertă activă!");
+            err.status = 400;
+            throw err;
+        }
+
         const result = await sqlRequest()
             .input("id", id)
             .query(`
