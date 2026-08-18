@@ -52,7 +52,7 @@ import { CreateReservationRequest } from '../reservation';
         <div class="ticket-content">
             <ul class="bundle-items">
             @for (item of products; track item.id) {
-                <li>
+                <li [class.is-out-of-stock]="item.quantity <= 0">
                 <div class="item-main">
                     <img [src]="item.photoPath || 'assets/shop-dashboard/default-product.png'" 
                         alt="Produs" 
@@ -71,9 +71,14 @@ import { CreateReservationRequest } from '../reservation';
                     </div>
                 </div>
 
-                @if (isLoggedIn && getOfferState(offer.startDate, offer.endDate) === 'active') {
+                @if (isLoggedIn && getOfferState(offer.startDate, offer.endDate) === 'active' && item.quantity > 0) {
                     <div class="item-actions">
                         <button type="button" class="btn-reserve" (click)="openModal(item)">Rezervă</button>
+                    </div>
+                }
+                @if (item.quantity <= 0) {
+                    <div class="item-actions">
+                        <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: bold;">Stoc epuizat</span>
                     </div>
                 }
                 </li>

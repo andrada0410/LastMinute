@@ -251,6 +251,18 @@
     transform: none;
 }
 
+.bundle-items li.is-out-of-stock {
+  opacity: 0.6;
+  filter: grayscale(100%);
+  pointer-events: none;
+}
+
+.bundle-items li.is-out-of-stock .item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media (max-width: 600px) {
   .ticket-timer-header {
     flex-direction: column;
