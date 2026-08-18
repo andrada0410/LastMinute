@@ -179,6 +179,7 @@ import { ReservationService } from "../services/reservation.service";
                     (click)="openCreateProduct()"
                   >
                     Adaugă produs
+
                   </button>
 
                   <button
@@ -285,6 +286,10 @@ export class ShopDashboard implements OnInit {
 
   openCreateOffer(): void {
     if (!this.shopId) {
+      return;
+    }
+    if (this.products.length === 0) {
+      this.toastService.error("Trebuie să adaugi produse înainte să creezi o ofertă.");
       return;
     }
 

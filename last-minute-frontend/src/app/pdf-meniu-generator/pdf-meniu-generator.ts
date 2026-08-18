@@ -27,6 +27,7 @@ export class PdfMeniuGenerator {
 
   async generatePDF() {
     if (!this.products.length) {
+      this.toastService.error("Trebuie să adaugi produse înainte să poți genera un meniu.");
       return;
     }
 
