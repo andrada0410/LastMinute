@@ -204,5 +204,49 @@ module.exports = {
             `);
 
         return result.recordset[0].quantity;
+    },
+
+    deleteOffer: async (offerId, shopId) => {
+        const offerCheck = await sqlRequest()
+            .input("offerId", offerId)
+            .input("shopId", shopId)
+            .query(`
+                SELECT id FROM offers
+                WHERE id = @offerId AND shop_id = @shopId
+            `);
+
+        if (offerCheck.recordset.length === 0) {
+            const err = new Error("Oferta nu a fost găsită sau nu aparține acestui magazin.");
+            err.status = 404;
+            throw err;
+        }
+
+        const reservationsCheck = await sqlRequest()
+            .input("offerId", offerId)
+            .query(`
+                SELECT COUNT(*) as rows
+                FROM reservations
+                WHERE offer_id = @offerId
+            `);
+
+        if (reservationsCheck.recordset[0].rows > 0) {
+            const err = new Error("Oferta nu poate fi ștearsă deoarece există deja rezervări asociate.")
+            err.status = 400;
+            throw err;
+        }
+
+        await sqlRequest()
+            .input("offerId", offerId)
+            .query(`
+                DELETE FROM offers_products
+                WHERE offer_id = @offerId
+            `);
+
+        await sqlRequest()
+            .input("offerId", offerId)
+            .query(`
+                DELETE FROM offers
+                WHERE id = @offerId
+            `);
     }
 }

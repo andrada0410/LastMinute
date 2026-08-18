@@ -30,4 +30,8 @@ export class OfferService {
             products: data.products
         });
     }
+
+    deleteOffer(offerId: number): Observable<void> {
+        return this.http.delete<void>(`${this.url}/offer/${offerId}`);
+    }
 }

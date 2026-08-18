@@ -1034,4 +1034,18 @@ router.get("/reservation", verifyToken, async (ctx) => {
   }
 });
 
+router.delete("/offer/:offerId", verifyToken, verifyRoleShopuser, verifyShopOwnership, async (ctx) => {
+  try {
+    const shopId = ctx.state.shopId;
+    const offerId = ctx.params.offerId;
+
+    await offerAPI.deleteOffer(offerId, shopId);
+
+    ctx.status = 204;
+  } catch (error) {
+    ctx.status = error.status || 500;
+    ctx.body = { error: error.message } 
+  }
+});
+
 module.exports = router;

@@ -4,11 +4,12 @@ import { OfferService } from "../services/offer.service";
 import { ToastService } from "../services/toast.service";
 import { ShopOfferList } from "../shop-offer-list/shop-offer-list";
 import { ShopService } from "../services/shop.service";
+import { ConfirmDelete } from "../confirm-delete/confirm-delete";
 
 @Component({
     selector: "app-shop-offer",
     standalone: true,
-    imports: [ShopOfferList],
+    imports: [ShopOfferList, ConfirmDelete],
     template: `
         <section class="page">
             <div class="offers-page">
@@ -29,6 +30,10 @@ import { ShopService } from "../services/shop.service";
                             </p>
                         }
                     </div>
+
+                    @if (offerInfo) {
+                        <button class="button primary btn-delete" (click)="showDeleteModal = true">Șterge Oferta</button> 
+                    }
                 </div>
 
                 <div class="card offer-card">
@@ -44,6 +49,14 @@ import { ShopService } from "../services/shop.service";
 
             </div>
         </section>
+
+    @if (showDeleteModal) {
+        <app-confirm-delete
+            message="Ești sigur că vrei să ștergi această ofertă?"
+            (confirm)="onConfirmDelete()"
+            (cancel)="showDeleteModal = false">
+        </app-confirm-delete>
+    }
     `,
     styleUrls: ["./shop-offer.css"]
 })
@@ -54,6 +67,8 @@ export class ShopOffer implements OnInit {
 
     offerInfo: OfferInfo | null = null;
     products: OfferProduct[] = [];
+
+    showDeleteModal: boolean = false;
 
     ngOnInit(): void {
         this.loadOffer();
@@ -98,5 +113,23 @@ export class ShopOffer implements OnInit {
         const date = new Date(dateString);
         const pad = (n: number) => n.toString().padStart(2, "0");
         return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    onConfirmDelete() {
+        if (!this.offerInfo) return;
+
+        this.offerService.deleteOffer(this.offerInfo.id).subscribe({
+            next: () => {
+                this.toastService.success("Oferta a fost ștearsă cu succes.");
+                this.showDeleteModal = false;
+                this.loadOffer();
+            },
+
+            error: (err) => {
+                const errorMsg = err.error?.error || "Nu am putut șterge oferta.";
+                this.toastService.error(errorMsg);
+                this.showDeleteModal = false;
+            }
+        })
     }
 }
