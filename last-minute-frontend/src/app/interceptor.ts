@@ -17,7 +17,7 @@ import { ToastService } from "./services/toast.service";
 export class AuthInterceptor implements HttpInterceptor {
     private router = inject(Router);
     private toastService = inject(ToastService);
-    private excludedRoutes = ['/login', '/register', '/map']
+    private excludedRoutes = ['/login', '/register']
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         let modifiedRequest = req;

@@ -50,6 +50,10 @@ export class ShopService {
         if (filters.maxPrice !== undefined) {
             params = params.set('maxPrice', filters.maxPrice.toString());
           }
+
+        if (filters.onlyFavorites === true){
+            params = params.set('onlyFavorites', 'true');
+          }
         }
 
         return this.http.get<ShopsMapResponse>(`${this.url}/shops/map`, { params });

@@ -385,6 +385,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           );
           this.updateMarkerIcon(shopId);
           this.toastService.success("Magazinul a fost șters din favorite.");
+
+          if (this.currentFilters?.onlyFavorites) {
+            if (this.hoveredShop?.id === shopId) {
+              this.areShopDetailsVisible = false;
+            }
+            this.loadShopsFromDatabase();
+          }
         },
 
         error: () =>

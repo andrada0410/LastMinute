@@ -255,6 +255,19 @@ module.exports = {
         request.input("maxPrice", filter.maxPrice);
     }
 
+    if (filter && filter.onlyFavorites) {
+      query += `
+        AND EXISTS (
+        SELECT 1
+          FROM favorite_shops fs
+          WHERE fs.shop_id = s.id
+          AND fs.user_id = @userId
+          )
+      `;
+
+        request.input("userId", filter.userId);
+    }
+
     query += ` ORDER BY s.id`;
 
     const result = await request.query(query);

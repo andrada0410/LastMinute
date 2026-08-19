@@ -73,6 +73,26 @@ const verifyToken = async (ctx, next) => {
   }
 };
 
+const optionalVerifyToken = async (ctx, next) => {
+    const authHeader = ctx.request.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        await next();
+        return;
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decodedPayload = jwt.verify(token, JWT_KEY);
+        ctx.state.user = decodedPayload;
+    } catch (err) {
+        ctx.state.user = undefined;
+    }
+
+    await next();
+};
+
 const verifyRoleSuperuser = async (ctx, next) => {
   if (ctx.method === "OPTIONS") {
     await next();
@@ -462,13 +482,16 @@ router.get('/shop', verifyToken, verifyRoleSuperuser, async (ctx) => {
     }
 });
 
-router.get('/shops/map', async (ctx) => {
+router.get('/shops/map', optionalVerifyToken, async (ctx) => {
     try {
         const categoryIdStr = ctx.query.categoryId;
         const maxPriceStr = ctx.query.maxPrice;
+        const onlyFavoritesStr = ctx.query.onlyFavorites;
 
         let categoryId = undefined;
         let maxPrice = undefined;
+        let onlyFavorites = undefined;
+        let userId = undefined;
 
         if (categoryIdStr !== undefined && categoryIdStr !== '') {
             const rawIds = categoryIdStr.split(',');
@@ -498,9 +521,23 @@ router.get('/shops/map', async (ctx) => {
             maxPrice = parsedMaxPrice;
         }
 
+        if (onlyFavoritesStr === 'true') {
+          userId = ctx.state.user?.id;
+
+          if (!userId) {
+            ctx.status = 401;
+            ctx.body = { error: "Trebuie să fii autentificat pentru a vedea magazinele favorite." };
+            return;
+          }
+
+          onlyFavorites = true;
+        }
+
         const filter = {
           categoryId: categoryId,
-          maxPrice: maxPrice
+          maxPrice: maxPrice,
+          onlyFavorites: onlyFavorites,
+          userId: userId
         }
 
         const shopMapData = await shopAPI.getShopsForMap(filter);

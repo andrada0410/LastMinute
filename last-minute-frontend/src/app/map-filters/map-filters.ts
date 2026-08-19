@@ -1,8 +1,9 @@
-import { Component, input, output } from "@angular/core";
+import { Component, inject, input, output } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { Category } from "../category";
 import { MapFilters } from "../filter";
 import { debounceTime, Subject } from "rxjs";
+import { AuthService } from "../services/auth.service";
 
 @Component({
   selector: "app-map-filters",
@@ -11,6 +12,27 @@ import { debounceTime, Subject } from "rxjs";
   template: `
     <div class="filters-overlay card">
       <h3>Filtre</h3>
+
+      @if (authService.isLoggedIn()){
+      <div class="filter-section">
+        <div class="toggle-container">
+          <span class="section-label">Favorite:</span>
+          <label class="switch-button">
+            <input
+              type="checkbox"
+              [checked]="onlyFavorites"
+              (change)="toggleFavorites($event)"
+            />
+            <span class="switch-slider">
+              <span class="switch-label-yes">Da</span>
+              <span class="switch-label-no">Nu</span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      }
+
 
       <div class="filter-section">
         <label class="section-label">Categorii</label>
@@ -65,6 +87,8 @@ import { debounceTime, Subject } from "rxjs";
   styleUrls: ["./map-filters.css"],
 })
 export class MapFiltersComponent {
+  authService = inject(AuthService);
+
   categories = input<Category[]>([]);
   filtersChange = output<MapFilters>();
 
@@ -72,6 +96,7 @@ export class MapFiltersComponent {
 
   selectedCategoryIds: number[] = [];
   maxPrice: number | null = null;
+  onlyFavorites: boolean = false;
 
   private priceSubject = new Subject<void>();
 
@@ -82,7 +107,12 @@ export class MapFiltersComponent {
   }
 
   get hasActiveFilters(): boolean {
-    return this.selectedCategoryIds.length > 0 || this.maxPrice !== null;
+    return this.selectedCategoryIds.length > 0 || this.maxPrice !== null || this.onlyFavorites; 
+  }
+
+  toggleFavorites(event: Event): void {
+    this.onlyFavorites = (event.target as HTMLInputElement).checked;
+    this.emitFilters();
   }
 
   toggleCategory(id: number, event: Event): void {
@@ -131,13 +161,15 @@ export class MapFiltersComponent {
   private emitFilters(): void {
     this.filtersChange.emit({
       categoryIds: [...this.selectedCategoryIds],
-      maxPrice: this.maxPrice ?? undefined
+      maxPrice: this.maxPrice ?? undefined,
+      onlyFavorites: this.onlyFavorites ? true : undefined
     });
   }
 
   resetFilters(): void {
     this.selectedCategoryIds = [];
     this.maxPrice = null;
+    this.onlyFavorites = false;
 
     this.emitFilters();
   }
