@@ -10,7 +10,7 @@ import { PricePipe } from "../pipes/price";
     template: `
         <div class="reservation-item" [class.is-history]="isHistory()">
             <img
-                [src]="reservation().productPhotoPath || 'assets/shop-dashboard/default-product.png'" 
+                [src]="resolveImagePath(reservation().productPhotoPath,'assets/shop-dashboard/default-product.png')" 
                 [alt]="reservation().productName"
                 class="item-thumb"
             />
@@ -47,6 +47,7 @@ import { PricePipe } from "../pipes/price";
 export class UserReservation {
     reservation = input.required<UserReservationModel>();
     isHistory = input<boolean>(false);
+    url = 'http://localhost:4001';
 
     formatTime(dateString: string): string {
         const date = new Date(dateString);
@@ -61,4 +62,16 @@ export class UserReservation {
 
         return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${this.formatTime(dateString)}`;
     }
+
+    public resolveImagePath(path?: string, fallback?: string): string {
+    if (!path) {
+      return fallback ?? '';
+    }
+    
+    const isExternalLink = /^https?:\/\//i.test(path);
+    
+    return isExternalLink
+      ? path
+      : `${this.url}/uploads/${path}`;
+  }
 }
