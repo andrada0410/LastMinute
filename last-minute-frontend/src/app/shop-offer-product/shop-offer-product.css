@@ -10,6 +10,35 @@
     box-shadow: var(--shadow-card);
     overflow: hidden;
     height: 100%;
+    position: relative;
+}
+
+.product-card.is-disabled .product-image,
+.product-card.is-disabled .product-content {
+    opacity: 0.6;
+    filter: grayscale(100%);
+}
+
+.product-card.is-disabled {
+    background-color: var(--bg-disabled);
+    border: 1px solid var(--border-disabled);
+}
+
+.badge-disabled {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background-color: #000;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-s, 6px);
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .product-image {

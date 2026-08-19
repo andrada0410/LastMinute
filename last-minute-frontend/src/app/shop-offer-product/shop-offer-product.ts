@@ -9,7 +9,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
     standalone: true,
     imports: [ShopDashboardImage, PricePipe, CapitalisePipe],
     template: `
-        <div class="product-card">
+        <div class="product-card" [class.is-disabled]="offerProduct().isDeleted">
 
             <app-shop-dashboard-image
                 class="product-image"
@@ -55,6 +55,10 @@ import { CapitalisePipe } from "../pipes/capitalise";
                         {{ expanded() ? 'Arată mai puțin' : 'Citește mai mult' }}
 
                     </button>
+                }
+
+                @if (offerProduct().isDeleted) {
+                    <span class="badge-disabled">Indisponibil</span>
                 }
 
             </div>

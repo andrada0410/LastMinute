@@ -13,6 +13,7 @@ export interface OfferProduct extends Product {
     resourceType: "Product";
     quantity: number;
     offerPrice: number;
+    isDeleted?: boolean;
 }
 
 export type OfferEntryItem = OfferInfo | OfferProduct;

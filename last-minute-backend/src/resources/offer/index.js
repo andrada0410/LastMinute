@@ -65,12 +65,12 @@ module.exports = {
                 p.price,
                 p.description,
                 p.photo_path AS photoPath,
+                p.is_deleted AS isDeleted,
                 op.quantity,
                 (p.price * (100 - op.discount_percent) / 100.0) AS offerPrice
             FROM offers_products op
             JOIN products p ON p.id = op.product_id
             WHERE op.offer_id = @offerId
-                AND p.is_deleted = 0
             `);
 
         const entry = [
@@ -91,7 +91,8 @@ module.exports = {
                 description: product.description,
                 photoPath: product.photoPath,
                 quantity: product.quantity,
-                offerPrice: Number(product.offerPrice)
+                offerPrice: Number(product.offerPrice),
+                isDeleted: Boolean(product.isDeleted)
             }))
         ];
 
