@@ -76,7 +76,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
 
                         <div class="field-group">
                             <label>Procent reducere (toate produsele selectate):</label>
-                            <input type="number" min="0" max="100" [formControl]="bulkDiscount">
+                            <input type="number" min="5" max="100" [formControl]="bulkDiscount">
                         </div>
                     </div>
 
@@ -87,7 +87,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
                             }
 
                             @if (bulkDiscount.invalid && bulkDiscount.touched) {
-                                <p class="error message">Procentul trebuie să fie între 0 și 100.</p>
+                                <p class="error message">Procentul trebuie să fie între 5 și 100.</p>
                             }
                         </div>
                     }
@@ -134,7 +134,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
 
                                 <div class="field-inline">
                                     <label>Procent reducere:</label>
-                                    <input type="number" min="0" max="100" formControlName="discountPercent">
+                                    <input type="number" min="5" max="100" formControlName="discountPercent">
                                 </div>
                             </div>
 
@@ -142,8 +142,9 @@ import { CapitalisePipe } from "../pipes/capitalise";
                                 <p class="error message">Cantitate invalidă.</p>
                             }
                             @if (group.get('discountPercent')?.invalid && group.get('discountPercent')?.touched) {
-                                <p class="error message">Procent invalid (0-100).</p>
+                                <p class="error message">Procentul trebuie să fie între 5 și 100.</p>
                             }
+
 
                         </div>
                     } @empty {
@@ -198,7 +199,7 @@ export class ShopOfferForm implements OnInit, OnChanges {
     }, { validators: this.sameDayEndValidator() });
 
     bulkQuantity = new FormControl<number | null>(null, [Validators.min(1)]);
-    bulkDiscount = new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]);
+    bulkDiscount = new FormControl<number | null>(null, [Validators.min(5), Validators.max(100)]);
 
     get productsArray(): FormArray<FormGroup> {
         return this.offerForm.get("products") as FormArray<FormGroup>;
@@ -281,7 +282,7 @@ export class ShopOfferForm implements OnInit, OnChanges {
             includedControl.valueChanges.subscribe((included) => {
                 if (included) {
                     quantityControl.setValidators([Validators.required, Validators.min(1)]);
-                    discountControl.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+                    discountControl.setValidators([Validators.required, Validators.min(5), Validators.max(100)]);
                 } else {
                     quantityControl.clearValidators();
                     discountControl.clearValidators();

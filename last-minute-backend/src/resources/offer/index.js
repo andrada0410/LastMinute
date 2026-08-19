@@ -19,8 +19,8 @@ async function validateOffer(offerData) {
             throw new Error("Cantitatea trebuie să fie mai mare decât 0!");
         }
 
-        if (p.discountPercent === undefined || p.discountPercent < 0 || p.discountPercent > 100) {
-            throw new Error("Discount-ul trebuie să fie între 0 și 100!");
+        if (p.discountPercent === undefined || p.discountPercent < 5 || p.discountPercent > 100) {
+            throw new Error("Discount-ul trebuie să fie între 5 și 100!");
         }
     }
 }
@@ -99,6 +99,13 @@ module.exports = {
     },
 
     createOffer: async (shopId, startDate, hoursAvailable, products) => {
+        await validateOffer({
+            hoursAvailable,
+            products,
+            shopId,
+            startDate
+        });
+
         const start = new Date(startDate);
         const end = new Date(start.getTime() + hoursAvailable * 60 * 60 * 1000);
 
