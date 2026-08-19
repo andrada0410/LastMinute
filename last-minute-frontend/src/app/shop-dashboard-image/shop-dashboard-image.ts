@@ -1,4 +1,5 @@
-import { Component, output, input } from '@angular/core';
+import { Component, output, input, inject } from '@angular/core';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-shop-dashboard-image',
@@ -14,7 +15,7 @@ import { Component, output, input } from '@angular/core';
         <div class="image-edit-overlay">
           <label class="image-edit-label">
             <span>{{ label() }}</span>
-            <input type="file" accept="image/*" (change)="onFileChange($event)">
+            <input type="file" accept="image/jpeg, image/png, image/webp" (change)="onFileChange($event)">
           </label>
         </div>
       }
@@ -31,6 +32,8 @@ export class ShopDashboardImage {
 
   imageSelected = output<File>();
 
+  toastService = inject(ToastService);
+
   onImageError(event: Event) {
     (event.target as HTMLImageElement).src = this.fallbackImage();
   }
@@ -39,8 +42,25 @@ export class ShopDashboardImage {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
-    if (file) {
-      this.imageSelected.emit(file);
+    if (!file) {
+      return;
     }
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      this.toastService.error("Te rugăm să încarci doar imagini de tip JPG, PNG, WEBP.");
+      input.value = "";
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.toastService.error("Imaginea este prea mare. Dimensiunea maximă este de 5MB.");
+      input.value = "";
+      return;
+    }
+
+    this.imageSelected.emit(file);
+
   }
 }

@@ -36,7 +36,23 @@ const diskStorage = multer.diskStorage({
     );
   },
 });
-const uploadImages = multer({ storage: diskStorage });
+const uploadImages = multer({
+   limits: {
+    fileSize: 5 * 1024 * 1024,
+   },
+
+   fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"]
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      const error = new Error("Te rugăm să încarci doar imagini de tip JPG, PNG, WEBP.");
+      error.status = 400;
+      cb(error, false);
+    }
+   },
+
+   storage: diskStorage });
 
 const memoryStorage = multer.memoryStorage();
 const uploadTemp = multer({ storage: memoryStorage });
@@ -59,11 +75,9 @@ const verifyToken = async (ctx, next) => {
 
   const token = authHeader.split(" ")[1];
 
+  let decodedPayload;
   try {
-    const decodedPayload = jwt.verify(token, JWT_KEY);
-    ctx.state.user = decodedPayload;
-
-    await next();
+    decodedPayload = jwt.verify(token, JWT_KEY);
   } catch (err) {
     ctx.status = 401;
     ctx.body = {
@@ -71,6 +85,10 @@ const verifyToken = async (ctx, next) => {
     };
     return;
   }
+
+  ctx.state.user = decodedPayload;
+
+  await next();
 };
 
 const optionalVerifyToken = async (ctx, next) => {
