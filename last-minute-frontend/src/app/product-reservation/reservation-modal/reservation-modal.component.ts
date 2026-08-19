@@ -17,7 +17,7 @@ import { PricePipe } from "src/app/pipes/price";
 
                 <div class="modal-body">
                     <div class="product-preview">
-                        <img [src]="product.photoPath || 'assets/shop-dashboard/default-logo.png'" 
+                        <img [src]="resolveImagePath(product.photoPath, 'assets/shop-dashboard/default-product.png')" 
                             alt="Produs"
                             class="modal-product-img">
                         <div class="product-info">
@@ -73,6 +73,7 @@ export class ReservationModalComponent {
 
     public selectedQuantity: number = 1;
     public showDescription: boolean = false;
+    private url = 'http://localhost:4001';
 
     get finalPrice(): number {
         return this.selectedQuantity * this.product.offerPrice;
@@ -102,4 +103,16 @@ export class ReservationModalComponent {
             quantity: this.selectedQuantity
         });
     }
+
+    public resolveImagePath(path?: string, fallback?: string): string {
+    if (!path) {
+      return fallback ?? '';
+    }
+    
+    const isExternalLink = /^https?:\/\//i.test(path);
+    
+    return isExternalLink
+      ? path
+      : `${this.url}/uploads/${path}`;
+  }
 }
