@@ -61,7 +61,7 @@ import { ReservationService } from "../services/reservation.service";
                 class="button primary"
                 (click)="startEditing()"
               >
-                Editeaza profilul
+                Editează profilul
               </button>
             </div>
           }
@@ -73,14 +73,14 @@ import { ReservationService } from "../services/reservation.service";
                 class="button secondary"
                 (click)="cancelEditing()"
               >
-                Anuleaza
+                Anulează
               </button>
               <button
                 type="submit"
                 class="button primary"
-                [disabled]="shopForm.invalid || !hasChanges()"
+                [disabled]="shopForm.invalid || !hasChanges() || (details.length > 1000)"
               >
-                Salveaza modificarile
+                Salvează modificările
               </button>
             </div>
           }
@@ -619,6 +619,11 @@ export class ShopDashboard implements OnInit {
         "ID-ul magazinului nu este disponibil.",
         "Eroare",
       );
+      return;
+    }
+
+    if (this.details && this.details.length > 1000) {
+      this.toastService.error("Detaliile nu pot depăși 1000 de caractere.", "Validare");
       return;
     }
 

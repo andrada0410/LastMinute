@@ -1,4 +1,4 @@
-import { Component, input, output, effect } from "@angular/core";
+import { Component, input, output, effect, signal } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Product } from "../product";
 import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
@@ -57,7 +57,7 @@ import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image
         <div class="form-actions">
           <button type="button" class="button secondary" (click)="cancel.emit()">Anulează</button>
 
-          <button type="submit" class="button primary" [disabled]="productForm.invalid">
+          <button type="submit" class="button primary" [disabled]="productForm.invalid || !hasChanges()">
             {{ product() ? 'Salvează modificări' : 'Adaugă produs' }}
 
           </button>
@@ -95,6 +95,10 @@ export class ShopDashboardProductForm {
 
   imagePreview = "";
 
+  hasChanges = signal(true);
+
+  private initialValues = { name: "", price: 0.01, description: "" };
+
   constructor() {
 
     effect(() => {
@@ -111,6 +115,9 @@ export class ShopDashboardProductForm {
         this.imagePreview = "";
         this.selectedPhoto = null;
 
+        this.initialValues = { name: "", price: 0.01, description: "" };
+        this.hasChanges.set(true);
+
         return;
       }
 
@@ -120,11 +127,38 @@ export class ShopDashboardProductForm {
         description: product.description
       });
 
+      this.initialValues = {
+        name: product.name,
+        price: product.price,
+        description: product.description
+      };
+
       this.imagePreview = this.resolveImageUrl(product.photoPath);
       this.selectedPhoto = null;
+      this.hasChanges.set(false);
 
     });
 
+    this.productForm.valueChanges.subscribe(() => this.isChanged());
+
+  }
+
+  private isChanged(): void {
+    const currentProduct = this.product();
+
+    if (!currentProduct) {
+      this.hasChanges.set(true);
+      return;
+    }
+
+    const current = this.productForm.value;
+
+    const changed = current.name !== this.initialValues.name ||
+                    current.price !== this.initialValues.price ||
+                    current.description !== this.initialValues.description ||
+                    this.selectedPhoto !== null;
+
+    this.hasChanges.set(changed);
   }
 
   private resolveImageUrl(photoPath: string | null | undefined): string {
@@ -137,10 +171,11 @@ export class ShopDashboardProductForm {
   return isExternalLink
     ? photoPath
     : `http://localhost:4001/uploads/${photoPath}`;
-}
+  }
 
   onImageSelected(file: File) {
     this.selectedPhoto = file;
+    this.isChanged();
 
     const reader = new FileReader();
 
@@ -153,7 +188,7 @@ export class ShopDashboardProductForm {
   }
 
   submit() {
-    if (this.productForm.invalid) {
+    if (this.productForm.invalid || !this.hasChanges()) {
       return;
     }
 
