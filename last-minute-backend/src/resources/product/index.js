@@ -26,7 +26,7 @@ async function validateProduct(productData) {
     }
 
     if (productData.price !== undefined) {
-        if (productData.price < 0) {
+        if (productData.price <= 0) {
             throw new Error("Pretul trebuie sa fie pozitiv!");
         }
     }

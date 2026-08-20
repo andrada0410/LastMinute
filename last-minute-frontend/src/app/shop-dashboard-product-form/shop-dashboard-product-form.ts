@@ -37,7 +37,7 @@ import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image
         <input type="number" step="0.01" formControlName="price">
 
         @if(productForm.get('price')?.invalid && productForm.get('price')?.touched){
-          <p class="error message">Prețul nu este valid.</p>
+          <p class="error message">Prețul trebuie să fie minim 0,01.</p>
         }
 
         <label>Descriere:</label>
@@ -87,7 +87,7 @@ export class ShopDashboardProductForm {
 
   productForm = new FormGroup({
     name: new FormControl("", [Validators.required, Validators.maxLength(100)]),
-    price: new FormControl(0, [Validators.required, Validators.min(0)]),
+    price: new FormControl(0.01, [Validators.required, Validators.min(0.01)]),
     description: new FormControl("", [Validators.required, Validators.maxLength(1000)])
   });
 
@@ -104,7 +104,7 @@ export class ShopDashboardProductForm {
       if (!product) {
         this.productForm.reset({
           name: "",
-          price: 0,
+          price: 0.01,
           description: ""
         });
 
