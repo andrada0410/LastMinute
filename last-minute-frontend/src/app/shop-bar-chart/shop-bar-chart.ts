@@ -104,7 +104,32 @@ export class ShopBarChart implements OnInit, OnChanges, AfterViewInit {
       .attr('transform', `translate(0,${contentHeight})`)
       .call(d3.axisBottom(x0));
 
+    const max_length = 20;
+
     xAxis.selectAll('text')
+    .each(function() {
+        const textNode = d3.select(this);
+        const text = textNode.text();
+
+        const words = text.split(' ');
+        if (text.length > max_length && words.length > 1) {
+          const middle = Math.ceil(words.length / 2);
+          const line1 = words.slice(0, middle).join(' ');
+          const line2 = words.slice(middle).join(' ');
+
+          textNode.text('');
+
+          textNode.append('tspan')
+            .attr('x', 0)
+            .attr('dy', '0.71em')
+            .text(line1);
+
+          textNode.append('tspan')
+            .attr('x', 0)
+            .attr('dy', '1.1em')
+            .text(line2);
+        }
+      })
       .attr('transform', 'rotate(-25)')
       .style('text-anchor', 'end')
       .attr('dx', '-.8em')
