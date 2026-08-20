@@ -246,20 +246,32 @@ getReservations: async ({ userId, shopId, status, page, limit }) => {
             SELECT
                 p.id AS productId,
                 p.name AS productName,
-                listed.listedQuantity,
+                (COALESCE(listed.currentQuantity, 0) + COALESCE(reserved.validReserved, 0)) AS listedQuantity,
                 COALESCE(sold.soldQuantity, 0) AS soldQuantity
             FROM products p
 
-            INNER JOIN (
+            LEFT JOIN (
                 SELECT
                     op.product_id,
-                    SUM(op.quantity) AS listedQuantity
+                    SUM(op.quantity) AS currentQuantity
                 FROM offers_products op
                 INNER JOIN offers o ON o.id = op.offer_id
                 WHERE o.shop_id = @shopId
                   AND o.is_deleted = 0
                 GROUP BY op.product_id
             ) listed ON listed.product_id = p.id
+
+            LEFT JOIN (
+                SELECT
+                    r.product_id,
+                    SUM(r.quantity) AS validReserved
+                FROM reservations r
+                INNER JOIN offers o ON o.id = r.offer_id
+                WHERE o.shop_id = @shopId
+                  AND o.is_deleted = 0
+                  AND r.status IN ('COMPLETED', 'PENDING')
+                GROUP BY r.product_id
+            ) reserved ON reserved.product_id = p.id
 
             LEFT JOIN (
                 SELECT
@@ -274,6 +286,7 @@ getReservations: async ({ userId, shopId, status, page, limit }) => {
             ) sold ON sold.product_id = p.id
 
             WHERE p.is_deleted = 0
+                AND (listed.currentQuantity > 0 OR reserved.validReserved > 0)
             ORDER BY p.name;
         `);
         return result.recordset;
