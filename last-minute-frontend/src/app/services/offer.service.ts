@@ -34,4 +34,8 @@ export class OfferService {
     deleteOffer(offerId: number): Observable<void> {
         return this.http.delete<void>(`${this.url}/offer/${offerId}`);
     }
+
+    getMaxPriceToday(): Observable<number> { 
+        return this.http.get<number>(`${this.url}/offer/max-price`);
+    }
 }

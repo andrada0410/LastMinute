@@ -1127,4 +1127,16 @@ router.get("/reservation/shop/:shopId/statistics", verifyToken, verifyRoleShopus
     }
 );
 
+router.get("/offer/max-price", async (ctx) => {
+  try {
+    const maxPrice = await offerAPI.getMaxOfferPriceToday();
+
+    ctx.status = 200;
+    ctx.body = maxPrice;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { error: error.message };
+  }
+});
+
 module.exports = router;

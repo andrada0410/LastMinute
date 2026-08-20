@@ -276,7 +276,7 @@ module.exports = {
                 WHERE o.shop_id = s.id
                     AND o.is_deleted = 0
                     AND p.is_deleted = 0
-                    AND CAST(o.start_date AS DATE) = CAST(GETDATE() AS DATE)
+                    AND CAST(o.start_date AS DATE) = CAST(GETUTCDATE() AS DATE)
                     AND (p.price * (100 - op.discount_percent) / 100.0) <= @maxPrice
             )
         `;

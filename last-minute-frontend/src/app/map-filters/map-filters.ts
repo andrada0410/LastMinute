@@ -58,9 +58,9 @@ import { AuthService } from "../services/auth.service";
             type="number"
             class="price-input"
             min="0"
-            [max]="priceUpperBound"
+            [max]="priceUpperBound()"
             step="0.01"
-            [value]="maxPrice"
+            [value]="maxPrice ?? priceUpperBound()"
             (input)="onManualPriceInput($event)"
           />
 
@@ -69,9 +69,9 @@ import { AuthService } from "../services/auth.service";
         <input
           type="range"
           min="0"
-          [max]="priceUpperBound"
+          [max]="priceUpperBound()"
           step="0.01"
-          [value]="maxPrice ?? priceUpperBound"
+          [value]="maxPrice ?? priceUpperBound()"
           (input)="onSliderInput($event)"
         />
 
@@ -92,7 +92,7 @@ export class MapFiltersComponent {
   categories = input<Category[]>([]);
   filtersChange = output<MapFilters>();
 
-  priceUpperBound = 150;
+  priceUpperBound = input<number>(0);
 
   selectedCategoryIds: number[] = [];
   maxPrice: number | null = null;
@@ -131,7 +131,7 @@ export class MapFiltersComponent {
 
   onSliderInput(event: Event): void {
     const value = Number((event.target as HTMLInputElement).value);
-    this.maxPrice = value >= this.priceUpperBound ? null : value;
+    this.maxPrice = value >= this.priceUpperBound() ? null : value;
 
     this.emitFilters();
   }
@@ -153,7 +153,7 @@ export class MapFiltersComponent {
 
     const clamped = Math.max(0, value);
 
-    this.maxPrice = clamped >= this.priceUpperBound ? null : Math.round(clamped * 100) / 100
+    this.maxPrice = clamped >= this.priceUpperBound() ? null : Math.round(clamped * 100) / 100
 
     this.priceSubject.next();
   }

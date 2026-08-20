@@ -10,6 +10,7 @@ import { MapFilters } from "../filter";
 import { ToastService } from "../services/toast.service";
 import { FavoritesService } from '../services/favorites.service';
 import { AuthService } from '../services/auth.service';
+import { OfferService } from '../services/offer.service';
 
 @Component({
   selector: "app-map",
@@ -20,6 +21,7 @@ import { AuthService } from '../services/auth.service';
       <app-map-filters
         [categories]="categoriesList"
         (filtersChange)="onFiltersChanged($event)"
+        [priceUpperBound]="maxPrice"
       >
       </app-map-filters>
 
@@ -64,6 +66,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private switchShopTimeout?: ReturnType<typeof setTimeout>;
 
   favoriteShopsIds: number[] = [];
+  maxPrice: number = 0;
 
   constructor(
     private shopService: ShopService,
@@ -71,11 +74,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private toastService: ToastService,
     private favoritesService: FavoritesService,
+    private offerService: OfferService,
     public authService: AuthService,
   ) {}
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadMaxPrice();
     if (this.authService.isLoggedIn()) {
       this.loadFavorites();
     }
@@ -420,5 +425,17 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       const newIcon = this.createShopIcon(shop.hasOffers || false, isFavorite);
       marker.setIcon(newIcon);
     }
+  }
+
+  private loadMaxPrice() {
+    this.offerService.getMaxPriceToday().subscribe({
+      next: (res) => {
+        this.maxPrice = res > 0 ? Math.ceil(res) : 100;
+      },
+
+      error: () => {
+        this.maxPrice = 100;
+      }
+    })
   }
 }

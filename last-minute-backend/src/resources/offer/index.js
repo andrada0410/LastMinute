@@ -256,5 +256,21 @@ module.exports = {
                 DELETE FROM offers
                 WHERE id = @offerId
             `);
+    },
+
+    getMaxOfferPriceToday: async () => {
+        const query = `
+            SELECT COALESCE(MAX(p.price * (100 - op.discount_percent) / 100.0), 0) AS maxPrice
+            FROM offers o
+            INNER JOIN offers_products op ON op.offer_id = o.id
+            INNER JOIN products p ON p.id = op.product_id
+            WHERE o.is_deleted = 0 
+            AND p.is_deleted = 0
+            AND CAST(o.start_date AS DATE) = CAST(GETUTCDATE() AS DATE)
+        `;
+
+        const request = sqlRequest();
+        const result = await request.query(query);
+        return result.recordset[0].maxPrice;
     }
 }
