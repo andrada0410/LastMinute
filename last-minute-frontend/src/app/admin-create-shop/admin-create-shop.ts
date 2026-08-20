@@ -14,28 +14,44 @@ import { CreateShopRequest } from "../shop";
             <input id="name" type="text" formControlName="name"/>
 
             @if(shopForm.get('name')?.hasError('required') && shopForm.get('name')?.touched) {
-                <p class="error-text">Numele este obligatoriu.</p>
+                <p class="message error">Numele este obligatoriu.</p>
             }
+
+            @if(shopForm.get('name')?.hasError('maxlength') && shopForm.get('name')?.touched) {
+                <p class="message error">Numele nu poate avea mai mult de 100 de caractere.</p>
+            }    
 
             <label for="email">Email: </label>
             <input id="email" type="text" formControlName="email"/>
 
             @if(shopForm.get('email')?.hasError('email') && shopForm.get('email')?.touched) {
-                <p class="error-text">Adresa de email introdusă nu este validă.</p>
+                <p class="message error">Adresa de email introdusă nu este validă.</p>
+            }
+
+            @else if(shopForm.get('email')?.hasError('maxlength') && shopForm.get('email')?.touched) {
+                <p class="message error">Emailul nu poate avea mai mult de 50 de caractere.</p>
             }
 
             <label for="password">Parolă: </label>
             <input id="password" type="password" formControlName="password"/>
 
             @if(shopForm.get('password')?.hasError('minlength') && shopForm.get('password')?.touched) {
-                <p class="error-text">Parola trebuie să conțină cel puțin 6 caractere.</p>
+                <p class="message error">Parola trebuie să conțină cel puțin 6 caractere.</p>
+            }
+
+            @if(shopForm.get('password')?.hasError('required') && shopForm.get('password')?.touched) {
+                <p class="message error">Parola este obligatorie.</p>
+            }
+
+            @if(shopForm.get('password')?.hasError('maxlength') && shopForm.get('password')?.touched) {
+                <p class="message error">Parola nu poate avea mai mult de 50 de caractere.</p>
             }
 
             <label for="confirm-password">Confirmare parolă: </label>
             <input id="confirm-password" type="password" formControlName="confirmPassword"/>
 
             @if(shopForm.hasError('passwordsDontMatch') && shopForm.get('confirmPassword')?.touched) {
-                <p class="error-text">Parolele sunt diferite!</p>
+                <p class="message error">Parolele sunt diferite!</p>
             }
 
             <label for="address">Adresă: </label>
@@ -44,7 +60,10 @@ import { CreateShopRequest } from "../shop";
             </textarea>
             
             @if(shopForm.get('address')?.hasError('required') && shopForm.get('address')?.touched) {
-                <p class="error-text">Adresa este obligatorie.</p>
+                <p class="message error">Adresa este obligatorie.</p>
+            }
+            @if(shopForm.get('address')?.hasError('maxlength') && shopForm.get('address')?.touched) {
+                <p class="message error">Adresa nu poate avea mai mult de 255 de caractere.</p>
             }
 
             <button type="submit" class="primary" [disabled]="shopForm.invalid">Creare magazin</button>
@@ -77,11 +96,11 @@ export class AdminCreateShop {
     }
 
     shopForm = new FormGroup({
-        name: new FormControl('', Validators.required),
-        email: new FormControl('', [Validators.required, Validators.email]),
-        password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+        name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
+        email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(50)]),
+        password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(50)]),
         confirmPassword: new FormControl('', Validators.required),
-        address: new FormControl('', Validators.required)
+        address: new FormControl('', [Validators.required, Validators.maxLength(255)])
     }, {
         validators: this.passwordValidator
     });

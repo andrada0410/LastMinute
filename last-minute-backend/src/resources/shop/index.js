@@ -2,14 +2,41 @@ const { sqlRequest } = require("../../db");
 const fs = require("fs/promises");
 const path = require("node:path");
 const config = require("../../../config.json");
+const { error } = require("node:console");
 
 async function validateShop(shopData) {
   if (!shopData.address || shopData.address.length === 0) {
     throw new Error("Trebuie sa introduceti o adresa valida!");
+    error.status = 400;
+    return;
+  }
+
+  if (shopData.address.length > 255) {
+    throw new Error(`Adresa nu poate avea mai mult de 255 de caractere.`);
+    error.status = 400;
+    return;
   }
 
   if (!shopData.name || shopData.name.length === 0) {
     throw new Error("Trebuie sa introduceti un nume valid!");
+    error.status = 400;
+    return;
+  }
+
+  if (shopData.name.length > 100) {
+    throw new Error(`Numele nu poate avea mai mult de 100 de caractere.`);
+    error.status = 400;
+    return;
+  }
+}
+
+async function validateShopDescription(shopData){
+  if (shopData.details !== undefined && shopData.details.length > 1000) {
+    const error = new Error(
+      "Detaliile nu pot avea mai mult de 1000 de caractere."
+    );
+    error.status = 400;
+    throw error;
   }
 }
 
@@ -75,6 +102,8 @@ module.exports = {
   },
 
   updateShop: async (id, shopData) => {
+    await validateShopDescription(shopData);
+
     if (shopData.name !== undefined || shopData.address !== undefined) {
       await validateShop({
         name: shopData.name,

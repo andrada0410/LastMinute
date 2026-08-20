@@ -147,16 +147,13 @@ import { ReservationService } from "../services/reservation.service";
                   name="details"
                   [(ngModel)]="details"
                   #detailsField="ngModel"
-                  maxlength="1000"
                   placeholder="Descrie magazinul..."
                 ></textarea>
 
-                @if (detailsField.invalid && detailsField.touched) {
-                  @if (detailsField.errors?.["maxlength"]) {
-                    <p class="error-text">
-                      Detaliile nu pot avea mai mult de 1000 de caractere.
-                    </p>
-                  }
+                @if (details && details.length > 1000) {
+                  <p class="message error">
+                    Detaliile nu pot avea mai mult de 1000 de caractere.
+                  </p>
                 }
               }
             </div>

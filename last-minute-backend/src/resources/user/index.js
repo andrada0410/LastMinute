@@ -1,5 +1,31 @@
 const { sqlRequest } = require("../../db");
 
+async function validateUserData(userData) {
+  if (!userData.email || userData.email.length === 0) {
+    const error = new Error("Trebuie sa introduceti un email valid!");
+    error.status = 400;
+    throw error;
+  }
+
+  if (userData.email.length > 50) {
+    const error = new Error(`Emailul nu poate avea mai mult de 50 de caractere.`);
+    error.status = 400;
+    throw error;
+  }
+
+  if (!userData.password || userData.password.length < 6) {
+    const error = new Error("Parola trebuie sa contina cel putin 6 caractere.");
+    error.status = 400;
+    throw error;
+  }
+
+  if (userData.password.length > 50) {
+    const error = new Error(`Parola nu poate avea mai mult de 50 de caractere.`);
+    error.status = 400;
+    throw error;
+  }
+}
+
 module.exports = {
   getUsers: async () => {
     const result = await sqlRequest().query(
@@ -27,6 +53,8 @@ module.exports = {
   },
 
   createUser: async function (userData) {
+    await validateUserData(userData);
+
     const existingUser = await this.getUserByEmail(userData.email);
     if (existingUser) {
       const error = new Error("Emailul este deja utilizat!");

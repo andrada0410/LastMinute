@@ -28,6 +28,12 @@ async function validateUser (userData) {
         throw error;
     }
 
+    if (userData.email.length > 50) {
+        const error = new Error(`Emailul nu poate avea mai mult de 50 de caractere.`);
+        error.status = 400;
+        throw error;
+    }
+
     if (!userData.firstName || userData.firstName.length === 0 
         || !userData.lastName || userData.lastName.length === 0) {
         
@@ -36,8 +42,32 @@ async function validateUser (userData) {
         throw error;
     }
 
+    if (userData.firstName.length > 50) {
+        const error = new Error(`Prenumele nu poate avea mai mult de 50 de caractere.`);
+        error.status = 400;
+        throw error;
+    }
+
+    if (userData.lastName.length > 50) {
+        const error = new Error(`Numele nu poate avea mai mult de 50 de caractere.`);
+        error.status = 400;
+        throw error;
+    }
+
     if (!userData.password ||  userData.password.length === 0) {
         const error = new Error("Trebuie să introduceți o parolă validă!");
+        error.status = 400;
+        throw error;
+    }
+
+    if (userData.password.length > 50) {
+        const error = new Error(`Parola nu poate avea mai mult de 50 de caractere.`);
+        error.status = 400;
+        throw error;
+    }
+
+    if (userData.password.length < 6) {
+        const error = new Error("Parola trebuie să conțină cel puțin 6 caractere.");
         error.status = 400;
         throw error;
     }

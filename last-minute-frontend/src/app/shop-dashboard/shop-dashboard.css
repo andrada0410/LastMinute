@@ -240,3 +240,8 @@ textarea.field-edit:focus {
   background: var(--primary-color-light);
   color: var(--primary-color-dark);
 }
+
+.field-group .message.error {
+    margin-top: 0.7rem;
+    display: block;
+}

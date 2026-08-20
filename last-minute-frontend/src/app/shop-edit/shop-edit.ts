@@ -16,14 +16,20 @@ import { ShopInfo } from "../shop";
                     <input id="edit-name" type="text" formControlName="name"/>
 
                     @if(editForm.get('name')?.hasError('required') && editForm.get('name')?.touched) {
-                        <p class="error-text">Numele este obligatoriu.</p>
+                        <p class="message error">Numele este obligatoriu.</p>
+                    }
+                    @else if(editForm.get('name')?.hasError('maxlength') && editForm.get('name')?.touched) {
+                        <p class="message error">Numele nu poate avea mai mult de 100 de caractere.</p>
                     }
 
                     <label for="edit-address">Adresă: </label>
                     <textarea id="edit-address" formControlName="address" rows="2"></textarea>
 
                     @if(editForm.get('address')?.hasError('required') && editForm.get('address')?.touched) {
-                        <p class="error-text">Adresa este obligatorie.</p>
+                        <p class="message error">Adresa este obligatorie.</p>
+                    }
+                    @else if(editForm.get('address')?.hasError('maxlength') && editForm.get('address')?.touched) {
+                        <p class="message error">Adresa nu poate avea mai mult de 255 de caractere.</p>
                     }
 
                     <div class="form-actions">
@@ -43,8 +49,8 @@ export class ShopEdit implements OnChanges {
     @Output() cancel = new EventEmitter<void>();
 
     editForm = new FormGroup({
-        name: new FormControl('', Validators.required),
-        address: new FormControl('', Validators.required)
+        name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
+        address: new FormControl('', [Validators.required, Validators.maxLength(255)])
     });
 
     ngOnChanges(changes: SimpleChanges) {

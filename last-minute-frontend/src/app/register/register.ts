@@ -14,9 +14,24 @@ import { ToastService } from "../services/toast.service";
 
                 <label for="first-name">Prenume: </label>
                 <input id="first-name" type="text" formControlName="firstName"/>
+
+                @if(registerForm.get('firstName')?.hasError('required') && registerForm.get('firstName')?.touched) {
+                    <p class="message error">Prenumele este obligatoriu.</p>
+                }
+                @if(registerForm.get('firstName')?.hasError('maxlength') && registerForm.get('firstName')?.touched) {
+                    <p class="message error">Prenumele nu poate avea mai mult de 50 de caractere.</p>
+                }
             
                 <label for="last-name">Nume: </label>
                 <input id="last-name" type="text" formControlName="lastName"/>
+
+                @if(registerForm.get('lastName')?.hasError('required') && registerForm.get('lastName')?.touched) {
+                    <p class="message error">Numele este obligatoriu.</p>
+                }
+
+                @if(registerForm.get('lastName')?.hasError('maxlength') && registerForm.get('lastName')?.touched) {
+                    <p class="message error">Numele nu poate avea mai mult de 50 de caractere.</p>
+                }
 
                 <label for="email">Email: </label>
                 <input id="email" type="text" formControlName="email"/>
@@ -25,11 +40,23 @@ import { ToastService } from "../services/toast.service";
                     <p class="message error">Adresa de email introdusă nu este validă.</p>
                 }
 
+                @else if(registerForm.get('email')?.hasError('maxlength') && registerForm.get('email')?.touched) {
+                    <p class="message error">Emailul nu poate avea mai mult de 50 de caractere.</p>
+                }
+
                 <label for="password">Parolă: </label>
                 <input id="password" type="password" formControlName="password"/>
 
+                @if(registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+                    <p class="message error">Parola este obligatorie.</p>
+                }
+
                 @if(registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
                     <p class="message error">Parola trebuie să conțină cel puțin 6 caractere.</p>
+                }
+
+                @if(registerForm.get('password')?.hasError('maxlength') && registerForm.get('password')?.touched) {
+                    <p class="message error">Parola nu poate avea mai mult de 50 de caractere.</p>
                 }
 
                 <label for="confirm-password">Confirmare parolă: </label>
@@ -63,10 +90,10 @@ export class Register {
     }
 
     registerForm = new FormGroup({
-        firstName: new FormControl('', Validators.required),
-        lastName: new FormControl('', Validators.required),
-        email: new FormControl('', [Validators.required, Validators.email]),
-        password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+        firstName: new FormControl('', [Validators.required, Validators.maxLength(50)]),
+        lastName: new FormControl('', [Validators.required, Validators.maxLength(50)]),
+        email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(50)]),
+        password: new FormControl('', [Validators.required, Validators.minLength(6), Validators.maxLength(50)]),
         confirmPassword: new FormControl('', Validators.required)
     }, {
         validators: this.passwordValidator
