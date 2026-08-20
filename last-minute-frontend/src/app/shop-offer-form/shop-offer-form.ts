@@ -71,7 +71,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
                     <div class="bulk-fields">
                         <div class="field-group">
                             <label>Cantitate (toate produsele selectate):</label>
-                            <input type="number" min="1" [formControl]="bulkQuantity">
+                            <input type="number" min="1" step="1" [formControl]="bulkQuantity">
                         </div>
 
                         <div class="field-group">
@@ -83,7 +83,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
                     @if ((bulkQuantity.invalid && bulkQuantity.touched) || (bulkDiscount.invalid && bulkDiscount.touched)) {
                         <div class="bulk-errors">
                             @if (bulkQuantity.invalid && bulkQuantity.touched) {
-                                <p class="error message">Cantitatea trebuie să fie cel puțin 1.</p>
+                                <p class="error message">Cantitatea trebuie să fie un număr întreg mai mare ca 0.</p>
                             }
 
                             @if (bulkDiscount.invalid && bulkDiscount.touched) {
@@ -129,7 +129,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
                             <div class="product-row-fields">
                                 <div class="field-inline">
                                     <label>Cantitate:</label>
-                                    <input type="number" min="1" formControlName="quantity">
+                                    <input type="number" min="1" step="1" formControlName="quantity">
                                 </div>
 
                                 <div class="field-inline">
@@ -139,7 +139,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
                             </div>
 
                             @if (group.get('quantity')?.invalid && group.get('quantity')?.touched) {
-                                <p class="error message">Cantitate invalidă.</p>
+                                <p class="error message">Cantitatea trebuie să fie un număr întreg mai mare ca 0.</p>
                             }
                             @if (group.get('discountPercent')?.invalid && group.get('discountPercent')?.touched) {
                                 <p class="error message">Procentul trebuie să fie între 5 și 100.</p>
@@ -198,7 +198,10 @@ export class ShopOfferForm implements OnInit, OnChanges {
         products: new FormArray<FormGroup>([])
     }, { validators: this.sameDayEndValidator() });
 
-    bulkQuantity = new FormControl<number | null>(null, [Validators.min(1)]);
+    bulkQuantity = new FormControl<number | null>(null, [
+        Validators.min(1),
+        Validators.pattern('^[0-9]+$')
+    ]);
     bulkDiscount = new FormControl<number | null>(null, [Validators.min(5), Validators.max(100)]);
 
     get productsArray(): FormArray<FormGroup> {
@@ -281,7 +284,7 @@ export class ShopOfferForm implements OnInit, OnChanges {
 
             includedControl.valueChanges.subscribe((included) => {
                 if (included) {
-                    quantityControl.setValidators([Validators.required, Validators.min(1)]);
+                    quantityControl.setValidators([Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')]);
                     discountControl.setValidators([Validators.required, Validators.min(5), Validators.max(100)]);
                 } else {
                     quantityControl.clearValidators();
