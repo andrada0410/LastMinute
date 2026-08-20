@@ -48,7 +48,8 @@ module.exports = {
         `select s.id, s.name, s.address, s.user_id, s.logo_path as logoPath, s.banner_path as bannerPath, s.details, c.id AS categoryId, c.name AS categoryName
          from shops s
          left join categories c on c.id = s.category_id
-         where s.id = @id`,
+         where s.id = @id
+         and s.is_deleted = 0`,
       );
     return result.recordset[0];
   },
@@ -58,7 +59,8 @@ module.exports = {
       .query(`select s.id, s.name, s.address, s.user_id, s.logo_path as logoPath, s.banner_path as bannerPath, s.details, c.id AS categoryId, c.name AS categoryName
              from shops s
              left join categories c on c.id = s.category_id
-             where s.user_id=@user_id`);
+             where s.user_id=@user_id
+             and s.is_deleted = 0`);
     return result.recordset[0];
   },
 
@@ -219,14 +221,6 @@ module.exports = {
       err.status = 404;
       throw err;
     }
-
-    return result.recordset[0];
-  },
-
-  getShopByUserId: async (userId) => {
-    const result = await sqlRequest()
-      .input("userId", userId)
-      .query(`SELECT id, is_deleted FROM shops WHERE user_id = @userId`);
 
     return result.recordset[0];
   },

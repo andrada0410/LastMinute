@@ -1,6 +1,6 @@
 const { getUserByEmail, createUser, deleteUserById} = require("../user/index")
 const {associatePersonToUser} = require("../person/index")
-const { getShopByUserId } = require("../shop/index")
+const { getShopByUser } = require("../shop/index")
 const config = require('../../../config.json');
 const jwt = require('jsonwebtoken');
 const userAPI = require("../user/index");
@@ -145,7 +145,7 @@ module.exports = {
         }
 
         if (user.role === 'SHOPUSER') {
-            const shop = await getShopByUserId(user.id);
+            const shop = await getShopByUser(user.id);
 
             if (!shop || shop.is_deleted) {
                 const error = new Error("Contul dumneavoastră nu mai este activ.");

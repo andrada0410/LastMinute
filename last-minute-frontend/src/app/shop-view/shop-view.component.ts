@@ -3,7 +3,7 @@ import { ShopService } from '../services/shop.service';
 import { Shop } from '../shop';
 import { isOfferInfo, isOfferProduct, OfferInfo, OfferProduct } from '../offer';
 import { OfferTicketComponent } from '../offer-ticket/offer-ticket.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CATEGORY_TRANSLATIONS } from '../category';
 import { OfferService } from '../services/offer.service';
 import { ToastService } from '../services/toast.service';
@@ -88,6 +88,8 @@ export class ShopViewComponent implements OnInit {
   public currentOfferProducts: OfferProduct[] = [];
   public errorMessage: string = '';
 
+  private router = inject(Router);
+
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
 
@@ -103,7 +105,10 @@ export class ShopViewComponent implements OnInit {
   private loadShopDetails(id: number): void {
     this.shopService.getShopById(id).subscribe({
       next: (data) => this.shop = data,
-      error: () => this.errorMessage = 'Nu am putut încărca detaliile magazinului.'
+      error: () => {
+        this.toastService.error("Magazinul accesat este blocat.");
+        this.router.navigate(["/map"]);
+      }
     });
   }
 
