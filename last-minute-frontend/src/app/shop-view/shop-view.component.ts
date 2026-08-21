@@ -106,7 +106,7 @@ export class ShopViewComponent implements OnInit {
     this.shopService.getShopById(id).subscribe({
       next: (data) => this.shop = data,
       error: () => {
-        this.toastService.error("Magazinul accesat este blocat.");
+        this.toastService.error("Magazinul accesat este indisponibil.");
         this.router.navigate(["/map"]);
       }
     });
