@@ -101,6 +101,10 @@
   border-bottom: 1px solid var(--border-color);
 }
 
+.bundle-items li.is-interactive {
+  cursor: pointer;
+}
+
 .bundle-items li:last-child {
   border-bottom: none;
   padding-bottom: 0;

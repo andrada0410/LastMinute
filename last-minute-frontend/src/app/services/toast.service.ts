@@ -14,6 +14,10 @@ export class ToastService {
     this.show('error', message, title);
   }
 
+  info(message: string, title: string = 'Informație'): void {
+    this.show('info', message, title);
+  }
+
   remove(id: number): void {
     this.toasts.update(list => list.filter(t => t.id !== id));
   }

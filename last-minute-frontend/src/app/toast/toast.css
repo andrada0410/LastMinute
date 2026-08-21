@@ -34,6 +34,11 @@
   color: var(--error-color);
 }
 
+.toast.info {
+  background-color: color-mix(in srgb, #fff3cd 95%, transparent);
+  color: #856404;
+}
+
 .toast-content {
   display: flex;
   flex-direction: column;

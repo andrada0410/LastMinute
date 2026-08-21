@@ -10,7 +10,7 @@ import { ToastService } from '../services/toast.service';
   template: `
     <div class="toast-container">
       @for (toast of toastService.toasts(); track toast.id) {
-        <div class="toast" [class.success]="toast.type === 'success'" [class.error]="toast.type === 'error'">
+        <div class="toast" [class.success]="toast.type === 'success'" [class.error]="toast.type === 'error'" [class.info]="toast.type === 'info'">
           <div class="toast-content">
             <strong>{{ toast.title }}</strong>
             <span>{{ toast.message }}</span>

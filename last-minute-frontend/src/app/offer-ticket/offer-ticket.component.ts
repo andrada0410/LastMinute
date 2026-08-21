@@ -52,7 +52,7 @@ import { CreateReservationRequest } from '../reservation';
         <div class="ticket-content">
             <ul class="bundle-items">
             @for (item of products; track item.id) {
-                <li [class.is-out-of-stock]="item.quantity <= 0">
+                <li [class.is-out-of-stock]="item.quantity <= 0" [class.is-interactive]="!isLoggedIn" (click)="onProductClick()">
                 <div class="item-main">
                     <img [src]="resolveImagePath(item.photoPath, 'assets/shop-dashboard/default-product.png')" 
                         alt="Produs" 
@@ -104,6 +104,7 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
     @Input({ required: true }) products!: OfferProduct[];
     @Input() isLoggedIn: boolean = false;
     @Output() reserve = new EventEmitter<CreateReservationRequest>();
+    @Output() productClick = new EventEmitter<OfferProduct>();
 
     public currentTime: Date = new Date();
     private timerInterval: any;
@@ -211,5 +212,9 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
     return isExternalLink
       ? path
       : `${this.url}/uploads/${path}`;
+  }
+
+  public onProductClick(): void {
+    this.productClick.emit();
   }
 }

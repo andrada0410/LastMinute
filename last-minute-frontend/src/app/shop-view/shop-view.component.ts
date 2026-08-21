@@ -50,6 +50,7 @@ import { ReservationService } from '../services/reservation.service';
                 [products]="currentOfferProducts"
                 [isLoggedIn]="authService.isLoggedIn()"
                 (reserve)="handleReservation($event)"
+                (productClick)="handleProductClick()"
                 >
                 </app-offer-ticket>
             } @else {
@@ -183,5 +184,13 @@ export class ShopViewComponent implements OnInit {
           this.toastService.error(errorMessage, "Eroare");
         },
       });
+  }
+
+  public handleProductClick(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.toastService.info(
+        "Trebuie să fii autentificat pentru a putea rezerva produse din ofertă.",
+      );
+    }
   }
 }
