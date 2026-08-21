@@ -54,7 +54,7 @@ import { CreateReservationRequest } from '../reservation';
             @for (item of products; track item.id) {
                 <li [class.is-out-of-stock]="item.quantity <= 0" [class.is-interactive]="!isLoggedIn" (click)="onProductClick()">
                 <div class="item-main">
-                    <img [src]="resolveImagePath(item.photoPath, 'assets/shop-dashboard/default-product.png')" 
+                    <img [src]="resolveImagePath(item.photoPath, 'assets/shop-dashboard/default-product.png')"
                         alt="Produs" 
                         class="item-thumb">
                     <div class="item-info">

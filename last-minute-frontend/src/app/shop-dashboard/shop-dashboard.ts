@@ -22,6 +22,7 @@ import { DropdownMenu } from "../dropdown-menu/dropdown-menu";
 import { ShopBarChart } from "../shop-bar-chart/shop-bar-chart";
 import { ShopReservationStatistics } from "../reservation";
 import { ReservationService } from "../services/reservation.service";
+import { ImageCropperModal } from '../image-cropper/image-cropper'
 
 @Component({
   selector: "shop-dashboard",
@@ -38,7 +39,8 @@ import { ReservationService } from "../services/reservation.service";
     PdfMeniuGenerator,
     ShopOfferForm,
     DropdownMenu,
-    ShopBarChart
+    ShopBarChart,
+    ImageCropperModal
 ],
   template: `
     <section class="page">
@@ -273,6 +275,17 @@ import { ReservationService } from "../services/reservation.service";
         </div>
       </div>
     }
+
+    @if (showCropperModal) {
+      <app-image-cropper-modal
+        [imageFile]="fileToCrop"
+        [aspectRatio]="cropperAspectRatio"
+        [modalTitle]="cropperTitle"
+        [recommendation]="cropperRecommendation"
+        (cropped)="onImageCropped($event)"
+        (closed)="closeCropper()"
+      ></app-image-cropper-modal>
+    }
   `,
   styleUrls: ["./shop-dashboard.css"],
 })
@@ -285,6 +298,13 @@ export class ShopDashboard implements OnInit {
 
   showStatistics = false;
   shopReservationStatistics: ShopReservationStatistics[] = [];
+
+  showCropperModal = false;
+  fileToCrop: File | null = null;
+  cropperType: "banner" | "logo" | null = null;
+  cropperAspectRatio: number = 1;
+  cropperTitle: string = '';
+  cropperRecommendation: string = '';
 
   openCreateOffer(): void {
     if (!this.shopId) {
@@ -603,21 +623,46 @@ export class ShopDashboard implements OnInit {
   }
 
   onImagePicked(file: File, type: "banner" | "logo"): void {
+    this.fileToCrop = file;
+    this.cropperType = type;
+
     if (type === "banner") {
-      this.bannerFile = file;
+      this.cropperAspectRatio = 2.5 / 1;
+      this.cropperTitle = 'Setează Banner-ul Magazinului';
+      this.cropperRecommendation = 'Pentru claritate maximă, încarcă o imagine de cel puțin 1200 x 480 pixeli (aspect 2.5 : 1).';
     } else {
-      this.logoFile = file;
+      this.cropperAspectRatio = 1 / 1;
+      this.cropperTitle = 'Setează Logo-ul Magazinului';
+      this.cropperRecommendation = 'Logo-ul va fi afișat în format pătrat (1 : 1). Recomandăm o rezoluție de cel puțin 400 x 400 pixeli.';
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (type === "banner") {
-        this.bannerUrl = reader.result as string;
-      } else {
-        this.logoUrl = reader.result as string;
-      }
-    };
-    reader.readAsDataURL(file);
+    this.showCropperModal = true;
+  }
+
+  onImageCropped(blob: Blob): void {
+    if (!this.fileToCrop || !this.cropperType) return;
+
+    const croppedFile = new File([blob], this.fileToCrop.name, {
+      type: 'image/jpeg'
+    });
+
+    const previewUrl = URL.createObjectURL(blob);
+
+    if (this.cropperType === "banner") {
+      this.bannerFile = croppedFile;
+      this.bannerUrl = previewUrl;
+    } else {
+      this.logoFile = croppedFile;
+      this.logoUrl = previewUrl;
+    }
+
+    this.closeCropper();
+  }
+
+  closeCropper(): void {
+    this.showCropperModal = false;
+    this.fileToCrop = null;
+    this.cropperType = null;
   }
 
   onSubmit(): void {

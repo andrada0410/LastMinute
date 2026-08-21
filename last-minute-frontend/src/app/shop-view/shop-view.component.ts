@@ -19,7 +19,7 @@ import { ReservationService } from '../services/reservation.service';
       @if (shop) {
         <div class="shop-view-page">
         <div class="shop-hero">
-            <img [src]="getBannerUrl()" class="banner-img" alt="Banner">
+            <img [src]="getBannerUrl()" alt="Banner" class="banner-img" >
             <div class="logo-container">
             <img [src]="getLogoUrl()" class="logo-img" alt="Logo">
             </div>

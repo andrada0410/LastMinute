@@ -9,7 +9,7 @@
 .shop-hero {
   position: relative;
   width: 100%;
-  height: 40vh;
+  aspect-ratio: 2.5 / 1;
   background-color: var(--accent-color);
 }
 
@@ -123,10 +123,6 @@
 }
 
 @media (max-width: 600px) {
-  .shop-hero {
-    height: 180px;
-  }
-
   .logo-container {
     left: var(--space-m);
     width: 80px;
