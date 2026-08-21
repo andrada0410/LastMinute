@@ -234,9 +234,12 @@ module.exports = {
                         CASE WHEN EXISTS (
                             SELECT 1 
                             FROM offers o 
+                            INNER JOIN offers_products op ON op.offer_id = o.id
                             WHERE o.shop_id = s.id 
                                 AND o.is_deleted = 0 
                                 AND GETUTCDATE() BETWEEN o.start_date AND o.end_date
+                            GROUP BY o.id
+                            HAVING SUM(op.quantity) > 0
                         ) THEN 1 ELSE 0 
                     END AS BIT) AS hasOffers,
                     s.coordinates.Lat as lat,
