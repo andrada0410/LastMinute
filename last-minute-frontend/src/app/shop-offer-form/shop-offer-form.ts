@@ -76,7 +76,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
 
                         <div class="field-group">
                             <label>Procent reducere (toate produsele selectate):</label>
-                            <input type="number" min="5" max="100" [formControl]="bulkDiscount">
+                            <input type="number" min="5" max="100" step="1" [formControl]="bulkDiscount">
                         </div>
                     </div>
 
@@ -87,7 +87,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
                             }
 
                             @if (bulkDiscount.invalid && bulkDiscount.touched) {
-                                <p class="error message">Procentul trebuie să fie între 5 și 100.</p>
+                                <p class="error message">Procentul trebuie să fie un număr întreg între 5 și 100.</p>
                             }
                         </div>
                     }
@@ -142,7 +142,7 @@ import { CapitalisePipe } from "../pipes/capitalise";
                                 <p class="error message">Cantitatea trebuie să fie un număr întreg mai mare ca 0.</p>
                             }
                             @if (group.get('discountPercent')?.invalid && group.get('discountPercent')?.touched) {
-                                <p class="error message">Procentul trebuie să fie între 5 și 100.</p>
+                                <p class="error message">Procentul trebuie să fie un număr întreg între 5 și 100.</p>
                             }
 
 
@@ -202,7 +202,10 @@ export class ShopOfferForm implements OnInit, OnChanges {
         Validators.min(1),
         Validators.pattern('^[0-9]+$')
     ]);
-    bulkDiscount = new FormControl<number | null>(null, [Validators.min(5), Validators.max(100)]);
+    bulkDiscount = new FormControl<number | null>(null, [
+        Validators.min(5), Validators.max(100),
+        Validators.pattern('^[0-9]+$')
+    ]);
 
     get productsArray(): FormArray<FormGroup> {
         return this.offerForm.get("products") as FormArray<FormGroup>;
@@ -285,7 +288,7 @@ export class ShopOfferForm implements OnInit, OnChanges {
             includedControl.valueChanges.subscribe((included) => {
                 if (included) {
                     quantityControl.setValidators([Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')]);
-                    discountControl.setValidators([Validators.required, Validators.min(5), Validators.max(100)]);
+                    discountControl.setValidators([Validators.required, Validators.min(5), Validators.max(100), Validators.pattern('^[0-9]+$')]);
                 } else {
                     quantityControl.clearValidators();
                     discountControl.clearValidators();
