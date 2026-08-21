@@ -122,6 +122,11 @@ import { ReservationService } from "../services/reservation.service";
             </div>
 
             <div class="field-group">
+              <span class="field-label">Adresă</span>
+              <div class="field-value muted">{{ address }}</div>
+            </div>
+
+            <div class="field-group">
               <span class="field-label">Categorie</span>
               @if (!isEditing()) {
                 <p class="field-value muted">{{ categoryName }}</p>
@@ -368,6 +373,7 @@ export class ShopDashboard implements OnInit {
 
   shopId: number | null = null;
   name = "Nume Magazin";
+  address ="Adresă magazin"
   details = "Descriere magazin...";
   bannerUrl = "";
   logoUrl = "";
@@ -551,6 +557,7 @@ export class ShopDashboard implements OnInit {
   private applyProfile(shop: Shop): void {
     this.shopId = shop.id;
     this.name = shop.name || "";
+    this.address = shop.address || "";
     this.details = shop.details || "";
     this.bannerUrl = this.resolveImagePath(
       shop.bannerPath,
