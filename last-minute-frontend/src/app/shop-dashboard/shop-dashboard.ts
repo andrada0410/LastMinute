@@ -1,10 +1,8 @@
 import { Component, inject, OnDestroy, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
 import { ShopService } from "../services/shop.service";
 import { Shop } from "../shop";
 import { ToastService } from "../services/toast.service";
-import { ShopCategorySelect } from "../shop-category-select/shop-category-select";
 import { Category, CATEGORY_TRANSLATIONS } from "../category";
 import { ShopDashboardProductList } from "../shop-dashboard-product-list/shop-dashboard-product-list";
 import { ProductService } from "../services/product.service";
@@ -12,7 +10,7 @@ import { Product } from "../product";
 import { ShopDashboardProductForm } from "../shop-dashboard-product-form/shop-dashboard-product-form";
 import { ConfirmDelete } from '../confirm-delete/confirm-delete';
 import { CreateOfferRequest } from "../offer";
-import { OfferService } from "../services/offer.service"; // presupun ca exista deja
+import { OfferService } from "../services/offer.service";
 import { ShopOfferForm } from '../shop-offer-form/shop-offer-form';
 import { debounceTime, Subject } from "rxjs";
 import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-bar";
@@ -22,15 +20,15 @@ import { DropdownMenu } from "../dropdown-menu/dropdown-menu";
 import { ShopBarChart } from "../shop-bar-chart/shop-bar-chart";
 import { ShopReservationStatistics } from "../reservation";
 import { ReservationService } from "../services/reservation.service";
-import { ImageCropperModal } from '../image-cropper/image-cropper'
+import { ImageCropperModal } from '../image-cropper/image-cropper';
+import { ShopDashboardProfile } from "../shop-dashboard-profile/shop-dashboard-profile";
 
 @Component({
   selector: "shop-dashboard",
   standalone: true,
   imports: [
     FormsModule,
-    ShopDashboardImage,
-    ShopCategorySelect,
+    ShopDashboardProfile,
     ShopDashboardProductList,
     ShopDashboardProductForm,
     ConfirmDelete,
@@ -41,132 +39,30 @@ import { ImageCropperModal } from '../image-cropper/image-cropper'
     DropdownMenu,
     ShopBarChart,
     ImageCropperModal
-],
+  ],
   template: `
     <section class="page">
-      <form
-        class="dashboard-page form-card"
-        [class.is-editing]="isEditing()"
-        #shopForm="ngForm"
-        (ngSubmit)="onSubmit()"
-      >
-        <div class="page-head">
-          <div>
-            <h1>Dashboard</h1>
-            <p class="text-muted">Profilul magazinului tau</p>
-          </div>
+      <div class="dashboard-page form-card" [class.is-editing]="isEditing()">
+        
+        <app-shop-dashboard-profile
+          [isEditing]="isEditing()"
+          [name]="name"
+          [address]="address"
+          [(details)]="details"
+          [bannerUrl]="bannerUrl"
+          [logoUrl]="logoUrl"
+          [categoryName]="categoryName"
+          [(categoryId)]="categoryId"
+          [categories]="categories"
+          [isSaveDisabled]="!hasChanges() || (details.length > 1000)"
+          (startEditing)="startEditing()"
+          (cancelEditing)="cancelEditing()"
+          (submitForm)="onSubmit()"
+          (imagePicked)="onImagePicked($event.file, $event.type)"
+        />
 
-          @if (!isEditing()) {
-            <div class="view-actions">
-              <button
-                type="button"
-                class="button primary"
-                (click)="startEditing()"
-              >
-                Editează profilul
-              </button>
-            </div>
-          }
-
-          @if (isEditing()) {
-            <div class="edit-only">
-              <button
-                type="button"
-                class="button secondary"
-                (click)="cancelEditing()"
-              >
-                Anulează
-              </button>
-              <button
-                type="submit"
-                class="button primary"
-                [disabled]="shopForm.invalid || !hasChanges() || (details.length > 1000)"
-              >
-                Salvează modificările
-              </button>
-            </div>
-          }
-        </div>
-
-        <div class="card shop-card">
-          <!-- Banner -->
-          <div class="shop-banner">
-            <app-shop-dashboard-image
-              [imageUrl]="bannerUrl"
-              altText="Banner magazin"
-              label="Schimbă banner-ul"
-              [isEditing]="isEditing()"
-              (imageSelected)="onImagePicked($event, 'banner')"
-              [fallbackImage]="'assets/shop-dashboard/default-banner.png'"
-              ;
-            />
-          </div>
-
-          <!-- Logo -->
-          <div class="shop-header">
-            <div class="shop-logo">
-              <app-shop-dashboard-image
-                [imageUrl]="logoUrl"
-                altText="Logo magazin"
-                label="Schimbă logo-ul"
-                [isEditing]="isEditing()"
-                (imageSelected)="onImagePicked($event, 'logo')"
-                [fallbackImage]="'assets/shop-dashboard/default-logo.png'"
-              />
-            </div>
-          </div>
-
+        <div class="card shop-card" style="margin-top: 1.5rem;">
           <div class="shop-body">
-            <!-- Shop Name -->
-            <div class="field-group">
-              <span class="field-label">Denumire</span>
-              <div class="shop-name-view">{{ name }}</div>
-            </div>
-
-            <div class="field-group">
-              <span class="field-label">Adresă</span>
-              <div class="field-value muted">{{ address }}</div>
-            </div>
-
-            <div class="field-group">
-              <span class="field-label">Categorie</span>
-              @if (!isEditing()) {
-                <p class="field-value muted">{{ categoryName }}</p>
-              }
-
-              @if (isEditing()) {
-                <app-shop-category-select
-                  [categories]="categories"
-                  [(selectedId)]="categoryId"
-                />
-              }
-            </div>
-
-            <!-- Details -->
-            <div class="field-group">
-              <span class="field-label">Detalii</span>
-              @if (!isEditing()) {
-                <p class="field-value muted">{{ details }}</p>
-              }
-              @if (isEditing()) {
-                <textarea
-                  class="field-edit"
-                  name="details"
-                  [(ngModel)]="details"
-                  #detailsField="ngModel"
-                  placeholder="Descrie magazinul..."
-                ></textarea>
-
-                @if (details && details.length > 1000) {
-                  <p class="message error">
-                    Detaliile nu pot avea mai mult de 1000 de caractere.
-                  </p>
-                }
-              }
-            </div>
-
-            <hr class="section-divider" />
-
             <div class="products-header">
               <h2>Produse</h2>
 
@@ -183,7 +79,6 @@ import { ImageCropperModal } from '../image-cropper/image-cropper'
                     (click)="openCreateProduct()"
                   >
                     Adaugă produs
-
                   </button>
 
                   <button
@@ -235,8 +130,9 @@ import { ImageCropperModal } from '../image-cropper/image-cropper'
             </app-shop-dashboard-product-list>
           </div>
         </div>
-      </form>
+      </div>
     </section>
+
     @if (showProductForm) {
       <app-shop-dashboard-product-form
         [product]="editingProduct"
@@ -289,22 +185,63 @@ import { ImageCropperModal } from '../image-cropper/image-cropper'
   `,
   styleUrls: ["./shop-dashboard.css"],
 })
-export class ShopDashboard implements OnInit {
+export class ShopDashboard implements OnInit, OnDestroy {
   private offerService = inject(OfferService);
   private reservationService = inject(ReservationService);
+  private shopService = inject(ShopService);
+  private toastService = inject(ToastService);
+  private productService = inject(ProductService);
+
+  CATEGORY_TRANSLATIONS: Record<string, string> = {
+    Restaurant: "Restaurant",
+    "Fast-Food": "Fast-Food",
+    Confectionery: "Cofetărie",
+    Bakery: "Patiserie",
+    Supermarket: "Supermarket",
+  };
+
+  shopId: number | null = null;
+  name = "Nume Magazin";
+  address ="Adresă magazin";
+  details = "Descriere magazin...";
+  bannerUrl = "";
+  logoUrl = "";
+  categoryName = "";
+  private bannerFile: File | null = null;
+  private logoFile: File | null = null;
+  private initialDetails = "";
+  private initialBannerUrl = "";
+  private initialLogoUrl = "";
+
+  categoryId: number | null = null;
+  categories: Category[] = [];
+  private initialCategoryId: number | null = null;
+
+  products: Product[] = [];
+  searchName: string = "";
+  private searchSubject = new Subject<string>();
+
+  isEditing = signal(false);
 
   showOfferForm = false;
   offerErrorMessage = signal("");
+
+  showImportModal = false;
 
   showStatistics = false;
   shopReservationStatistics: ShopReservationStatistics[] = [];
 
   showCropperModal = false;
-  fileToCrop: File | null = null;
+  fileToCrop: File | undefined = undefined;
   cropperType: "banner" | "logo" | null = null;
   cropperAspectRatio: number = 1;
   cropperTitle: string = '';
   cropperRecommendation: string = '';
+
+  showProductForm = false;
+  editingProduct: Product | null = null;
+  productErrorMessage = signal("");
+  productPendingDelete: number | null = null;
 
   openCreateOffer(): void {
     if (!this.shopId) {
@@ -371,51 +308,6 @@ export class ShopDashboard implements OnInit {
       },
     });
   }
-
-  CATEGORY_TRANSLATIONS: Record<string, string> = {
-    Restaurant: "Restaurant",
-    "Fast-Food": "Fast-Food",
-    Confectionery: "Cofetărie",
-    Bakery: "Patiserie",
-    Supermarket: "Supermarket",
-  };
-
-  private shopService = inject(ShopService);
-  private toastService = inject(ToastService);
-  private productService = inject(ProductService);
-
-  isEditing = signal(false);
-
-  showProductForm = false;
-  editingProduct: Product | null = null;
-  productErrorMessage = signal("");
-  productPendingDelete: number | null = null;
-
-  shopId: number | null = null;
-  name = "Nume Magazin";
-  address ="Adresă magazin"
-  details = "Descriere magazin...";
-  bannerUrl = "";
-  logoUrl = "";
-  categoryName = "";
-
-  categoryId: number | null = null;
-  categories: Category[] = [];
-  private initialCategoryId: number | null = null;
-
-  products: Product[] = [];
-
-  private bannerFile: File | null = null;
-  private logoFile: File | null = null;
-
-  private initialDetails = "";
-  private initialBannerUrl = "";
-  private initialLogoUrl = "";
-
-  searchName: string = "";
-  private searchSubject = new Subject<string>();
-
-  showImportModal = false;
 
   ngOnInit(): void {
     this.loadShopProfile();
@@ -661,7 +553,7 @@ export class ShopDashboard implements OnInit {
 
   closeCropper(): void {
     this.showCropperModal = false;
-    this.fileToCrop = null;
+    this.fileToCrop = undefined;
     this.cropperType = null;
   }
 

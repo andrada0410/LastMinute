@@ -1,0 +1,63 @@
+.product-row {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-m);
+    padding: var(--space-m);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    background-color: rgba(255, 240, 224, 0.2);
+}
+
+.product-row-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+}
+
+.product-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: var(--primary-color-dark);
+}
+
+.product-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.field-inline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    flex: 1;
+    min-width: 45%;
+}
+
+.field-inline label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-color);
+    white-space: nowrap;
+}
+
+.field-inline input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-m);
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.field-inline input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--accent-color);
+}

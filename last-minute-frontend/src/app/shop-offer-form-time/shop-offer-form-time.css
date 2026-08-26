@@ -1,0 +1,51 @@
+.interval-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-m);
+}
+
+.interval-fields .field-group {
+    flex: 1;
+    min-width: 160px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.field-value.muted {
+    color: var(--text-muted);
+    font-size: 1rem;
+    padding: 0.75rem;
+    border: 1px solid transparent;
+    margin: 0;
+    line-height: 1.2;
+}   
+
+.time-select {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.time-select select {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-m);
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--bg-color);
+}
+
+.time-select select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--accent-color);
+}
+
+.time-select span {
+    font-weight: 600;
+    color: var(--text-color);
+}

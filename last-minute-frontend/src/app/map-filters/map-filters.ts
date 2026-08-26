@@ -90,9 +90,9 @@ export class MapFiltersComponent {
   authService = inject(AuthService);
 
   categories = input<Category[]>([]);
-  filtersChange = output<MapFilters>();
-
   priceUpperBound = input<number>(0);
+
+  filtersChange = output<MapFilters>();
 
   selectedCategoryIds: number[] = [];
   maxPrice: number | null = null;

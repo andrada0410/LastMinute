@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild, ElementRef, OnChanges, AfterViewInit } from '@angular/core';
+import { Component, input, ViewChild, ElementRef, effect } from '@angular/core';
 import * as d3 from 'd3';
 import { ShopReservationStatistics } from '../reservation';
 
@@ -17,7 +17,7 @@ import { ShopReservationStatistics } from '../reservation';
           <span>Cantitate vândută</span>
         </div>
       </div>
-      @if (!data || data.length === 0) {
+      @if (!data() || data().length === 0) {
         <div class="empty-state">
           <p>Nu există date de afișat, deoarece nu există oferte create.</p>
         </div>
@@ -28,23 +28,20 @@ import { ShopReservationStatistics } from '../reservation';
   `,
   styleUrls: ['./shop-bar-chart.css']
 })
-export class ShopBarChart implements OnInit, OnChanges, AfterViewInit {
+export class ShopBarChart {
   @ViewChild('barChart')
   private chartContainer!: ElementRef<HTMLDivElement>;
 
-  @Input()
-  data: ShopReservationStatistics[] = [];
+  public data = input<ShopReservationStatistics[]>([]);
 
   margin = { top: 30, right: 20, bottom: 100, left: 50 };
 
-  ngOnInit() {}
-
-  ngAfterViewInit(): void {
-    this.renderWithDelay();
-  }
-
-  ngOnChanges(): void {
-    this.renderWithDelay();
+  constructor() {
+    effect(() => {
+      if (this.data() && this.data().length > 0) {
+        this.renderWithDelay();
+      }
+    });
   }
 
   private renderWithDelay(): void {
@@ -54,12 +51,11 @@ export class ShopBarChart implements OnInit, OnChanges, AfterViewInit {
   }
 
   private createChart(): void {
-    if (!this.chartContainer || !this.data || this.data.length === 0) {
+    if (!this.chartContainer || !this.data() || this.data().length === 0) {
       return;
     }
 
     const element = this.chartContainer.nativeElement;
-    const data = this.data;
 
     d3.select(element).selectAll('*').remove();
 
@@ -77,7 +73,7 @@ export class ShopBarChart implements OnInit, OnChanges, AfterViewInit {
       .scaleBand()
       .rangeRound([0, contentWidth])
       .padding(0.4)
-      .domain(data.map((d: ShopReservationStatistics) => d.productName));
+      .domain(this.data().map((d: ShopReservationStatistics) => d.productName));
     
     const x1 = d3
       .scaleBand()
@@ -86,7 +82,7 @@ export class ShopBarChart implements OnInit, OnChanges, AfterViewInit {
       .domain(['listed', 'sold']);
 
     const maxQuantity = d3.max(
-      this.data,
+      this.data(),
       (d: ShopReservationStatistics) => Math.max(d.listedQuantity, d.soldQuantity)
     ) ?? 0;
 
@@ -147,7 +143,7 @@ export class ShopBarChart implements OnInit, OnChanges, AfterViewInit {
 
     const productGroups = g
       .selectAll('.product-group')
-      .data(this.data)
+      .data(this.data())
       .enter()
       .append('g')
       .attr('class', 'product-group')

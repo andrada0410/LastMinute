@@ -1,0 +1,149 @@
+.button.secondary {
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.button.secondary:hover {
+    background: var(--accent-color);
+    border-color: var(--primary-color-light);
+}
+
+.button svg { 
+    width: 17px; 
+    height: 17px; 
+}
+
+.page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--space-l);
+    gap: var(--space-m);
+    flex-wrap: wrap;
+}
+
+.page-head .button { 
+    width: auto; 
+}
+
+.edit-only { 
+    display: flex; 
+    align-items: center;
+    gap: var(--space-m); 
+}
+
+.shop-card { 
+    padding: 0; 
+    overflow: hidden; 
+}
+
+/* --- Banner --- */
+.shop-banner {
+    width: 100%;
+    aspect-ratio: 2.5/1;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+}
+
+.shop-banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+}
+
+/* --- Header + Logo --- */
+.shop-header {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-m);
+    padding: 0 var(--space-xl);
+    margin-top: -44px;
+    position: relative;
+}
+
+.shop-logo {
+    width: 88px;
+    height: 88px;
+    border-radius: var(--radius-m);
+    background: var(--bg-color);
+    border: 3px solid var(--bg-color);
+    box-shadow: var(--shadow-card);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    --image-fit: contain;
+}
+
+/* --- Body + Fields --- */
+.shop-body { 
+    padding: var(--space-xl); 
+}
+
+.shop-name-view { 
+    font-size: 1.5rem; 
+    font-weight: 700; 
+    color: var(--primary-color); 
+}
+
+.field-group { 
+    margin-bottom: var(--space-l); 
+}
+
+.field-group:last-child { 
+    margin-bottom: 0; 
+}
+
+.field-label {
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.field-value { 
+    color: var(--text-color); 
+    font-size: 0.95rem; 
+}
+
+.field-value.muted { 
+    color: var(--text-muted); 
+    line-height: 1.6; 
+}
+
+textarea.field-edit {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    font-size: 0.95rem;
+    font-weight: 400;
+    font-family: inherit;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-s);
+    padding: 0.7rem;
+    resize: vertical;
+    min-height: 90px;
+}
+
+textarea.field-edit:hover { 
+    background: var(--accent-color); 
+}
+
+textarea.field-edit:focus {
+    outline: none;
+    background: var(--bg-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--accent-color);
+}
+
+.field-group .message.error {
+    margin-top: 0.7rem;
+    display: block;
+}

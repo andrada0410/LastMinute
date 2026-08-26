@@ -12,7 +12,7 @@ import { Component, OnInit, OnDestroy } from "@angular/core";
 
     <!-- Right Side -->
     <div class = "details">
-        <h1><span class="highlight">Descoperă mese la prețuri reduse</span>, direct de la restaurantele si magazinele din orașul tău.</h1>
+        <h1><span class="highlight">Descoperă mese la prețuri reduse</span>, direct de la restaurantele și magazinele din orașul tău.</h1>
 
         <p>Transformă risipa alimentară în oportunitatea ta de a mânca bine.<br> Prin Last Minute, prinzi ultimele porții ale zilei la prețuri reduse și reduci risipa cu fiecare comandă.</p>
     
@@ -64,7 +64,6 @@ export class Home implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        console.log('oprit', this.intervalId);
         clearInterval(this.intervalId);
     }
 }

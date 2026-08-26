@@ -1,138 +1,114 @@
-import { Component, Input, OnInit, OnDestroy, inject, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, output, signal } from '@angular/core';
 import { OfferInfo, OfferProduct } from '../offer';
-import { PricePipe } from '../pipes/price';
 import { ReservationModalComponent } from '../product-reservation/reservation-modal/reservation-modal.component';
 import { CreateReservationRequest } from '../reservation';
+import { OfferProductItemComponent } from '../offer-product-item/offer-product-item';
 
 @Component({
-    selector: 'app-offer-ticket',
-    standalone: true,
-    imports: [PricePipe, ReservationModalComponent],
-    template: `
+  selector: 'app-offer-ticket',
+  standalone: true,
+  imports: [ReservationModalComponent, OfferProductItemComponent],
+  template: `
     <div class="promo-ticket"
-        [class.is-expired]="getOfferState(offer.startDate, offer.endDate) === 'expired'"
-         [class.is-upcoming]="getOfferState(offer.startDate, offer.endDate) === 'upcoming'">
+      [class.is-expired]="getOfferState(offer().startDate, offer().endDate) === 'expired'"
+      [class.is-upcoming]="getOfferState(offer().startDate, offer().endDate) === 'upcoming'">
 
-        <div class="ticket-timer-header">
-            <div class="header-text">
-                @switch (getOfferState(offer.startDate, offer.endDate)) {
-                    @case ('expired') {
-                        <span class="valability">Ofertă </span>
-                        <strong class="date countdown-timer">EXPIRATĂ</strong>
-                    }
-                    @case ('upcoming') {
-                        <span class="valability">Începe în:</span>
-                        <strong class="date countdown-timer">
-                            {{ getCountdown(offer.startDate) }}
-                        </strong>
-                    }
-                    @case ('active') {
-                        <span class="valability">Expiră în:</span>
-                        <strong class="date countdown-timer">
-                            {{ getCountdown(offer.endDate) }}
-                        </strong>
-                    }
-                }
-            </div>
-
-            <div class="interval-badge">
-                {{ getFormattedTime(offer.startDate) }} - {{ getFormattedTime(offer.endDate) }}
-            </div>
-        </div>
-
-        @if (getOfferState(offer.startDate, offer.endDate) === 'active') {
-            <div class="progress-container-top">
-                <div class="progress-bar" 
-                        [style.width.%]="getProgressPercentage(offer.startDate, offer.endDate)"
-                        [style.--progress-val]="getProgressPercentage(offer.startDate, offer.endDate)">
-                </div>
-            </div>
-        }
-        
-        <div class="ticket-content">
-            <ul class="bundle-items">
-            @for (item of products; track item.id) {
-                <li [class.is-out-of-stock]="item.quantity <= 0" [class.is-interactive]="!isLoggedIn" (click)="onProductClick()">
-                <div class="item-main">
-                    <img [src]="resolveImagePath(item.photoPath, 'assets/shop-dashboard/default-product.png')"
-                        alt="Produs" 
-                        class="item-thumb">
-                    <div class="item-info">
-                    <span class="item-name">
-                        <span class="qty">{{ item.quantity }}x</span> {{ item.name }}
-                    </span>
-                    <div class="item-prices">
-                        <span class="old-price">{{ item.price | price }}</span>
-                        <span class="new-price">{{ item.offerPrice | price }}</span>
-                        @if (getDiscountPercent(item.price, item.offerPrice) > 0) {
-                            <span class="badge-discount">-{{ getDiscountPercent(item.price, item.offerPrice) }}%</span>
-                        }
-                    </div>
-                    </div>
-                </div>
-
-                @if (isLoggedIn && getOfferState(offer.startDate, offer.endDate) === 'active' && item.quantity > 0) {
-                    <div class="item-actions">
-                        <button type="button" class="btn-reserve" (click)="openModal(item)">Rezervă</button>
-                    </div>
-                }
-                @if (item.quantity <= 0) {
-                    <div class="item-actions">
-                        <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: bold;">Stoc epuizat</span>
-                    </div>
-                }
-                </li>
+      <div class="ticket-timer-header">
+        <div class="header-text">
+          @switch (getOfferState(offer().startDate, offer().endDate)) {
+            @case ('expired') {
+              <span class="valability">Ofertă </span>
+              <strong class="date countdown-timer">EXPIRATĂ</strong>
             }
-            </ul>
+            @case ('upcoming') {
+              <span class="valability">Începe în:</span>
+              <strong class="date countdown-timer">
+                {{ getCountdown(offer().startDate) }}
+              </strong>
+            }
+            @case ('active') {
+              <span class="valability">Expiră în:</span>
+              <strong class="date countdown-timer">
+                {{ getCountdown(offer().endDate) }}
+              </strong>
+            }
+          }
         </div>
 
+        <div class="interval-badge">
+          {{ getFormattedTime(offer().startDate) }} - {{ getFormattedTime(offer().endDate) }}
+        </div>
+      </div>
+
+      @if (getOfferState(offer().startDate, offer().endDate) === 'active') {
+        <div class="progress-container-top">
+          <div class="progress-bar" 
+               [style.width.%]="getProgressPercentage(offer().startDate, offer().endDate)"
+               [style.--progress-val]="getProgressPercentage(offer().startDate, offer().endDate)">
+          </div>
+        </div>
+      }
+      
+      <div class="ticket-content">
+        <ul class="bundle-items">
+        @for (item of products(); track item.id) {
+          <app-offer-product-item
+            [item]="item"
+            [isLoggedIn]="isLoggedIn()"
+            [isOfferActive]="getOfferState(offer().startDate, offer().endDate) === 'active'"
+            (reserveProduct)="openModal($event)"
+            (productClick)="onProductClick()">
+          </app-offer-product-item>
+        }
+        </ul>
+      </div>
     </div>
 
-    @if (selectedProductForReservation) {
-        <app-reservation-modal
-        [product]="selectedProductForReservation"
+    @if (selectedProductForReservation()) {
+      <app-reservation-modal
+        [product]="selectedProductForReservation()!"
         (close)="closeModal()"
         (reserve)="handleReservation($event)">
-        </app-reservation-modal>
+      </app-reservation-modal>
     }
-
-    `,
-    styleUrls: ['./offer-ticket.component.css']
+  `,
+  styleUrls: ['./offer-ticket.component.css']
 })
 export class OfferTicketComponent implements OnInit, OnDestroy {
-    @Input({ required: true }) offer!: OfferInfo;
-    @Input({ required: true }) products!: OfferProduct[];
-    @Input() isLoggedIn: boolean = false;
-    @Output() reserve = new EventEmitter<CreateReservationRequest>();
-    @Output() productClick = new EventEmitter<OfferProduct>();
+  offer = input.required<OfferInfo>();
+  products = input.required<OfferProduct[]>();
+  isLoggedIn = input<boolean>(false);
 
-    public currentTime: Date = new Date();
-    private timerInterval: any;
-    private url = 'http://localhost:4001';
+  reserve = output<CreateReservationRequest>();
+  productClick = output<void>();
 
-    public selectedProductForReservation: OfferProduct | null = null;
+  public currentTime = signal<Date>(new Date());
+  public selectedProductForReservation = signal<OfferProduct | null>(null);
 
-    ngOnInit(): void {
-        this.startTimer();
+  private timerInterval: any;
+  private url = 'http://localhost:4001';
+
+  ngOnInit(): void {
+    this.startTimer();
+  }
+
+  ngOnDestroy(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
     }
+  }
 
-    ngOnDestroy(): void {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-        }
-    }
-
-   public getProgressPercentage(startDate: string | Date, endDate: string | Date): number {
+  public getProgressPercentage(startDate: string | Date, endDate: string | Date): number {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
-    const now = this.currentTime.getTime();
+    const now = this.currentTime().getTime();
 
     if (now >= end) {
-    return 100;
+      return 100;
     }
     
     if (now <= start) {
-    return 0;
+      return 0;
     }
 
     const totalDuration = end - start;
@@ -143,12 +119,12 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
 
   private startTimer(): void {
     this.timerInterval = setInterval(() => {
-      this.currentTime = new Date();
+      this.currentTime.set(new Date());
     }, 250);
   }
 
   public getOfferState(startDate: string | Date, endDate: string | Date): 'upcoming' | 'active' | 'expired' {
-    const now = this.currentTime.getTime();
+    const now = this.currentTime().getTime();
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
 
@@ -166,7 +142,7 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
 
   public getCountdown(endDate: string | Date): string {
     const end = new Date(endDate).getTime();
-    const now = this.currentTime.getTime();
+    const now = this.currentTime().getTime();
     const diffInSeconds = Math.floor((end - now) / 1000);
 
     if (diffInSeconds <= 0) {
@@ -186,19 +162,19 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
   }
 
   public openModal(product: OfferProduct): void {
-    this.selectedProductForReservation = product;
+    this.selectedProductForReservation.set(product);
   }
 
   public closeModal(): void {
-    this.selectedProductForReservation = null;
+    this.selectedProductForReservation.set(null);
   }
 
-  public handleReservation(event: {productId: number, quantity: number}): void {
+  public handleReservation(event: { productId: number, quantity: number }): void {
     this.closeModal();
     this.reserve.emit({
-        offerId: this.offer.id,
-        productId: event.productId,
-        quantity: event.quantity
+      offerId: this.offer().id,
+      productId: event.productId,
+      quantity: event.quantity
     });
   }
 

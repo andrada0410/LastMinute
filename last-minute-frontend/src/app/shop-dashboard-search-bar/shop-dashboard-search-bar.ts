@@ -1,15 +1,13 @@
 import { Component, input, output } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: 'app-shop-dashboard-search-bar',
   standalone: true,
-  imports: [],
   template: `
     <div class="search-bar">
       <input
         type="text"
-        placeholder="Caută după nume"
+        [placeholder]="placeholder()"
         [value]="name()"
         (input)="onInputChange($event)"
         (keydown.enter)="$event.preventDefault()"
@@ -25,6 +23,7 @@ import { FormsModule } from "@angular/forms";
 })
 export class SearchBar {
   name = input<string>('');
+  placeholder = input<string>('Caută după nume');
   nameChange = output<string>();
 
   onInputChange(event: Event): void {

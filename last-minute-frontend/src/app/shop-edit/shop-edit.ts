@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from "@angular/core";
+import { Component, effect, input, output } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ShopInfo } from "../shop";
 
@@ -42,38 +42,41 @@ import { ShopInfo } from "../shop";
     `,
     styleUrls: ['./shop-edit.css']
 })
-export class ShopEdit implements OnChanges {
-    @Input({ required: true }) shop!: ShopInfo;
+export class ShopEdit {
+    public shop = input.required<ShopInfo>();
 
-    @Output() save = new EventEmitter<{ id: number; name: string; address: string }>();
-    @Output() cancel = new EventEmitter<void>();
+    public save = output<{ id: number; name: string; address: string }>();
+    public cancel = output<void>();
 
-    editForm = new FormGroup({
+    public editForm = new FormGroup({
         name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
         address: new FormControl('', [Validators.required, Validators.maxLength(255)])
     });
 
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes['shop'] && this.shop) {
-            this.editForm.patchValue({
-                name: this.shop.name,
-                address: this.shop.address
-            });
-        }
+    constructor() {
+        effect(() => {
+            const currentShop = this.shop();
+            if (currentShop) {
+                this.editForm.patchValue({
+                    name: currentShop.name,
+                    address: currentShop.address
+                });
+            }
+        });
     }
 
     get hasChanges(): boolean {
-        if (!this.shop) return false;
+        if (!this.shop()) return false;
         const { name, address } = this.editForm.value;
-        return name !== this.shop.name || address !== this.shop.address;
+        return name !== this.shop().name || address !== this.shop().address;
     }
 
-    submitEdit() {
+    public submitEdit(): void {
         if (this.editForm.invalid || !this.hasChanges) return;
 
         const { name, address } = this.editForm.value;
         this.save.emit({ 
-            id: this.shop.id,
+            id: this.shop().id,
             name: name!, 
             address: address! 
         });

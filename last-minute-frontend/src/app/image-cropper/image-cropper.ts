@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 
 @Component({
@@ -9,20 +9,20 @@ import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
     <div class="modal-overlay">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>{{ modalTitle }}</h3>
+          <h3>{{ modalTitle() }}</h3>
         </div>
 
-        @if (recommendation) {
+        @if (recommendation()) {
           <div class="recommendation-box">
-            <strong> Recomandare:</strong> {{ recommendation }}
+            <strong> Recomandare:</strong> {{ recommendation() }}
           </div>
         }
         
         <div class="cropper-container">
           <image-cropper
-            [imageFile]="imageFile"
+            [imageFile]="imageFile()"
             [maintainAspectRatio]="true"
-            [aspectRatio]="aspectRatio"
+            [aspectRatio]="aspectRatio()"
             format="jpeg"
             (imageCropped)="imageCropped($event)"
           ></image-cropper>
@@ -38,24 +38,24 @@ import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
   styleUrls: ['./image-cropper.css']
 })
 export class ImageCropperModal {
-  @Input() imageFile: File | any = null;
-  @Input() aspectRatio: number = 1;
+  imageFile = input<File | undefined>(undefined);
+  aspectRatio = input<number>(1);
+  modalTitle = input<string>('Decupează Imaginea');
+  recommendation = input<string>('');
 
-  @Input() modalTitle: string = 'Decupează Imaginea';
-  @Input() recommendation: string = '';
+  cropped = output<Blob>();
+  closed = output<void>();
 
-  @Output() cropped = new EventEmitter<Blob>();
-  @Output() closed = new EventEmitter<void>();
-
-  croppedImageBlob: Blob | null | undefined = null;
+  croppedImageBlob = signal<Blob | null>(null);
 
   imageCropped(event: ImageCroppedEvent) {
-    this.croppedImageBlob = event.blob;
+    this.croppedImageBlob.set(event.blob ?? null);
   }
 
   save() {
-    if (this.croppedImageBlob) {
-      this.cropped.emit(this.croppedImageBlob);
+    const blob = this.croppedImageBlob();
+    if (blob) {
+      this.cropped.emit(blob);
     }
   }
 

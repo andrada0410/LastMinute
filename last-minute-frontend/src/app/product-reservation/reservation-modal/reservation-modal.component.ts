@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, input, output, signal, computed } from "@angular/core";
 import { OfferProduct } from "src/app/offer";
 import { PricePipe } from "src/app/pipes/price";
 
@@ -17,25 +17,25 @@ import { PricePipe } from "src/app/pipes/price";
 
                 <div class="modal-body">
                     <div class="product-preview">
-                        <img [src]="resolveImagePath(product.photoPath, 'assets/shop-dashboard/default-product.png')" 
+                        <img [src]="resolveImagePath(product().photoPath, 'assets/shop-dashboard/default-product.png')" 
                             alt="Produs"
                             class="modal-product-img">
                         <div class="product-info">
-                            <h3>{{product.name}}</h3>
-                            <p>Preț per bucată: {{ product.offerPrice | price }}</p>
-                            <p class="stock-info">Stoc disponibil: {{ product.quantity }}</p>
+                            <h3>{{product().name}}</h3>
+                            <p>Preț per bucată: {{ product().offerPrice | price }}</p>
+                            <p class="stock-info">Stoc disponibil: {{ product().quantity }}</p>
                         </div>
                     </div>
 
-                    @if (product.description) {
+                    @if (product().description) {
                         <div class="description-section">
                             <button type="button" class="btn-link" (click)="toggleDescription()">
-                                {{ showDescription ? 'Ascunde descrierea' : 'Vezi descrierea produsului' }}
+                                {{ showDescription() ? 'Ascunde descrierea' : 'Vezi descrierea produsului' }}
                             </button>
                     
-                            @if (showDescription) {
+                            @if (showDescription()) {
                                 <div class="description-content">
-                                    <p>{{ product.description }}</p>
+                                    <p>{{ product().description }}</p>
                                 </div>
                             }
                         </div>
@@ -44,15 +44,15 @@ import { PricePipe } from "src/app/pipes/price";
                     <div class="quantity-selector">
                         <label>Selectează cantitatea:</label>
                         <div class="controls">
-                            <button type="button" (click)="decreaseQuantity()" [disabled]="selectedQuantity <= 1">-</button>
-                            <span class="current-quantity">{{ selectedQuantity }}</span>
-                            <button type="button" (click)="increaseQuantity()" [disabled]="selectedQuantity >= product.quantity">+</button>
+                            <button type="button" (click)="decreaseQuantity()" [disabled]="selectedQuantity() <= 1">-</button>
+                            <span class="current-quantity">{{ selectedQuantity() }}</span>
+                            <button type="button" (click)="increaseQuantity()" [disabled]="selectedQuantity() >= product().quantity">+</button>
                         </div>
                     </div>
 
                     <div class="total-price-section">
                         <span>Total estimat:</span>
-                        <strong>{{ finalPrice | price }}</strong>
+                        <strong>{{ finalPrice() | price }}</strong>
                     </div>
                 </div>
 
@@ -66,31 +66,32 @@ import { PricePipe } from "src/app/pipes/price";
     styleUrls: ['./reservation-modal.component.css']
 })
 export class ReservationModalComponent {
-    @Input({ required: true}) product!: OfferProduct;
+    product = input.required<OfferProduct>();
 
-    @Output() close = new EventEmitter<void>();
-    @Output() reserve = new EventEmitter<{productId : number, quantity: number}>();
+    close = output<void>();
+    reserve = output<{ productId: number; quantity: number }>();
 
-    public selectedQuantity: number = 1;
-    public showDescription: boolean = false;
+    public selectedQuantity = signal<number>(1);
+    public showDescription = signal<boolean>(false);
+
     private url = 'http://localhost:4001';
 
-    get finalPrice(): number {
-        return this.selectedQuantity * this.product.offerPrice;
-    }
+    public finalPrice = computed (() => { 
+        return this.selectedQuantity() * this.product().offerPrice;
+    });
 
     public increaseQuantity(): void {
-        if (this.selectedQuantity < this.product.quantity)
-            this.selectedQuantity++;
+        if (this.selectedQuantity() < this.product().quantity)
+            this.selectedQuantity.update((q) => q + 1);
     }
 
     public decreaseQuantity(): void {
-        if (this.selectedQuantity > 1)
-            this.selectedQuantity--;
+        if (this.selectedQuantity() > 1)
+            this.selectedQuantity.update((q) => q - 1);
     }
 
     public toggleDescription(): void {
-        this.showDescription = !this.showDescription;
+        this.showDescription.update((v) => !v);
     }
 
     public onClose(): void {
@@ -99,8 +100,8 @@ export class ReservationModalComponent {
 
     public onConfirm(): void {
         this.reserve.emit({
-            productId: this.product.id,
-            quantity: this.selectedQuantity
+            productId: this.product().id,
+            quantity: this.selectedQuantity()
         });
     }
 

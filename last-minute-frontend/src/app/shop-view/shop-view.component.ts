@@ -79,17 +79,16 @@ export class ShopViewComponent implements OnInit {
   private shopService = inject(ShopService);
   private offerService = inject(OfferService);
   private toastService = inject(ToastService);
+  private router = inject(Router);
   authService = inject(AuthService);
   private reservationService = inject(ReservationService);
   private route = inject(ActivatedRoute);
-  public CATEGORY_TRANSLATIONS = CATEGORY_TRANSLATIONS;
 
+  public CATEGORY_TRANSLATIONS = CATEGORY_TRANSLATIONS;
   public shop: Shop | null = null;
   public currentOfferInfo: OfferInfo | null = null;
   public currentOfferProducts: OfferProduct[] = [];
   public errorMessage: string = '';
-
-  private router = inject(Router);
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');

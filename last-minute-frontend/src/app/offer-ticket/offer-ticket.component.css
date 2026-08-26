@@ -93,86 +93,6 @@
   gap: var(--space-m);
 }
 
-.bundle-items li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: var(--space-m);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.bundle-items li.is-interactive {
-  cursor: pointer;
-}
-
-.bundle-items li:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.item-main {
-  display: flex;
-  align-items: center;
-  gap: var(--space-m);
-}
-
-.item-thumb {
-  width: 65px;
-  height: 65px;
-  border-radius: var(--radius-m);
-  object-fit: cover;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-card);
-}
-
-.item-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.item-name {
-  font-weight: 600;
-  color: var(--text-color);
-  font-size: 1.05rem;
-}
-
-.qty {
-  color: var(--primary-color);
-  font-weight: 800;
-  font-size: 1rem;
-  margin-right: var(--space-s);
-}
-
-.item-prices {
-  display: flex;
-  align-items: center;
-  gap: var(--space-s);
-  font-size: 0.95rem;
-  flex-wrap: wrap;
-}
-
-.old-price {
-  text-decoration: line-through;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-}
-
-.new-price {
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.badge-discount {
-  background: var(--primary-color-light);
-  color: var(--primary-color);
-  padding: var(--space-s) var(--space-m);
-  border-radius: var(--radius-l);
-  font-size: 0.75rem;
-  font-weight: 800;
-  margin-left: var(--space-s);
-}
-
 .promo-ticket.is-upcoming {
   border-color: var(--border-color);
   box-shadow: var(--shadow-card);
@@ -198,15 +118,6 @@
   opacity: 0.75; 
 }
 
-.promo-ticket.is-upcoming .item-thumb {
-  filter: blur(1px) grayscale(30%);
-}
-
-.promo-ticket.is-upcoming .badge-discount {
-  background-color: var(--shadow-color);
-  color: var(--text-muted);
-}
-
 .promo-ticket.is-expired {
   opacity: 0.6;
   pointer-events: none; 
@@ -218,73 +129,10 @@
   background: linear-gradient(135deg, var(--disabled-color), var(--text-muted));
 }
 
-
-.item-actions {
-  margin-left: var(--space-m);
-}
-
-.btn-reserve {
-  background-color: var(--primary-color);
-  color: var(--bg-color);
-  border: none;
-  padding: var(--space-s) var(--space-m);
-  border-radius: var(--radius-m);
-  font-weight: 700;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 2px 8px rgba(224, 101, 10, 0.2);
-}
-
-.btn-reserve:hover {
-  background-color: var(--primary-color-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(224, 101, 10, 0.3);
-}
-
-.btn-reserve:active {
-  transform: translateY(0);
-}
-
-.btn-reserve:disabled {
-    background-color: var(--bg-disabled, #e0e0e0);
-    color: var(--text-muted, #888888);
-    border-color: transparent;
-    cursor: not-allowed;
-    opacity: 0.7;
-    transform: none;
-}
-
-.bundle-items li.is-out-of-stock {
-  opacity: 0.6;
-  filter: grayscale(100%);
-  pointer-events: none;
-}
-
-.bundle-items li.is-out-of-stock .item-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 @media (max-width: 600px) {
   .ticket-timer-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-s);
-  }
-
-  .bundle-items li {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-m);
-  }
-  .item-actions {
-    margin-left: 0;
-    width: 100%;
-  }
-  .btn-reserve {
-    width: 100%;
-    padding: 12px;
   }
 }

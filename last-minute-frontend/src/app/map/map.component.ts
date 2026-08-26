@@ -52,9 +52,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private accuracyCircle?: L.Circle;
   private addressMarkers = new Map<number, L.Marker>();
   private shopsList: ShopMapInfo[] = [];
-
-  categoriesList: Category[] = [];
-  currentFilters?: MapFilters;
+  private hideShopDetailsTimeout?: ReturnType<typeof setTimeout>;
+  private switchShopTimeout?: ReturnType<typeof setTimeout>;
 
   public hoveredShop?: ShopMapInfo;
   public hoveredShopLogoPath: string = "";
@@ -62,9 +61,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   public cardTop: number = 0;
   public cardLeft: number = 0;
   public isFlippedDown: boolean = false;
-  private hideShopDetailsTimeout?: ReturnType<typeof setTimeout>;
-  private switchShopTimeout?: ReturnType<typeof setTimeout>;
 
+  categoriesList: Category[] = [];
+  currentFilters?: MapFilters;
   favoriteShopsIds: number[] = [];
   maxPrice: number = 0;
 

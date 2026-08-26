@@ -1,4 +1,4 @@
-import { Component, inject, Input } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { ShopService } from "../services/shop.service";
@@ -22,11 +22,14 @@ export class PdfMeniuGenerator {
   private toastService = inject(ToastService);
   private pdfFontService = inject(PdfFontService);
 
-  @Input() shopName = "";
-  @Input() products: Product[] = [];
+  shopName = input<string>("");
+  products = input<Product[]>([]);
 
   async generatePDF() {
-    if (!this.products.length) {
+    const currentProducts = this.products();
+    const currentShopName = this.shopName();
+
+    if (!currentProducts.length) {
       this.toastService.error("Trebuie să adaugi produse înainte să poți genera un meniu.");
       return;
     }
@@ -58,16 +61,16 @@ export class PdfMeniuGenerator {
       doc.setFont("Roboto", "bold");
       doc.setFontSize(22);
       doc.setTextColor(255, 255, 255);
-      doc.text(this.shopName, 14, 24);
+      doc.text(currentShopName, 14, 24);
 
       const imageDataUrls = await Promise.all(
-        this.products.map((p) => this.loadImageAsBase64(p.photoPath)),
+        currentProducts.map((p) => this.loadImageAsBase64(p.photoPath)),
       );
 
       const rowHeight = 22;
 
       const data: any[] = [];
-      this.products.forEach((p) => {
+      currentProducts.forEach((p) => {
         data.push([
           {
             content: "",
@@ -147,7 +150,7 @@ export class PdfMeniuGenerator {
         },
       });
 
-      doc.save(`Meniu ${this.shopName}.pdf`);
+      doc.save(`Meniu ${currentShopName}.pdf`);
     } catch (err) {
       console.error(err);
       this.toastService.error("Eroare generare meniu", "Eroare");

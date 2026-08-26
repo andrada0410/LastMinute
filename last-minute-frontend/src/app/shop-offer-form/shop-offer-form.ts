@@ -1,152 +1,36 @@
-import { Component, input, output, signal, computed, OnChanges, OnInit, SimpleChanges } from "@angular/core";
+import { Component, input, output, signal, computed, OnChanges, SimpleChanges } from "@angular/core";
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
 import { Product } from "../product";
 import { CreateOfferProduct, CreateOfferRequest } from "../offer";
-import { CapitalisePipe } from "../pipes/capitalise";
+import { ShopOfferFormProduct } from "../shop-offer-form-product/shop-offer-form-product";
+import { ShopOfferFormTime } from "../shop-offer-form-time/shop-offer-form-time";
+import { ShopOfferFormBulk } from "../shop-offer-form-bulk/shop-offer-form-bulk";
+import { SearchBar } from "../shop-dashboard-search-bar/shop-dashboard-search-bar";
 
 @Component({
     selector: "app-shop-offer-form",
     standalone: true,
-    imports: [ReactiveFormsModule, CapitalisePipe],
+    imports: [ReactiveFormsModule, ShopOfferFormProduct, ShopOfferFormTime, ShopOfferFormBulk, SearchBar],
     template: `
     <div class="form">
         <div class="form-content">
-
             <h2>Creează ofertă</h2>
 
             <form class="form-card" [formGroup]="offerForm" (ngSubmit)="submit()">
 
-                <div class="interval-fields">
-                    <div class="field-group">
-                        <label>Data de început:</label>
-                        <p class="field-value muted">{{ todayLabel }}</p>
-                    </div>
-
-                    <div class="field-group">
-                        <label>Ora de început:</label>
-                        <div class="time-select">
-                            <input
-                                type="number"
-                                min="0"
-                                max="23"
-                                formControlName="startHour">
-                            <span>:</span>
-                            <input
-                                type="number"
-                                min="0"
-                                max="59"
-                                formControlName="startMinute">
-                        </div>
-
-                        @if (offerForm.get('startHour')?.invalid && offerForm.get('startHour')?.touched) {
-                            <p class="error message">Ora trebuie să fie între 0 și 23.</p>
-                        }
-                        @if (offerForm.get('startMinute')?.invalid && offerForm.get('startMinute')?.touched) {
-                            <p class="error message">Minutul trebuie să fie între 0 și 59.</p>
-                        }
-                    </div>
-
-                    <div class="field-group">
-                        <label>Număr de ore active:</label>
-                        <input type="number" min="1" max="23" formControlName="hoursAvailable">
-
-                        @if (offerForm.get('hoursAvailable')?.invalid && offerForm.get('hoursAvailable')?.touched) {
-                            <p class="error message">Introdu un numar de ore valid (1-23).</p>
-                        }
-                    </div>
-
-                    <div class="field-group">
-                        <label>Data de sfârșit (calculată):</label>
-                        <p class="field-value muted">{{ endDateLabel }}</p>
-                    </div>
-                </div>
-
-                @if (offerForm.hasError('endsNextDay')) {
-                    <p class="error message">Oferta trebuie să se încheie tot în ziua curentă. Redu ora start sau numărul de ore active.</p>
-                }
+                <app-shop-offer-form-time [form]="offerForm" />
 
                 <hr class="section-divider" />
 
-                <div class="bulk-container">
-                    <div class="bulk-fields">
-                        <div class="field-group">
-                            <label>Cantitate (toate produsele selectate):</label>
-                            <input type="number" min="1" step="1" [formControl]="bulkQuantity">
-                        </div>
-
-                        <div class="field-group">
-                            <label>Procent reducere (toate produsele selectate):</label>
-                            <input type="number" min="5" max="100" step="1" [formControl]="bulkDiscount">
-                        </div>
-                    </div>
-
-                    @if ((bulkQuantity.invalid && bulkQuantity.touched) || (bulkDiscount.invalid && bulkDiscount.touched)) {
-                        <div class="bulk-errors">
-                            @if (bulkQuantity.invalid && bulkQuantity.touched) {
-                                <p class="error message">Cantitatea trebuie să fie un număr întreg mai mare ca 0.</p>
-                            }
-
-                            @if (bulkDiscount.invalid && bulkDiscount.touched) {
-                                <p class="error message">Procentul trebuie să fie un număr întreg între 5 și 100.</p>
-                            }
-                        </div>
-                    }
-
-                    <div class="bulk-actions">
-                        <button
-                            type="button"
-                            class="button secondary"
-                            [disabled]="bulkQuantity.invalid || bulkDiscount.invalid"
-                            (click)="applyBulkToAll()">
-                            Aplică la toate produsele
-                        </button>
-                    </div>
-                </div>
+                <app-shop-offer-form-bulk (applyBulk)="onApplyBulk($event)" />
 
                 <hr class="section-divider" />
 
-                <div class="search-bar">
-                    <input
-                        type="text"
-                        placeholder="Caută produse după nume..."
-                        [value]="searchTerm()"
-                        (input)="onSearchChange($event)">
-
-                    @if (searchTerm()) {
-                        <button type="button" class="clear-btn" (click)="onClearSearch()">&times;</button>
-                    }
-                </div>
+                <app-shop-dashboard-search-bar [(name)]="searchTerm" placeholder="Caută produse după nume..." />
 
                 <div class="products-list" formArrayName="products">
                     @for (group of visibleProductGroups(); track group) {
-                        <div class="product-row" [formGroupName]="getIndex(group)">
-
-                            <label class="product-checkbox">
-                                <input type="checkbox" formControlName="included">
-                                {{ group.get('name')?.value | capitalise }}
-                            </label>
-
-                            <div class="product-row-fields">
-                                <div class="field-inline">
-                                    <label>Cantitate:</label>
-                                    <input type="number" min="1" step="1" formControlName="quantity">
-                                </div>
-
-                                <div class="field-inline">
-                                    <label>Procent reducere:</label>
-                                    <input type="number" min="5" max="100" formControlName="discountPercent">
-                                </div>
-                            </div>
-
-                            @if (group.get('quantity')?.invalid && group.get('quantity')?.touched) {
-                                <p class="error message">Cantitatea trebuie să fie un număr întreg mai mare ca 0.</p>
-                            }
-                            @if (group.get('discountPercent')?.invalid && group.get('discountPercent')?.touched) {
-                                <p class="error message">Procentul trebuie să fie un număr întreg între 5 și 100.</p>
-                            }
-
-
-                        </div>
+                        <app-shop-offer-form-product [group]="group" />
                     } @empty {
                         <p class="text-muted">Niciun produs găsit.</p>
                     }
@@ -162,33 +46,25 @@ import { CapitalisePipe } from "../pipes/capitalise";
 
                 <div class="form-actions">
                     <button type="button" class="button cancel" (click)="cancel.emit()">Anulează</button>
-
                     <button type="submit" class="button primary" [disabled]="offerForm.invalid || !hasSelectedProducts">
                         Creează oferta
                     </button>
                 </div>
 
             </form>
-
         </div>
     </div>
     `,
     styleUrls: ["./shop-offer-form.css"]
 })
-export class ShopOfferForm implements OnInit, OnChanges {
-
+export class ShopOfferForm implements OnChanges {
     products = input.required<Product[]>();
     backendError = input("");
 
     save = output<CreateOfferRequest>();
     cancel = output<void>();
 
-    todayLabel = "";
     private today = new Date();
-
-    hours = Array.from({ length: 24 }, (_, i) => i);
-    minutes = Array.from({ length: 60 }, (_, i) => i);
-
     searchTerm = signal("");
 
     offerForm = new FormGroup({
@@ -198,47 +74,22 @@ export class ShopOfferForm implements OnInit, OnChanges {
         products: new FormArray<FormGroup>([])
     }, { validators: this.sameDayEndValidator() });
 
-    bulkQuantity = new FormControl<number | null>(null, [
-        Validators.min(1),
-        Validators.pattern('^[0-9]+$')
-    ]);
-    bulkDiscount = new FormControl<number | null>(null, [
-        Validators.min(5), Validators.max(100),
-        Validators.pattern('^[0-9]+$')
-    ]);
-
     get productsArray(): FormArray<FormGroup> {
         return this.offerForm.get("products") as FormArray<FormGroup>;
     }
 
     visibleProductGroups = computed(() => {
         const term = this.searchTerm().trim().toLowerCase();
-        if (!term) {
-            return this.productsArray.controls;
-        }
+        if (!term) return this.productsArray.controls;
         return this.productsArray.controls.filter(group =>
             (group.get("name")?.value as string).toLowerCase().includes(term)
         );
     });
 
-    ngOnInit(): void {
-        this.todayLabel = this.today.toLocaleDateString("ro-RO", {
-            day: "2-digit", month: "2-digit", year: "numeric"
-        });
-    }
-
     ngOnChanges(changes: SimpleChanges): void {
         if (changes["products"]) {
             this.buildProductRows();
         }
-    }
-
-    pad(n: number): string {
-        return n.toString().padStart(2, "0");
-    }
-
-    getIndex(group: FormGroup): number {
-        return this.productsArray.controls.indexOf(group);
     }
 
     onSearchChange(event: Event): void {
@@ -247,6 +98,15 @@ export class ShopOfferForm implements OnInit, OnChanges {
 
     onClearSearch(): void {
         this.searchTerm.set("");
+    }
+
+    onApplyBulk(data: { quantity: number | null; discount: number | null }): void {
+        for (const group of this.productsArray.controls) {
+            if (data.quantity !== null) group.get("quantity")?.setValue(data.quantity);
+            if (data.discount !== null) group.get("discountPercent")?.setValue(data.discount);
+            group.get("quantity")?.markAsTouched();
+            group.get("discountPercent")?.markAsTouched();
+        }
     }
 
     private sameDayEndValidator(): ValidatorFn {
@@ -261,17 +121,14 @@ export class ShopOfferForm implements OnInit, OnChanges {
 
             const start = new Date(this.today);
             start.setHours(hour, minute, 0, 0);
-
             const end = new Date(start.getTime() + hoursAvailable * 60 * 60 * 1000);
 
-            const isSameDay =
-                end.getFullYear() === start.getFullYear() &&
+            const isSameDay = end.getFullYear() === start.getFullYear() &&
                 end.getMonth() === start.getMonth() &&
                 end.getDate() === start.getDate();
 
-            const isMidnightBoundary =
-                end.getHours() === 0 && end.getMinutes() === 0 && end.getSeconds() === 0 &&
-                end.getDate() !== start.getDate();
+            const isMidnightBoundary = end.getHours() === 0 && end.getMinutes() === 0 &&
+                end.getSeconds() === 0 && end.getDate() !== start.getDate();
 
             return (isSameDay || isMidnightBoundary) ? null : { endsNextDay: true };
         };
@@ -279,7 +136,6 @@ export class ShopOfferForm implements OnInit, OnChanges {
 
     private buildProductRows(): void {
         this.productsArray.clear();
-
         for (const product of this.products()) {
             const includedControl = new FormControl(false, { nonNullable: true });
             const quantityControl = new FormControl<number | null>(null);
@@ -297,15 +153,13 @@ export class ShopOfferForm implements OnInit, OnChanges {
                 discountControl.updateValueAndValidity();
             });
 
-            const group = new FormGroup({
+            this.productsArray.push(new FormGroup({
                 productId: new FormControl(product.id, { nonNullable: true }),
                 name: new FormControl(product.name, { nonNullable: true }),
                 included: includedControl,
                 quantity: quantityControl,
                 discountPercent: discountControl
-            });
-
-            this.productsArray.push(group);
+            }));
         }
     }
 
@@ -313,69 +167,8 @@ export class ShopOfferForm implements OnInit, OnChanges {
         return this.productsArray.controls.some(group => group.get("included")?.value === true);
     }
 
-    get endDateLabel(): string {
-        const startDate = this.buildStartDate();
-        const hours = this.offerForm.get("hoursAvailable")?.value;
-
-        if (!startDate || !hours) {
-            return "-";
-        }
-
-        const end = new Date(startDate.getTime() + hours * 60 * 60 * 1000);
-        return this.formatDateTime(end);
-    }
-
-    private formatDateTime(date: Date): string {
-        const day = this.pad(date.getDate());
-        const month = this.pad(date.getMonth() + 1);
-        const year = date.getFullYear();
-        const hours = this.pad(date.getHours());
-        const minutes = this.pad(date.getMinutes());
-
-        return `${day}.${month}.${year}, ${hours}:${minutes}`;
-    }
-
-    applyBulkToAll(): void {
-        this.bulkQuantity.markAsTouched();
-        this.bulkDiscount.markAsTouched();
-
-        if (this.bulkQuantity.invalid || this.bulkDiscount.invalid) {
-            return;
-        }
-
-        const quantity = this.bulkQuantity.value;
-        const discount = this.bulkDiscount.value;
-
-        for (const group of this.productsArray.controls) {
-            if (quantity !== null) {
-                group.get("quantity")?.setValue(quantity);
-            }
-            if (discount !== null) {
-                group.get("discountPercent")?.setValue(discount);
-            }
-            group.get("quantity")?.markAsTouched();
-            group.get("discountPercent")?.markAsTouched();
-        }
-    }
-
-    private buildStartDate(): Date | null {
-        const hour = this.offerForm.get("startHour")?.value;
-        const minute = this.offerForm.get("startMinute")?.value;
-
-        if (hour === null || hour === undefined || minute === null || minute === undefined) {
-            return null;
-        }
-
-        const startDate = new Date(this.today);
-        startDate.setHours(hour, minute, 0, 0);
-
-        return startDate;
-    }
-
     submit(): void {
-        if (this.offerForm.invalid || !this.hasSelectedProducts) {
-            return;
-        }
+        if (this.offerForm.invalid || !this.hasSelectedProducts) return;
 
         const selectedProducts: CreateOfferProduct[] = this.productsArray.controls
             .filter(group => group.get("included")?.value === true)
@@ -385,7 +178,10 @@ export class ShopOfferForm implements OnInit, OnChanges {
                 discountPercent: group.get("discountPercent")!.value!
             }));
 
-        const startDate = this.buildStartDate()!;
+        const hour = this.offerForm.get("startHour")!.value;
+        const minute = this.offerForm.get("startMinute")!.value;
+        const startDate = new Date(this.today);
+        startDate.setHours(hour, minute, 0, 0);
 
         this.save.emit({
             startDate: startDate.toISOString(),

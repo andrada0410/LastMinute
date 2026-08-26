@@ -74,8 +74,8 @@ import { CreateShopRequest } from "../shop";
 })
 
 export class AdminCreateShop {
-    addShopEvent = output<CreateShopRequest>();
     requestStatus = input<'loading' | 'success'>('loading');
+    addShopEvent = output<CreateShopRequest>();
     
     constructor() {
         effect(() => {

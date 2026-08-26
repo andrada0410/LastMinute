@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from "@angular/core";
+import { Component, output } from "@angular/core";
 
 @Component({
     selector: 'app-shop-confirm-delete',
@@ -17,6 +17,6 @@ import { Component, EventEmitter, Output } from "@angular/core";
     styleUrls: ['./shop-confirm-delete.css']
 })
 export class ShopConfirmDelete {
-    @Output() confirm = new EventEmitter<void>();
-    @Output() cancel = new EventEmitter<void>();
+    confirm = output<void>();
+    cancel = output<void>();
 }
