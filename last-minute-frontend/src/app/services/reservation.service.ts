@@ -51,6 +51,6 @@ export class ReservationService {
     }
 
     getShopStatistics(shopId: number) {
-        return this.http.get<ShopReservationStatistics[]>(`${this.url}/reservation/shop/${shopId}/statistics`);
+        return this.http.get<ShopReservationStatistics[]>(`${this.url}/reservation/statistics`);
     }
 }

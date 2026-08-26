@@ -572,7 +572,7 @@ export class ShopDashboard implements OnInit, OnDestroy {
     }
 
     this.shopService
-      .updateShopDashboard(this.shopId, {
+      .updateShopDashboard({
         details: this.details,
         logo: this.logoFile,
         banner: this.bannerFile,

@@ -24,7 +24,6 @@ export class ProductService {
     ): Observable<Product> {
         const formData = new FormData();
 
-        formData.append("shopId", shopId.toString());
         formData.append("name", productData.name);
         formData.append("price", productData.price.toString());
         formData.append("description", productData.description);
@@ -67,7 +66,7 @@ export class ProductService {
         formData.append("file", excelFile);
 
         return this.http.post<ProductsImportResponse>(
-          `${this.url}/shop/${shopId}/products/import`,
+          `${this.url}/product/import`,
           formData,
         );
     }

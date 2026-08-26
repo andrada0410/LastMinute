@@ -56,7 +56,7 @@ export class ShopService {
           }
         }
 
-        return this.http.get<ShopsMapResponse>(`${this.url}/shops/map`, { params });
+        return this.http.get<ShopsMapResponse>(`${this.url}/shop/map`, { params });
     }
 
     updateShopCoordinates(shopId: number, lat: number, lon: number): Observable<any> {
@@ -80,7 +80,6 @@ export class ShopService {
     }
 
     updateShopDashboard (
-        shopId: number, 
         shopData: { details?: string; logo?: File | null; banner?: File | null, categoryId?: number | null }
     ): Observable<Shop> {
     
@@ -103,7 +102,7 @@ export class ShopService {
     }
 
     return this.http.patch<Shop>(
-      `${this.url}/shop/${shopId}/dashboard`,
+      `${this.url}/shop/dashboard`,
       formData
     );
   }
