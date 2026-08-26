@@ -1,0 +1,3 @@
+C:
+cd /nginx-1.30.4/nginx-1.30.4
+nginx.exe

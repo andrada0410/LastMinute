@@ -2,6 +2,7 @@ import { Component, input, output, effect, signal } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Product } from "../product";
 import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
+import { environment } from "../environments/environment";
 
 @Component({
   selector: "app-shop-dashboard-product-form",
@@ -170,7 +171,7 @@ export class ShopDashboardProductForm {
 
   return isExternalLink
     ? photoPath
-    : `http://localhost:4001/uploads/${photoPath}`;
+    :  environment.apiUrl + `/uploads/${photoPath}`;
   }
 
   onImageSelected(file: File) {

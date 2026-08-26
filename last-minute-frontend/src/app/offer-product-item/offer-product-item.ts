@@ -1,6 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { OfferProduct } from '../offer';
 import { PricePipe } from '../pipes/price';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-offer-product-item',
@@ -48,7 +49,7 @@ export class OfferProductItemComponent {
   reserveProduct = output<OfferProduct>();
   productClick = output<void>();
 
-  private url = 'http://localhost:4001';
+  private url = environment.apiUrl;
 
   public getDiscountPercent(originalPrice: number, offerPrice: number): number {
     if (!originalPrice) return 0;

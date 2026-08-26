@@ -3,6 +3,7 @@ import { Product } from "../product";
 import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
 import { PricePipe } from "../pipes/price";
 import { CapitalisePipe } from "../pipes/capitalise";
+import { environment } from "../environments/environment";
 
 @Component({
   selector: "app-shop-dashboard-product",
@@ -57,6 +58,6 @@ export class ShopDashboardProduct {
     
     return isExternalLink
       ? photoPath
-      : `http://localhost:4001/uploads/${photoPath}`;
+      : environment.apiUrl + `/uploads/${photoPath}`;
   }
 }

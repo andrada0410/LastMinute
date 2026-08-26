@@ -1,3 +1,4 @@
+import { environment } from "src/app/environments/environment";
 import { Component, input, output, signal, computed } from "@angular/core";
 import { OfferProduct } from "src/app/offer";
 import { PricePipe } from "src/app/pipes/price";
@@ -73,8 +74,7 @@ export class ReservationModalComponent {
 
     public selectedQuantity = signal<number>(1);
     public showDescription = signal<boolean>(false);
-
-    private url = 'http://localhost:4001';
+    private url = environment.apiUrl;
 
     public finalPrice = computed (() => { 
         return this.selectedQuantity() * this.product().offerPrice;

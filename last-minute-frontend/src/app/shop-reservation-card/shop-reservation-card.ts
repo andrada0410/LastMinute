@@ -4,6 +4,7 @@ import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image
 import { PricePipe } from "../pipes/price";
 import { CapitalisePipe } from "../pipes/capitalise";
 import { DatePipe } from '../pipes/date'
+import { environment } from "../environments/environment";
 
 @Component({
     selector: "app-shop-reservation-card",
@@ -94,7 +95,7 @@ export class ShopReservationCard {
 
         return isExternalLink
             ? photoPath
-            : `http://localhost:4001/uploads/${photoPath}`;
+            : environment.apiUrl + `/uploads/${photoPath}`;
     }
 
     statusLabel(): string {

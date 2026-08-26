@@ -2,6 +2,7 @@ import { Component, input } from "@angular/core";
 import { UserReservation as UserReservationModel } from "../reservation";
 import { CapitalisePipe } from "../pipes/capitalise";
 import { PricePipe } from "../pipes/price";
+import { environment } from "../environments/environment";
 
 @Component({
     selector: "app-user-reservation",
@@ -47,7 +48,7 @@ import { PricePipe } from "../pipes/price";
 export class UserReservation {
     reservation = input.required<UserReservationModel>();
     isHistory = input<boolean>(false);
-    url = 'http://localhost:4001';
+    url = environment.apiUrl;
 
     formatTime(dateString: string): string {
         const date = new Date(dateString);

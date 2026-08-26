@@ -4,12 +4,13 @@ import { Observable } from "rxjs";
 import { CreateShopResponse, PaginatedShopsResponse, ShopInfo, Shop, ShopsMapResponse} from "../shop";
 import { Category } from "../category";
 import { MapFilters } from "../filter";
+import { environment } from "../environments/environment";
 
 @Injectable({
   providedIn: 'root',
 })
 export class ShopService {
-    url = 'http://localhost:4001';
+    url = environment.apiUrl;
     private http = inject(HttpClient);
 
     registerShop(email: string, password: string, name: string, address: string): Observable<CreateShopResponse> {
