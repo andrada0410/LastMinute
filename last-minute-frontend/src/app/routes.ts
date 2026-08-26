@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { Home } from './home/home';
-import { Details } from './details/details';
 import { Login } from './login/login';
 import { Register } from './register/register';
 import { Admin } from './admin/admin';
@@ -19,11 +18,6 @@ const routeConfig: Routes = [
     path: '',
     component: Home,
     title: 'Last Minute',
-  },
-  {
-    path: 'details/:id',
-    component: Details,
-    title: 'Example details',
   },
   {
     path: 'login',
@@ -95,6 +89,11 @@ const routeConfig: Routes = [
     component: ShopReservationsHistory,
     title: 'Istoric Rezervări',
     data: { roles: ['SHOPUSER'] }
+  },
+  {
+    path: '**',
+    redirectTo: '', 
+    pathMatch: 'full'
   }
 ];
 
