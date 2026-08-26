@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy, input, output, signal } from '@angular/co
 import { OfferInfo, OfferProduct } from '../offer';
 import { ReservationModalComponent } from '../product-reservation/reservation-modal/reservation-modal.component';
 import { CreateReservationRequest } from '../reservation';
-import { environment } from '../environments/environment';
 import { OfferProductItemComponent } from '../offer-product-item/offer-product-item';
 
 @Component({
@@ -87,7 +86,6 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
   public selectedProductForReservation = signal<OfferProduct | null>(null);
 
   private timerInterval: any;
-  private url = environment.apiUrl;
 
   ngOnInit(): void {
     this.startTimer();
@@ -177,18 +175,6 @@ export class OfferTicketComponent implements OnInit, OnDestroy {
       productId: event.productId,
       quantity: event.quantity
     });
-  }
-
-  public resolveImagePath(path?: string, fallback?: string): string {
-    if (!path) {
-      return fallback ?? '';
-    }
-    
-    const isExternalLink = /^https?:\/\//i.test(path);
-    
-    return isExternalLink
-      ? path
-      : `${this.url}/uploads/${path}`;
   }
 
   public onProductClick(): void {

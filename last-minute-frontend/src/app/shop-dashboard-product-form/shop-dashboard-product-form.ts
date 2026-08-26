@@ -2,7 +2,7 @@ import { Component, input, output, effect, signal } from "@angular/core";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Product } from "../product";
 import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
-import { environment } from "../environments/environment";
+import { resolveImagePath } from "../utils";
 
 @Component({
   selector: "app-shop-dashboard-product-form",
@@ -134,7 +134,7 @@ export class ShopDashboardProductForm {
         description: product.description
       };
 
-      this.imagePreview = this.resolveImageUrl(product.photoPath);
+      this.imagePreview = resolveImagePath(product.photoPath, 'assets/shop-dashboard/default-product.png');
       this.selectedPhoto = null;
       this.hasChanges.set(false);
 
@@ -160,18 +160,6 @@ export class ShopDashboardProductForm {
                     this.selectedPhoto !== null;
 
     this.hasChanges.set(changed);
-  }
-
-  private resolveImageUrl(photoPath: string | null | undefined): string {
-  if (!photoPath) {
-    return "";
-  }
-
-  const isExternalLink = /^https?:\/\//i.test(photoPath);
-
-  return isExternalLink
-    ? photoPath
-    :  environment.apiUrl + `/uploads/${photoPath}`;
   }
 
   onImageSelected(file: File) {

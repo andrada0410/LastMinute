@@ -2,7 +2,7 @@ import { Component, input } from "@angular/core";
 import { UserReservation as UserReservationModel } from "../reservation";
 import { CapitalisePipe } from "../pipes/capitalise";
 import { PricePipe } from "../pipes/price";
-import { environment } from "../environments/environment";
+import { resolveImagePath } from "../utils";
 
 @Component({
     selector: "app-user-reservation",
@@ -48,7 +48,8 @@ import { environment } from "../environments/environment";
 export class UserReservation {
     reservation = input.required<UserReservationModel>();
     isHistory = input<boolean>(false);
-    url = environment.apiUrl;
+
+    resolveImagePath = resolveImagePath;
 
     formatTime(dateString: string): string {
         const date = new Date(dateString);
@@ -63,16 +64,4 @@ export class UserReservation {
 
         return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${this.formatTime(dateString)}`;
     }
-
-    public resolveImagePath(path?: string, fallback?: string): string {
-    if (!path) {
-      return fallback ?? '';
-    }
-    
-    const isExternalLink = /^https?:\/\//i.test(path);
-    
-    return isExternalLink
-      ? path
-      : `${this.url}/uploads/${path}`;
-  }
 }

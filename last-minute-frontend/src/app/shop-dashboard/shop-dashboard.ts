@@ -22,6 +22,7 @@ import { ShopReservationStatistics } from "../reservation";
 import { ReservationService } from "../services/reservation.service";
 import { ImageCropperModal } from '../image-cropper/image-cropper';
 import { ShopDashboardProfile } from "../shop-dashboard-profile/shop-dashboard-profile";
+import { resolveImagePath } from "../utils";
 
 @Component({
   selector: "shop-dashboard",
@@ -471,11 +472,11 @@ export class ShopDashboard implements OnInit, OnDestroy {
     this.name = shop.name || "";
     this.address = shop.address || "";
     this.details = shop.details || "";
-    this.bannerUrl = this.resolveImagePath(
+    this.bannerUrl = resolveImagePath(
       shop.bannerPath,
       "assets/shop-dashboard/default-banner.png",
     );
-    this.logoUrl = this.resolveImagePath(
+    this.logoUrl = resolveImagePath(
       shop.logoPath,
       "assets/shop-dashboard/default-logo.png",
     );
@@ -492,16 +493,6 @@ export class ShopDashboard implements OnInit, OnDestroy {
     }
     this.categoryId = shop.categoryId || null;
     this.initialCategoryId = this.categoryId;
-  }
-
-  private resolveImagePath(path?: string, fallback?: string): string {
-    if (!path) {
-      return fallback ?? "";
-    }
-
-    const isExternalLink = /^https?:\/\//i.test(path);
-
-    return isExternalLink ? path : `${this.shopService.url}/uploads/${path}`;
   }
 
   startEditing(): void {

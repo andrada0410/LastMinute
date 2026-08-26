@@ -6,6 +6,7 @@ import { Product } from "../product";
 import { PricePipe } from "../pipes/price";
 import { ToastService } from "../services/toast.service";
 import { PdfFontService } from "../services/pdf-font.service";
+import { resolveImagePath } from "../utils";
 
 @Component({
   selector: "app-pdf-meniu-generator",
@@ -157,19 +158,8 @@ export class PdfMeniuGenerator {
     }
   }
 
-  private resolveImageUrl(path?: string): string | null {
-    if (!path) 
-      return 'assets/shop-dashboard/default-product.png';
-
-    const isExternalLink = /^https?:\/\//i.test(path);
-    
-    return isExternalLink 
-      ? path 
-      : `${this.shopService.url}/uploads/${path}`;
-  }
-
   private loadImageAsBase64(path?: string): Promise<string | null> {
-    const url = this.resolveImageUrl(path);
+    const url = resolveImagePath(path, 'assets/shop-dashboard/default-product.png');
     if (!url) 
       return Promise.resolve(null);
 

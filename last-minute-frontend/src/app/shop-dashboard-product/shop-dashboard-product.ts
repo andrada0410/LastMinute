@@ -3,7 +3,7 @@ import { Product } from "../product";
 import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image";
 import { PricePipe } from "../pipes/price";
 import { CapitalisePipe } from "../pipes/capitalise";
-import { environment } from "../environments/environment";
+import { resolveImagePath } from "../utils";
 
 @Component({
   selector: "app-shop-dashboard-product",
@@ -13,7 +13,7 @@ import { environment } from "../environments/environment";
     <div class="product-card">
         <app-shop-dashboard-image
             class="product-image"
-            [imageUrl]="imageUrl"
+            [imageUrl]="resolveImagePath(product().photoPath, 'assets/shop-dashboard/default-product.png')"
             altText="Imagine produs"
             label="Schimbă imaginea"
             [fallbackImage]="'assets/shop-dashboard/default-product.png'"
@@ -47,17 +47,5 @@ export class ShopDashboardProduct {
 
   expanded = signal(false)
 
-  get imageUrl(): string {
-    const photoPath = this.product().photoPath;
-    
-    if (!photoPath) {
-      return "";
-    }
-    
-    const isExternalLink = /^https?:\/\//i.test(photoPath);
-    
-    return isExternalLink
-      ? photoPath
-      : environment.apiUrl + `/uploads/${photoPath}`;
-  }
+  resolveImagePath = resolveImagePath;
 }

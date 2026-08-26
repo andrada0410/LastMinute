@@ -1,7 +1,7 @@
-import { environment } from "src/app/environments/environment";
 import { Component, input, output, signal, computed } from "@angular/core";
 import { OfferProduct } from "src/app/offer";
 import { PricePipe } from "src/app/pipes/price";
+import { resolveImagePath } from "../../utils";
 
 @Component({
     selector: 'app-reservation-modal',
@@ -74,7 +74,8 @@ export class ReservationModalComponent {
 
     public selectedQuantity = signal<number>(1);
     public showDescription = signal<boolean>(false);
-    private url = environment.apiUrl;
+
+    resolveImagePath = resolveImagePath;
 
     public finalPrice = computed (() => { 
         return this.selectedQuantity() * this.product().offerPrice;
@@ -104,16 +105,4 @@ export class ReservationModalComponent {
             quantity: this.selectedQuantity()
         });
     }
-
-    public resolveImagePath(path?: string, fallback?: string): string {
-    if (!path) {
-      return fallback ?? '';
-    }
-    
-    const isExternalLink = /^https?:\/\//i.test(path);
-    
-    return isExternalLink
-      ? path
-      : `${this.url}/uploads/${path}`;
-  }
 }

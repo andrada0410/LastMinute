@@ -10,6 +10,7 @@ import { ToastService } from '../services/toast.service';
 import { AuthService } from '../services/auth.service';
 import { CreateReservationRequest } from '../reservation';
 import { ReservationService } from '../services/reservation.service';
+import { resolveImagePath } from '../utils';
 
 @Component({
   selector: 'app-shop-view',
@@ -137,24 +138,12 @@ export class ShopViewComponent implements OnInit {
     });
   }
 
-  private resolveImagePath(path?: string, fallback?: string): string {
-    if (!path) {
-      return fallback ?? '';
-    }
-    
-    const isExternalLink = /^https?:\/\//i.test(path);
-    
-    return isExternalLink
-      ? path
-      : `${this.shopService.url}/uploads/${path}`;
-  }
-
   public getBannerUrl(): string {
-    return this.resolveImagePath(this.shop?.bannerPath, 'assets/shop-dashboard/default-banner.png');
+    return resolveImagePath(this.shop?.bannerPath, 'assets/shop-dashboard/default-banner.png');
   }
 
   public getLogoUrl(): string {
-    return this.resolveImagePath(this.shop?.logoPath, 'assets/shop-dashboard/default-logo.png');
+    return resolveImagePath(this.shop?.logoPath, 'assets/shop-dashboard/default-logo.png');
   }
 
   public handleReservation(event: CreateReservationRequest) {

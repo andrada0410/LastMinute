@@ -5,13 +5,13 @@ import { ShopService } from "../services/shop.service";
 import { AdminCreateShop } from "../admin-create-shop/admin-create-shop";
 import { CreateShopRequest, ShopInfo } from "../shop";
 import { ShopEdit } from "../shop-edit/shop-edit";
-import { ShopConfirmDelete } from "../shop-confirm-delete/shop-confirm-delete";
 import { ToastService } from "../services/toast.service";
+import { ConfirmDelete } from "../confirm-delete/confirm-delete";
 
 @Component({
   selector: "app-super-admin-page",
   standalone: true,
-  imports: [ReactiveFormsModule, AdminShopList, AdminCreateShop, ShopEdit, ShopConfirmDelete],
+  imports: [ReactiveFormsModule, AdminShopList, AdminCreateShop, ShopEdit, ConfirmDelete],
   template: `
     <div class="admin-dashboard-layout">
       <section class="list-section">
@@ -44,10 +44,11 @@ import { ToastService } from "../services/toast.service";
     }
 
     @if(shopToDelete) {
-      <app-shop-confirm-delete
+      <app-confirm-delete
+        [message]="'Sigur dorești să blochezi magazinul ' + shopToDelete.name + '?'"
         (confirm)="handleDeleteShop()"
         (cancel)="shopToDelete = null">
-      </app-shop-confirm-delete>
+      </app-confirm-delete>
     }
   `,
 

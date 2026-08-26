@@ -4,7 +4,7 @@ import { ShopDashboardImage } from "../shop-dashboard-image/shop-dashboard-image
 import { PricePipe } from "../pipes/price";
 import { CapitalisePipe } from "../pipes/capitalise";
 import { DatePipe } from '../pipes/date'
-import { environment } from "../environments/environment";
+import { resolveImagePath } from "../utils";
 
 @Component({
     selector: "app-shop-reservation-card",
@@ -15,7 +15,7 @@ import { environment } from "../environments/environment";
 
             <app-shop-dashboard-image
                 class="reservation-image"
-                [imageUrl]="imageUrl"
+                [imageUrl]="resolveImagePath(reservation().productImage, 'assets/shop-dashboard/default-product.png')"
                 altText="Imagine produs"
                 [fallbackImage]="'assets/shop-dashboard/default-product.png'"
                 [isEditing]="false"
@@ -84,19 +84,7 @@ export class ShopReservationCard {
     confirm = output<number>();
     cancel = output<number>();
 
-    get imageUrl(): string {
-        const photoPath = this.reservation().productImage;
-
-        if (!photoPath) {
-            return "";
-        }
-
-        const isExternalLink = /^https?:\/\//i.test(photoPath);
-
-        return isExternalLink
-            ? photoPath
-            : environment.apiUrl + `/uploads/${photoPath}`;
-    }
+    resolveImagePath = resolveImagePath;
 
     statusLabel(): string {
         switch (this.reservation().status) {

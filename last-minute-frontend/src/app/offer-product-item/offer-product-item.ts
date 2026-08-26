@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { OfferProduct } from '../offer';
 import { PricePipe } from '../pipes/price';
-import { environment } from '../environments/environment';
+import { resolveImagePath } from '../utils';
 
 @Component({
   selector: 'app-offer-product-item',
@@ -49,23 +49,11 @@ export class OfferProductItemComponent {
   reserveProduct = output<OfferProduct>();
   productClick = output<void>();
 
-  private url = environment.apiUrl;
+  resolveImagePath = resolveImagePath;
 
   public getDiscountPercent(originalPrice: number, offerPrice: number): number {
     if (!originalPrice) return 0;
     return Math.round(((originalPrice - offerPrice) / originalPrice) * 100);
-  }
-
-  public resolveImagePath(path?: string, fallback?: string): string {
-    if (!path) {
-      return fallback ?? '';
-    }
-
-    const isExternalLink = /^https?:\/\//i.test(path);
-
-    return isExternalLink
-      ? path
-      : `${this.url}/uploads/${path}`;
   }
 
   public openModal(product: OfferProduct, event: MouseEvent): void {
