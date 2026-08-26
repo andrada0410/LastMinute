@@ -19,6 +19,8 @@ body {
   --error-bg: #FBEAEA;
   --success-color: #549d4a;
   --success-bg: #E8F5EA;
+  --information-color: #856404;
+  --information-bg: #fff3cd;
 
   --text-color: #1A1A1A;
   --text-muted: #6B6B6B;
@@ -36,7 +38,12 @@ body {
   --radius-m: 8px;
   --radius-l: 16px;
 
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.10);
+  --shadow-card: 0 5px 20px rgba(0, 0, 0, 0.10);
+
+  --overlay-bg: rgba(0, 0, 0, 0.5);
+  --overlay-blur: blur(4px);
+
+  --transition-fast: 0.2s;
 }
 
 h1, h2, h3 {

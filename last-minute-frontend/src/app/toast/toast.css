@@ -35,8 +35,8 @@
 }
 
 .toast.info {
-  background-color: color-mix(in srgb, #fff3cd 95%, transparent);
-  color: #856404;
+  background-color: color-mix(in srgb, var(--information-bg) 95%, transparent);
+  color: var(--information-color);
 }
 
 .toast-content {
@@ -65,7 +65,7 @@
   margin-left: var(--space-m);
   line-height: 1;
   opacity: 0.6;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--transition-fast) ease;
   padding: 2px;
   color: inherit;
 }

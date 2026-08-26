@@ -19,7 +19,7 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity var(--transition-fast) ease;
 }
 
 .image-container:hover .image-edit-overlay {
@@ -27,7 +27,7 @@
 }
 
 .image-edit-label {
-    color: #fff;
+    color: white;
     cursor: pointer;
     font-weight: 500;
 }

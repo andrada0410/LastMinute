@@ -55,7 +55,7 @@
   width: 100%;
   display: block; 
   box-sizing: border-box;
-  transition: background 0.2s, color 0.2s;
+  transition: background var(--transition-fast), color var(--transition-fast);
   outline: none;
 }
 

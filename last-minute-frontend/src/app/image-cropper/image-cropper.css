@@ -4,7 +4,8 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--overlay-bg);
+    backdrop-filter: var(--overlay-blur);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -74,7 +75,7 @@
     border-radius: var(--radius-s);
     cursor: pointer;
     font-weight: 600;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-fast) ease;
 }
 
 .btn-save:hover {
@@ -89,7 +90,7 @@
     border-radius: var(--radius-s); 
     cursor: pointer;
     font-weight: 600;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-fast) ease;
 }
 
 .btn-cancel:hover {

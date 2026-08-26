@@ -15,9 +15,9 @@
 }
 
 ::ng-deep .pin-heart-icon {
-    width: 20px;
-    height: 20px;
-    transform: rotate(45deg) translateX(-1.5px);
-    position: relative;
-    top: 2px;
+  width: 20px;
+  height: 20px;
+  transform: rotate(45deg) translateX(-1.5px);
+  position: relative;
+  top: 2px;
 }

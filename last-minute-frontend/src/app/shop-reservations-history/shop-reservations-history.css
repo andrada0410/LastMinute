@@ -37,7 +37,7 @@
     font-weight: 700;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast) ease;
 }
 
 .btn-load-more:hover:not(:disabled) {

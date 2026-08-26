@@ -1,6 +1,6 @@
 :host {
-    display: flex;
-    height: 100%;
+  display: flex;
+  height: 100%;
 }
 
 h2 {
@@ -13,10 +13,10 @@ form {
   flex-direction: column;
   width: 100%;
   min-width: 700px; 
-  background-color: white;
+  background-color: var(--bg-color);
   padding: 2rem 2.5rem 2.5rem 2.5rem; 
   border-radius: 12px;
-  box-shadow: 0px 5px 25px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-card); 
   overflow-y: auto;
 }
 
@@ -35,11 +35,11 @@ label {
 input, textarea {
   padding: 0.75rem;
   margin-bottom: 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-m);
   font-size: 1rem;
   font-family: inherit;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-fast);
 }
 
 input:focus, textarea:focus {
@@ -51,16 +51,16 @@ input:focus, textarea:focus {
 button {
   margin-top: auto; 
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity var(--transition-fast);
   padding: 0.75rem; 
   border: none; 
-  border-radius: 8px; 
-  background-color: var(--primary-color, #007bff); 
+  border-radius: var(--radius-m); 
+  background-color: var(--primary-color); 
   color: white;
 }
 
 button:disabled {
-  background-color: #a0a0a0;
+  background-color: var(--disabled-color);
   cursor: not-allowed;
   opacity: 0.7;
 }

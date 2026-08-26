@@ -59,7 +59,7 @@
   font-size: 0.95rem;
   cursor: pointer;
   color: var(--text-color);
-  transition: color 0.2s;
+  transition: color var(--transition-fast);
 }
 
 .checkbox-label:hover {
@@ -83,23 +83,23 @@ input[type="checkbox"] {
 }
 
 .price-input {
-    width: 70px;
-    padding: 0.4rem 0.5rem;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-m);
-    font-size: 0.95rem;
-    font-family: inherit;
+  width: 70px;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-m);
+  font-size: 0.95rem;
+  font-family: inherit;
 }
 
 .price-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 1px var(--accent-color);
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
 }
 
 .price-unit {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
 .toggle-container {
@@ -131,7 +131,7 @@ input[type="checkbox"] {
   cursor: pointer;
   inset: 0;
   background-color: var(--border-color);
-  border-radius: 6px;
+  border-radius: var(--radius-s);
   display: flex;
   align-items: center;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
